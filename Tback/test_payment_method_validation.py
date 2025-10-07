@@ -103,7 +103,7 @@ def test_payment_method_validation():
     print(f"   • MTN Mobile Money → 'mtn_momo'")
     print(f"   • Vodafone Cash → 'vodafone_cash'")
     print(f"   • AirtelTigo Money → 'airteltigo_money'")
-    print(f"   • Stripe → 'stripe'")
+    print(f"   • Stripe → 'stripe' (REMOVED - using MTN MoMo only)")
     print(f"❌ NOT: 'mtn_mobile_money' (this causes the error)")
 
 if __name__ == "__main__":

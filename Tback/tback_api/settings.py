@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'destinations',
     'tickets',
     'payments',
-    'stripe_payments',
 ]
 
 MIDDLEWARE = [
@@ -213,10 +212,7 @@ PAYMENT_TIMEOUT = 30  # seconds
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
 SITE_NAME = os.getenv('SITE_NAME', 'Trails & Trails')
 
-# Stripe settings
-STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_51234567890abcdef')
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51234567890abcdef')
-STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', 'whsec_1234567890abcdef')
+# Stripe settings removed - using MTN MoMo only
 
 # MTN Mobile Money settings
 MTN_MOMO_ENVIRONMENT = os.getenv('MTN_MOMO_ENVIRONMENT', 'sandbox')

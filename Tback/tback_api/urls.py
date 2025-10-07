@@ -57,6 +57,5 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/', include('destinations.urls')),
     path('api/payments/', include('payments.urls')),
-    path('api/stripe/', include('stripe_payments.urls')),
     path('api/tickets/', include('tickets.urls')),
 ]

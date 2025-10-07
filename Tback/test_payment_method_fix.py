@@ -29,7 +29,7 @@ def test_payment_method_fix():
         ('mtn_mobile_money', 'Should fail'),
         ('vodafone_cash', 'Should work'),
         ('airteltigo_money', 'Should work'),
-        ('stripe', 'Should work'),
+        # ('stripe', 'Removed - using MTN MoMo only'),
         ('invalid_method', 'Should fail')
     ]
     
@@ -78,7 +78,7 @@ def test_payment_method_fix():
     print(f"\n" + "=" * 50)
     print(f"🎯 PAYMENT METHOD TEST COMPLETE")
     print(f"=" * 50)
-    print(f"✅ Valid methods: mtn_momo, vodafone_cash, airteltigo_money, stripe")
+    print(f"✅ Valid methods: mtn_momo, vodafone_cash, airteltigo_money")
     print(f"❌ Invalid methods: mtn_mobile_money, invalid_method")
 
 if __name__ == "__main__":

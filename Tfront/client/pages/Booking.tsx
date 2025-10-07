@@ -262,8 +262,9 @@ export default function Booking() {
     if (paymentMethod === "mobile_money") {
       navigate("/momo-checkout", { state: paymentData });
     } else if (paymentMethod === "card") {
-      // Navigate to Stripe checkout
-      navigate("/stripe-checkout", { state: paymentData });
+      // Card payments removed - show message
+      alert("Card payments are no longer supported. Please use MTN Mobile Money.");
+      return;
     } else if (paymentMethod === "bank_transfer") {
       // Show bank transfer information
       alert("Bank transfer details will be provided via email. Please contact support for large group bookings.");

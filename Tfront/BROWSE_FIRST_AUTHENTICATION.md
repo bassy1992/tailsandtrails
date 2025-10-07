@@ -23,8 +23,7 @@ POST /api/auth/register/            // User registration ✅
 // These endpoints require authentication
 POST /api/tickets/purchase/direct/   // Create ticket purchase 🔒
 GET  /api/tickets/purchases/user/    // User's purchases 🔒
-POST /api/stripe/payment-intents/    // Create payment 🔒
-GET  /api/stripe/payment-intents/    // List payments 🔒
+# Stripe endpoints removed - using MTN MoMo only
 POST /api/tickets/reviews/create/    // Create review 🔒
 GET  /api/tickets/stats/user/        // User stats 🔒
 ```

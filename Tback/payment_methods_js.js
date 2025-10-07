@@ -9,7 +9,7 @@ class PaymentMethodsManager {
         this.authToken = authToken;
         this.paymentMethods = [];
         this.selectedMethod = null;
-        this.stripe = null;
+        // Stripe removed - using MTN MoMo only
         this.elements = null;
     }
 
@@ -104,24 +104,14 @@ class PaymentMethodsManager {
             form.style.display = 'block';
         }
 
-        // Initialize Stripe if card method selected
+        // Card payments removed - using MTN MoMo only
         if (methodId === 'card') {
-            this.initializeStripe();
+            alert('Card payments are no longer supported. Please use MTN MoMo.');
+            return;
         }
     }
 
-    // Initialize Stripe
-    async initializeStripe() {
-        if (!this.stripe) {
-            // You need to set your Stripe publishable key
-            const stripeKey = 'pk_test_your_key_here'; // Replace with your actual key
-            this.stripe = Stripe(stripeKey);
-            this.elements = this.stripe.elements();
-
-            const paymentElement = this.elements.create('payment');
-            paymentElement.mount('#stripe-elements');
-        }
-    }
+    // Stripe initialization removed - using MTN MoMo only
 
     // Process Mobile Money Payment
     async processMoMoPayment(phoneNumber, amount, currency = 'GHS') {
@@ -158,52 +148,7 @@ class PaymentMethodsManager {
         }
     }
 
-    // Process Stripe Payment
-    async processStripePayment(amount, currency = 'GHS') {
-        try {
-            // Create payment intent
-            const response = await fetch(`${this.apiBase}/checkout/create/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Token ${this.authToken}`
-                },
-                body: JSON.stringify({
-                    amount: amount,
-                    currency: currency,
-                    payment_method: 'card',
-                    provider_code: 'stripe',
-                    description: 'Travel booking payment'
-                })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Confirm payment with Stripe
-                const {error} = await this.stripe.confirmPayment({
-                    elements: this.elements,
-                    clientSecret: result.stripe.client_secret,
-                    confirmParams: {
-                        return_url: window.location.origin + '/payment-success'
-                    }
-                });
-
-                if (error) {
-                    this.showMessage('Payment failed: ' + error.message, 'error');
-                    return null;
-                } else {
-                    return result;
-                }
-            } else {
-                this.showMessage('Error: ' + result.error, 'error');
-                return null;
-            }
-        } catch (error) {
-            this.showMessage('Error processing payment: ' + error.message, 'error');
-            return null;
-        }
-    }
+    // Stripe payment processing removed - using MTN MoMo only
 
     // Poll payment status for mobile money
     async pollPaymentStatus(reference) {
@@ -277,11 +222,7 @@ function handleMoMoPayment() {
     paymentManager.processMoMoPayment(phoneNumber, amount);
 }
 
-// Handle Stripe payment
-function handleStripePayment() {
-    const amount = 150.00;
-    paymentManager.processStripePayment(amount);
-}
+// Stripe payment handler removed - using MTN MoMo only
 */
 
 // Export for use in other files
