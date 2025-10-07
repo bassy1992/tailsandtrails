@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Integration - Trails & Trails</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .payment-method {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .payment-method:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .payment-method.selected {
+            border-color: #007bff;
+            background-color: #e7f3ff;
+        }
+        .payment-form {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .payment-form.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        #stripe-elements {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Checkout Payment</h1>
+    <p>Amount: <strong id="amount">GHS 150.00</strong></p>
+    
+    <div id="loading" class="loading">
+        <p>Loading payment methods...</p>
+    </div>
+    
+    <div id="payment-methods" style="display: none;">
+        <h3>Choose your preferred payment option</h3>
+        <div id="methods-container"></div>
+    </div>
+    
+    <!-- Mobile Money Form -->
+    <div id="momo-form" class="payment-form">
+        <h4>📱 Mobile Money Payment</h4>
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" placeholder="+233244123456" required>
+            <small>Enter your mobile money number</small>
+        </div>
+        <button onclick="processMoMoPayment()">Pay GHS 150.00</button>
+    </div>
+    
+    <!-- Stripe Card Form -->
+    <div id="stripe-form" class="payment-form">
+        <h4>💳 Credit/Debit Card Payment</h4>
+        <div class="form-group">
+            <label>Card Details</label>
+            <div id="stripe-elements">
+                <!-- Stripe Elements will be mounted here -->
+            </div>
+        </div>
+        <button id="stripe-submit" onclick="processStripePayment()">Pay GHS 150.00</button>
+    </div>
+    
+    <!-- Bank Transfer Form -->
+    <div id="bank-form" class="payment-form">
+        <h4>🏦 Bank Transfer</h4>
+        <p>For large group bookings, please contact us directly:</p>
+        <ul>
+            <li>Email: payments@trailsandtrails.com</li>
+            <li>Phone: +233 XX XXX XXXX</li>
+        </ul>
+        <p><em>Processing time: 1-2 business days</em></p>
+    </div>
+    
+    <div id="messages"></div>
+    
+    <script>
+        // Configuration
+        const API_BASE = '/api/payments';
+        const AUTH_TOKEN = 'your-auth-token-here'; // Replace with actual token
+        let stripe = null;
+        let elements = null;
+        let paymentElement = null;
+        let selectedMethod = null;
+        let paymentMethods = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadPaymentMethods();
+        });
+        
+        // Load payment methods from API
+        async function loadPaymentMethods() {
+            try {
+                const response = await fetch(`${API_BASE}/checkout/methods/`);
+                const data = await response.json();
+                
+                paymentMethods = data.payment_methods;
+                renderPaymentMethods(paymentMethods);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('payment-methods').style.display = 'block';
+                
+            } catch (error) {
+                showMessage('Error loading payment methods: ' + error.message, 'error');
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // Render payment methods
+        function renderPaymentMethods(methods) {
+            const container = document.getElementById('methods-container');
+            container.innerHTML = '';
+            
+            methods.forEach(method => {
+                if (method.providers.length > 0 || method.id === 'bank_transfer') {
+                    const methodDiv = document.createElement('div');
+                    methodDiv.className = 'payment-method';
+                    methodDiv.onclick = () => selectPaymentMethod(method.id);
+                    
+                    methodDiv.innerHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <div style="font-size: 24px; margin-right: 15px;">${method.icon}</div>
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0;">${method.name}</h4>
+                                <p style="margin: 5px 0; color: #666;">${method.description}</p>
+                                <small style="color: #007bff;">${method.processing_time}</small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(methodDiv);
+                }
+            });
+        }
+        
+        // Select payment method
+        function selectPaymentMethod(methodId) {
+            // Remove previous selection
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('selected');
+            });
+            document.querySelectorAll('.payment-form').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Select new method
+            event.target.closest('.payment-method').classList.add('selected');
+            selectedMethod = methodId;
+            
+            // Show appropriate form
+            if (methodId === 'mobile_money') {
+                document.getElementById('momo-form').classList.add('active');
+            } else if (methodId === 'card') {
+                document.getElementById('stripe-form').classList.add('active');
+                initializeStripe();
+            } else if (methodId === 'bank_transfer') {
+                document.getElementById('bank-form').classList.add('active');
+            }
+        }
+        
+        // Initialize Stripe
+        async function initializeStripe() {
+            if (!stripe) {
+                // Get publishable key from your settings
+                stripe = Stripe('pk_test_your_publishable_key_here'); // Replace with actual key
+                elements = stripe.elements();
+                
+                paymentElement = elements.create('payment');
+                paymentElement.mount('#stripe-elements');
+            }
+        }
+        
+        // Process Mobile Money Payment
+        async function processMoMoPayment() {
+            const phone = document.getElementById('phone').value;
+            
+            if (!phone) {
+                showMessage('Please enter your phone number', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/checkout/create/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${AUTH_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        amount: 150.00,
+                        currency: 'GHS',
+                        payment_method: 'momo',
+                        provider_code: 'mtn_momo',
+                        phone_number: phone,
+                        description: 'Travel booking payment'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('Payment request sent to your phone. Please check your mobile money app.', 'success');
+                    pollPaymentStatus(result.payment.reference);
+                } else {
+                    showMessage('Error: ' + result.error, 'error');
+                }
+                
+            } catch (error) {
+                showMessage('Error processing payment: ' + error.message, 'error');
+            }
+        }
+        
+        // Process Stripe Payment
+        async function processStripePayment() {
+            if (!stripe || !paymentElement) {
+                showMessage('Stripe not initialized', 'error');
+                return;
+            }
+            
+            try {
+                // Create payment intent
+                const response = await fetch(`${API_BASE}/checkout/create/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Token ${AUTH_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        amount: 150.00,
+                        currency: 'GHS',
+                        payment_method: 'card',
+                        provider_code: 'stripe',
+                        description: 'Travel booking payment'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Confirm payment with Stripe
+                    const {error} = await stripe.confirmPayment({
+                        elements,
+                        clientSecret: result.stripe.client_secret,
+                        confirmParams: {
+                            return_url: window.location.origin + '/payment-success'
+                        }
+                    });
+                    
+                    if (error) {
+                        showMessage('Payment failed: ' + error.message, 'error');
+                    }
+                } else {
+                    showMessage('Error: ' + result.error, 'error');
+                }
+                
+            } catch (error) {
+                showMessage('Error processing payment: ' + error.message, 'error');
+            }
+        }
+        
+        // Poll payment status
+        async function pollPaymentStatus(reference) {
+            let attempts = 0;
+            const maxAttempts = 30;
+            
+            const checkStatus = async () => {
+                try {
+                    const response = await fetch(`${API_BASE}/${reference}/status/`, {
+                        headers: {
+                            'Authorization': `Token ${AUTH_TOKEN}`
+                        }
+                    });
+                    
+                    const payment = await response.json();
+                    
+                    if (payment.status === 'successful') {
+                        showMessage('Payment completed successfully! 🎉', 'success');
+                    } else if (payment.status === 'failed') {
+                        showMessage('Payment failed. Please try again.', 'error');
+                    } else if (payment.status === 'cancelled') {
+                        showMessage('Payment was cancelled.', 'error');
+                    } else if (attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(checkStatus, 10000);
+                    } else {
+                        showMessage('Payment is taking longer than expected. Please contact support.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error checking payment status:', error);
+                }
+            };
+            
+            setTimeout(checkStatus, 5000);
+        }
+        
+        // Show message
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            
+            messagesDiv.innerHTML = '';
+            messagesDiv.appendChild(messageDiv);
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

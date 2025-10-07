@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Stripe Integration</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .payment-method { border: 2px solid #e0e0e0; border-radius: 8px; padding: 15px; margin: 10px 0; cursor: pointer; }
+        .payment-method.selected { border-color: #007bff; background-color: #e7f3ff; }
+        .payment-form { display: none; margin-top: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .payment-form.active { display: block; }
+        button { background-color: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; }
+        .message { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Stripe Integration</h1>
+    <p>Amount: <strong>GHS 150.00</strong></p>
+    
+    <div id="payment-methods">
+        <h3>Payment Methods</h3>
+        <div id="methods-container">Loading...</div>
+    </div>
+    
+    <div id="stripe-form" class="payment-form">
+        <h4>💳 Credit/Debit Card Payment</h4>
+        <div id="stripe-elements"></div>
+        <button onclick="processStripePayment()">Pay GHS 150.00</button>
+    </div>
+    
+    <div id="messages"></div>
+    
+    <script>
+        let paymentMethods = [];
+        let stripe = null;
+        let elements = null;
+        
+        // Load payment methods
+        async function loadPaymentMethods() {
+            try {
+                const response = await fetch('/api/payments/checkout/methods/');
+                const data = await response.json();
+                
+                paymentMethods = data.payment_methods;
+                renderPaymentMethods();
+                
+            } catch (error) {
+                showMessage('Error loading payment methods: ' + error.message, 'error');
+            }
+        }
+        
+        // Render payment methods
+        function renderPaymentMethods() {
+            const container = document.getElementById('methods-container');
+            container.innerHTML = '';
+            
+            paymentMethods.forEach(method => {
+                if (method.providers.length > 0) {
+                    const methodDiv = document.createElement('div');
+                    methodDiv.className = 'payment-method';
+                    methodDiv.onclick = () => selectPaymentMethod(method.id);
+                    
+                    methodDiv.innerHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <div style="font-size: 24px; margin-right: 15px;">${method.icon}</div>
+                            <div>
+                                <h4 style="margin: 0;">${method.name}</h4>
+                                <p style="margin: 5px 0; color: #666;">${method.description}</p>
+                                <small>Providers: ${method.providers.map(p => p.name).join(', ')}</small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(methodDiv);
+                }
+            });
+        }
+        
+        // Select payment method
+        function selectPaymentMethod(methodId) {
+            document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('selected'));
+            event.target.closest('.payment-method').classList.add('selected');
+            
+            if (methodId === 'card') {
+                document.getElementById('stripe-form').classList.add('active');
+                initializeStripe();
+            }
+        }
+        
+        // Initialize Stripe
+        async function initializeStripe() {
+            if (!stripe) {
+                // Use test key for now - you'll need to replace with your actual key
+                stripe = Stripe('pk_test_51234567890abcdef');
+                elements = stripe.elements();
+                
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#stripe-elements');
+            }
+        }
+        
+        // Process Stripe payment
+        async function processStripePayment() {
+            showMessage('Stripe integration test - keys need to be configured with real values', 'error');
+        }
+        
+        // Show message
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', loadPaymentMethods);
+    </script>
+</body>
+</html>

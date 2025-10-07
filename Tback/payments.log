@@ -1,0 +1,217 @@
+Failed to send payment initiated email for TEST-001: payments/emails/payment_initiated.html
+Failed to send payment initiated email for PAY7549264D: payments/emails/payment_initiated.html
+Failed to send payment initiated email for PAY47DEE72F: payments/emails/payment_initiated.html
+Failed to send payment initiated email for PAY936E3242: payments/emails/payment_initiated.html
+Failed to send payment initiated email for PAY937F8EEC: payments/emails/payment_initiated.html
+Failed to send payment initiated email for PAY-20250819171256-LPE44D: 'NoneType' object has no attribute 'email'
+Failed to send payment failed email for PAY-20250819171256-LPE44D: 'NoneType' object has no attribute 'email'
+Failed to send payment initiated email for PAY-20250819182046-JHIDN1: 'NoneType' object has no attribute 'email'
+Failed to send payment success email for PAY-20250819182046-JHIDN1: 'NoneType' object has no attribute 'email'
+Failed to send payment initiated email for PAY-20250819183112-4G3903: 'NoneType' object has no attribute 'email'
+Failed to send payment success email for PAY-20250819183112-4G3903: 'NoneType' object has no attribute 'email'
+Checkout payment error: no such table: main.bookings_tourbooking
+Checkout payment error: no such table: main.bookings_tourbooking
+Checkout payment error: no such table: main.bookings_tourbooking
+Checkout payment error: no such table: main.bookings_tourbooking
+Checkout payment error: no such table: main.bookings_tourbooking
+Checkout payment error: no such table: main.bookings_tourbooking
+Checkout payment error: no such table: main.bookings_tourbooking
+Checkout payment error: no such table: main.bookings_tourbooking
+Started auto-completion task for payment DEMO_1755684799 (delay: 10s)
+Auto-completed payment DEMO_1755684799 successfully
+Started auto-completion task for payment DEMO_1755686197 (delay: 10s)
+Auto-completed payment DEMO_1755686197 successfully
+Started auto-completion task for payment PAY-20250820103702-CGXS2R (delay: 5s)
+Auto-added booking details to payment PAY-20250820235849-SCEXMN via signal
+Auto-added booking details to payment PAY-20250821004741-XVXHWP via signal
+Stored sample booking details for payment PAY-20250821004741-XVXHWP
+Payment PAY-20250821004741-XVXHWP created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821005357-OJOMR7 via signal
+Stored sample booking details for payment PAY-20250821005357-OJOMR7
+Payment PAY-20250821005357-OJOMR7 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821005627-1XGT8H via signal
+Stored sample booking details for payment PAY-20250821005627-1XGT8H
+Payment PAY-20250821005627-1XGT8H created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821065118-CLYHII via signal
+Stored sample booking details for payment PAY-20250821065118-CLYHII
+Payment PAY-20250821065118-CLYHII created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821070057-E1CZQI via signal
+Stored sample booking details for payment PAY-20250821070057-E1CZQI
+Payment PAY-20250821070057-E1CZQI created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821070404-NMS3FG via signal
+Stored sample booking details for payment PAY-20250821070404-NMS3FG
+Payment PAY-20250821070404-NMS3FG created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821070533-OYGQN7 via signal
+Stored sample booking details for payment PAY-20250821070533-OYGQN7
+Payment PAY-20250821070533-OYGQN7 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821070815-VSV1RY via signal
+Stored sample booking details for payment PAY-20250821070815-VSV1RY
+Payment PAY-20250821070815-VSV1RY created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821071354-1048WO via signal
+Stored sample booking details for payment PAY-20250821071354-1048WO
+Payment PAY-20250821071354-1048WO created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821071700-WKZJH8 via signal
+Stored sample booking details for payment PAY-20250821071700-WKZJH8
+Payment PAY-20250821071700-WKZJH8 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821071821-ZYCPUX via signal
+Stored sample booking details for payment PAY-20250821071821-ZYCPUX
+Payment PAY-20250821071821-ZYCPUX created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821073617-OKF17Q via signal
+Stored sample booking details for payment PAY-20250821073617-OKF17Q
+Payment PAY-20250821073617-OKF17Q created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821073806-ZFKN7V via signal
+Stored sample booking details for payment PAY-20250821073806-ZFKN7V
+Payment PAY-20250821073806-ZFKN7V created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821074511-EYUQA2 via signal
+Stored real-time booking details for payment PAY-20250821074511-EYUQA2
+Payment PAY-20250821074511-EYUQA2 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250821075711-8VG2DW via signal
+Stored real-time booking details for payment PAY-20250821075711-8VG2DW
+Payment PAY-20250821075711-8VG2DW created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250822092822-TP6251 via signal
+Stored sample booking details for payment PAY-20250822092822-TP6251
+Payment PAY-20250822092822-TP6251 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826213321-JW2F5E via signal
+Stored real-time booking details for payment PAY-20250826213321-JW2F5E
+Payment PAY-20250826213321-JW2F5E created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826213643-67HJE2 via signal
+Stored real-time booking details for payment PAY-20250826213643-67HJE2
+Payment PAY-20250826213643-67HJE2 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826214505-N7KXVK via signal
+Stored sample booking details for payment PAY-20250826214505-N7KXVK
+Payment PAY-20250826214505-N7KXVK created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826214857-537165 via signal
+Stored sample booking details for payment PAY-20250826214857-537165
+Payment PAY-20250826214857-537165 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826221200-AHJRQL via signal
+Stored sample booking details for payment PAY-20250826221200-AHJRQL
+Payment PAY-20250826221200-AHJRQL created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826224101-QQDPBX via signal
+Stored sample booking details for payment PAY-20250826224101-QQDPBX
+Payment PAY-20250826224101-QQDPBX created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826230937-RSME0V via signal
+Stored sample booking details for payment PAY-20250826230937-RSME0V
+Payment PAY-20250826230937-RSME0V created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826230957-XN13U4 via signal
+Stored real-time booking details for payment PAY-20250826230957-XN13U4
+Payment PAY-20250826230957-XN13U4 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826231038-EK020S via signal
+Stored real-time booking details for payment PAY-20250826231038-EK020S
+Payment PAY-20250826231038-EK020S created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826231121-Y8Y9AL via signal
+Stored real-time booking details for payment PAY-20250826231121-Y8Y9AL
+Payment PAY-20250826231121-Y8Y9AL created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826231604-Z2WOPP via signal
+Stored real-time booking details for payment PAY-20250826231604-Z2WOPP
+Payment PAY-20250826231604-Z2WOPP created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826232050-LT36FS via signal
+Stored real-time booking details for payment PAY-20250826232050-LT36FS
+Payment PAY-20250826232050-LT36FS created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826232756-KZ4102 via signal
+Stored real-time booking details for payment PAY-20250826232756-KZ4102
+Payment PAY-20250826232756-KZ4102 created - will be auto-completed by daemon
+Auto-added booking details to payment PAY-20250826233149-48IAHP via signal
+Stored real-time booking details for payment PAY-20250826233149-48IAHP
+Started auto-completion task for payment PAY-20250826233149-48IAHP (delay: 15s)
+Started auto-completion for ticket payment PAY-20250826233149-48IAHP (15s delay)
+Auto-failed payment PAY-20250826233149-48IAHP
+Auto-added booking details to payment PAY-20250826233349-DQMH6Y via signal
+Stored real-time booking details for payment PAY-20250826233349-DQMH6Y
+Started auto-completion task for payment PAY-20250826233349-DQMH6Y (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826233349-DQMH6Y (5s delay)
+Auto-completed payment PAY-20250826233349-DQMH6Y successfully
+Auto-added booking details to payment PAY-20250826233424-GR9AZT via signal
+Stored real-time booking details for payment PAY-20250826233424-GR9AZT
+Started auto-completion task for payment PAY-20250826233424-GR9AZT (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826233424-GR9AZT (5s delay)
+Auto-completed payment PAY-20250826233424-GR9AZT successfully
+Auto-added booking details to payment PAY-20250826233537-L4KSK6 via signal
+Stored real-time booking details for payment PAY-20250826233537-L4KSK6
+Started auto-completion task for payment PAY-20250826233537-L4KSK6 (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826233537-L4KSK6 (5s delay)
+Auto-completed payment PAY-20250826233537-L4KSK6 successfully
+Auto-added ticket details to payment PAY-20250826234049-YJZDE2 via signal
+Stored real-time booking details for payment PAY-20250826234049-YJZDE2
+Started auto-completion task for payment PAY-20250826234049-YJZDE2 (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826234049-YJZDE2 (5s delay)
+Auto-completed payment PAY-20250826234049-YJZDE2 successfully
+Auto-added ticket details to payment PAY-20250826234103-6IBCL2 via signal
+Stored real-time booking details for payment PAY-20250826234103-6IBCL2
+Started auto-completion task for payment PAY-20250826234103-6IBCL2 (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826234103-6IBCL2 (5s delay)
+Auto-completed payment PAY-20250826234103-6IBCL2 successfully
+Auto-added ticket details to payment PAY-20250826234142-V3KRUT via signal
+Stored ticket details for payment PAY-20250826234142-V3KRUT
+Started auto-completion task for payment PAY-20250826234142-V3KRUT (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826234142-V3KRUT (5s delay)
+Auto-completed payment PAY-20250826234142-V3KRUT successfully
+Auto-added destination booking details to payment PAY-20250826234212-S6NHSD via signal
+Stored real-time booking details for payment PAY-20250826234212-S6NHSD
+Started auto-completion task for payment PAY-20250826234212-S6NHSD (delay: 15s)
+Started auto-completion for payment PAY-20250826234212-S6NHSD (15s delay)
+Auto-failed payment PAY-20250826234212-S6NHSD
+Auto-added ticket details to payment PAY-20250826234253-3M0GVQ via signal
+Stored ticket details for payment PAY-20250826234253-3M0GVQ
+Started auto-completion task for payment PAY-20250826234253-3M0GVQ (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826234253-3M0GVQ (5s delay)
+Auto-added destination booking details to payment PAY-20250826234255-XGDGOQ via signal
+Stored real-time booking details for payment PAY-20250826234255-XGDGOQ
+Started auto-completion task for payment PAY-20250826234255-XGDGOQ (delay: 15s)
+Started auto-completion for payment PAY-20250826234255-XGDGOQ (15s delay)
+Auto-completed payment PAY-20250826234253-3M0GVQ successfully
+Auto-completed payment PAY-20250826234255-XGDGOQ successfully
+Auto-added ticket details to payment PAY-20250826234531-VSNI8K via signal
+Stored ticket details for payment PAY-20250826234531-VSNI8K
+Started auto-completion task for payment PAY-20250826234531-VSNI8K (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826234531-VSNI8K (5s delay)
+Auto-completed payment PAY-20250826234531-VSNI8K successfully
+Auto-added ticket details to payment PAY-20250826234618-16C4XH via signal
+Stored ticket details for payment PAY-20250826234618-16C4XH
+Started auto-completion task for payment PAY-20250826234618-16C4XH (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826234618-16C4XH (5s delay)
+Auto-completed payment PAY-20250826234618-16C4XH successfully
+Auto-added ticket details to payment PAY-20250826234757-5FZJA3 via signal
+Stored ticket details for payment PAY-20250826234757-5FZJA3
+Started auto-completion task for payment PAY-20250826234757-5FZJA3 (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826234757-5FZJA3 (5s delay)
+Auto-completed payment PAY-20250826234757-5FZJA3 successfully
+Auto-added ticket details to payment PAY-20250826235250-8WWHOG via signal
+Stored ticket details for payment PAY-20250826235250-8WWHOG
+Started auto-completion task for payment PAY-20250826235250-8WWHOG (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826235250-8WWHOG (5s delay)
+Auto-completed payment PAY-20250826235250-8WWHOG successfully
+Auto-added ticket details to payment PAY-20250826235342-96FSL2 via signal
+Stored ticket details for payment PAY-20250826235342-96FSL2
+Started auto-completion task for payment PAY-20250826235342-96FSL2 (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826235342-96FSL2 (5s delay)
+Auto-completed payment PAY-20250826235342-96FSL2 successfully
+Auto-added ticket details to payment PAY-20250826235505-G1C1BU via signal
+Stored ticket details for payment PAY-20250826235505-G1C1BU
+Started auto-completion task for payment PAY-20250826235505-G1C1BU (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826235505-G1C1BU (5s delay)
+Auto-completed payment PAY-20250826235505-G1C1BU successfully
+Auto-added ticket details to payment PAY-20250826235515-2UAPYC via signal
+Stored ticket details for payment PAY-20250826235515-2UAPYC
+Started auto-completion task for payment PAY-20250826235515-2UAPYC (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826235515-2UAPYC (5s delay)
+Auto-completed payment PAY-20250826235515-2UAPYC successfully
+Auto-added ticket details to payment PAY-20250826235604-JNV0M0 via signal
+Stored ticket details for payment PAY-20250826235604-JNV0M0
+Started auto-completion task for payment PAY-20250826235604-JNV0M0 (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826235604-JNV0M0 (5s delay)
+Auto-completed payment PAY-20250826235604-JNV0M0 successfully
+Auto-added ticket details to payment PAY-20250826235613-N5OAFE via signal
+Stored ticket details for payment PAY-20250826235613-N5OAFE
+Started auto-completion task for payment PAY-20250826235613-N5OAFE (delay: 5s)
+Started auto-completion for ticket payment PAY-20250826235613-N5OAFE (5s delay)
+Auto-completed payment PAY-20250826235613-N5OAFE successfully
+Auto-added ticket details to payment PAY-20250827001025-T3X427 via signal
+Stored ticket details for payment PAY-20250827001025-T3X427
+Started auto-completion task for payment PAY-20250827001025-T3X427 (delay: 5s)
+Started auto-completion for ticket payment PAY-20250827001025-T3X427 (5s delay)
+Auto-completed payment PAY-20250827001025-T3X427 successfully
+Auto-added destination booking details to payment PAY-20250827001218-BBI3JK via signal
+Stored real-time booking details for payment PAY-20250827001218-BBI3JK
+Started auto-completion task for payment PAY-20250827001218-BBI3JK (delay: 15s)
+Started auto-completion for payment PAY-20250827001218-BBI3JK (15s delay)
+Auto-completed payment PAY-20250827001218-BBI3JK successfully
