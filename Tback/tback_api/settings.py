@@ -160,25 +160,29 @@ AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
 
-# Media storage configuration - Force S3 when credentials exist
-# Check credentials at import time
-_spaces_key = os.getenv('SPACES_KEY')
-_spaces_secret = os.getenv('SPACES_SECRET')
-
-if _spaces_key and _spaces_secret:
-    # Force DigitalOcean Spaces storage
+# Media storage configuration
+# Always try to use DigitalOcean Spaces if credentials are available
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+    # DigitalOcean Spaces configuration
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = 'https://tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com/'
     
-    # Additional S3 settings to ensure proper configuration
+    # Additional S3 settings
     AWS_S3_FILE_OVERWRITE = False
     AWS_S3_CUSTOM_DOMAIN = 'tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com'
-    AWS_LOCATION = ''  # No subdirectory
+    AWS_LOCATION = ''
+    
+    # Debug: Print storage configuration (remove in production)
+    print(f"🔧 Using DigitalOcean Spaces storage")
+    print(f"   Bucket: {AWS_STORAGE_BUCKET_NAME}")
+    print(f"   Region: {AWS_S3_REGION_NAME}")
+    print(f"   Endpoint: {AWS_S3_ENDPOINT_URL}")
 else:
-    # Fallback to local storage for development
+    # Fallback to local storage
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
+    print(f"⚠️  Using local file storage (no Spaces credentials)")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
