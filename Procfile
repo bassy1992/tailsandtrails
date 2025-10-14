@@ -1,0 +1,1 @@
+web: cd Tback && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn tback_api.wsgi --log-file -

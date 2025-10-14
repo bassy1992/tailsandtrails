@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ['python39', 'postgresql']
+
+[phases.install]
+cmds = ['cd Tback && pip install -r requirements.txt']
+
+[phases.build]
+cmds = ['cd Tback && python manage.py collectstatic --noinput']
+
+[start]
+cmd = 'cd Tback && python manage.py migrate && gunicorn tback_api.wsgi --bind 0.0.0.0:$PORT'
