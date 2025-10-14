@@ -60,6 +60,7 @@ urlpatterns = [
     path('api/', include('destinations.urls')),
     path('api/payments/', include('payments.urls')),
     path('api/tickets/', include('tickets.urls')),
+    path('api/gallery/', include('gallery.urls')),
 ]
 
 # Serve media files during development and production
