@@ -112,11 +112,11 @@ export default function Gallery() {
               </div>
               <div className="flex items-center space-x-2">
                 <Camera className="h-5 w-5" />
-                <span>{galleryImages.length} Photos</span>
+                <span>{loading ? '...' : images.length} Photos</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Video className="h-5 w-5" />
-                <span>{galleryVideos.length} Videos</span>
+                <span>{loading ? '...' : videos.length} Videos</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Calendar className="h-5 w-5" />
