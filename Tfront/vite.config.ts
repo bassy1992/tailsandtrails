@@ -13,13 +13,15 @@ export default defineConfig(({ mode }) => ({
       allow: ["..", ".", "./client", "./shared", "./public", "./node_modules"],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:8000',
-        changeOrigin: true,
-        secure: false,
+    ...(mode === 'development' && {
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:8000',
+          changeOrigin: true,
+          secure: false,
+        }
       }
-    }
+    })
   },
   build: {
     outDir: "dist/spa",
