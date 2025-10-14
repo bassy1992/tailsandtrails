@@ -164,12 +164,12 @@ AWS_S3_OBJECT_PARAMETERS = {
 # Media storage configuration
 # Always try to use DigitalOcean Spaces if credentials are available
 if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
-    # Store files at root level (no subfolder)
-    AWS_LOCATION = ''
+    # Store files in media subfolder for organization
+    AWS_LOCATION = 'media'
     
     # DigitalOcean Spaces configuration
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.sfo3.cdn.digitaloceanspaces.com/'
+    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.sfo3.cdn.digitaloceanspaces.com/{AWS_LOCATION}/'
     
     # Additional S3 settings
     AWS_S3_FILE_OVERWRITE = False
