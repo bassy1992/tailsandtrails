@@ -25,6 +25,12 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
+    rollupOptions: {
+      external: [],
+    },
+  },
+  esbuild: {
+    target: 'es2020'
   },
   plugins: [react(), expressPlugin()],
   resolve: {
@@ -32,6 +38,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./client"),
       "@shared": path.resolve(__dirname, "./shared"),
     },
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
 }));
 

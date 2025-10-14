@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
-import { destinationsApi, Destination, Category } from "../lib/api";
+import { destinationsApi, Destination, Category } from "../lib/api.ts";
 import { useToast } from "@/contexts/ToastContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
