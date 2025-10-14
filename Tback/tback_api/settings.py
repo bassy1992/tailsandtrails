@@ -89,26 +89,13 @@ WSGI_APPLICATION = 'tback_api.wsgi.application'
 
 import dj_database_url
 
-# Database configuration with build-time fallback
-DATABASE_URL = os.getenv('DATABASE_URL')
-IS_BUILD_TIME = os.getenv('RAILWAY_SKIP_BUILD_MIGRATIONS') == 'true'
-
-if DATABASE_URL and not IS_BUILD_TIME:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+# Database configuration - using SQLite only
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    # Use SQLite for build time or when DATABASE_URL is not available
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 
 # Password validation
