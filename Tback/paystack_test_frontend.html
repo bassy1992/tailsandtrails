@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paystack Integration Test - Tails & Trails</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .payment-form {
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .momo-button {
+            background: #ffc107;
+            color: #000;
+        }
+        .momo-button:hover {
+            background: #e0a800;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .provider-buttons {
+            display: none;
+            margin-top: 10px;
+        }
+        .provider-button {
+            background: #007bff;
+            margin: 5px;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .provider-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Paystack Integration Test</h1>
+        <p>Test your Paystack integration for Tails & Trails</p>
+        
+        <div class="payment-form">
+            <div class="form-group">
+                <label for="amount">Amount (GHS)</label>
+                <input type="number" id="amount" value="50.00" step="0.01" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" value="test@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" value="Test payment for Tails & Trails tour">
+            </div>
+            
+            <div class="form-group">
+                <label for="payment-method">Payment Method</label>
+                <select id="payment-method" onchange="toggleMobileMoneyOptions()">
+                    <option value="card">Card Payment</option>
+                    <option value="mobile_money">Mobile Money</option>
+                </select>
+            </div>
+            
+            <div id="mobile-money-options" style="display: none;">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="+233241234567">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Provider</label>
+                    <div class="provider-buttons">
+                        <button type="button" class="provider-button" onclick="selectProvider('mtn')">MTN Mobile Money</button>
+                        <button type="button" class="provider-button" onclick="selectProvider('vodafone')">Vodafone Cash</button>
+                        <button type="button" class="provider-button" onclick="selectProvider('airteltigo')">AirtelTigo Money</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="createPayment()">Create Payment</button>
+            <button onclick="getPaystackConfig()" class="momo-button">Test Config</button>
+        </div>
+        
+        <div id="result" class="result"></div>
+        
+        <div id="payment-status" style="display: none;">
+            <h3>Payment Status</h3>
+            <p>Reference: <span id="payment-reference"></span></p>
+            <button onclick="verifyPayment()">Verify Payment</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api/payments';
+        let currentPaymentReference = null;
+        let selectedProvider = 'mtn';
+
+        function toggleMobileMoneyOptions() {
+            const paymentMethod = document.getElementById('payment-method').value;
+            const momoOptions = document.getElementById('mobile-money-options');
+            const providerButtons = document.querySelector('.provider-buttons');
+            
+            if (paymentMethod === 'mobile_money') {
+                momoOptions.style.display = 'block';
+                providerButtons.style.display = 'block';
+            } else {
+                momoOptions.style.display = 'none';
+                providerButtons.style.display = 'none';
+            }
+        }
+
+        function selectProvider(provider) {
+            selectedProvider = provider;
+            
+            // Update button styles
+            document.querySelectorAll('.provider-button').forEach(btn => {
+                btn.style.background = '#007bff';
+            });
+            
+            event.target.style.background = '#28a745';
+            
+            showResult(`Selected provider: ${provider.toUpperCase()}`, 'info');
+        }
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.className = `result ${type}`;
+            result.innerHTML = message;
+            result.style.display = 'block';
+        }
+
+        async function getPaystackConfig() {
+            try {
+                showResult('Fetching Paystack configuration...', 'info');
+                
+                const response = await fetch(`${API_BASE}/paystack/config/`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const configHtml = `
+                        <h4>✅ Paystack Configuration</h4>
+                        <p><strong>Public Key:</strong> ${data.public_key.substring(0, 20)}...</p>
+                        <p><strong>Supported Currencies:</strong> ${data.supported_currencies.join(', ')}</p>
+                        <p><strong>Supported Channels:</strong> ${data.supported_channels.join(', ')}</p>
+                        <p><strong>Mobile Money Providers:</strong></p>
+                        <ul>
+                            ${data.mobile_money_providers.map(p => `<li>${p.name} (${p.code})</li>`).join('')}
+                        </ul>
+                    `;
+                    showResult(configHtml, 'success');
+                } else {
+                    showResult(`❌ Config fetch failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function createPayment() {
+            try {
+                const amount = document.getElementById('amount').value;
+                const email = document.getElementById('email').value;
+                const description = document.getElementById('description').value;
+                const paymentMethod = document.getElementById('payment-method').value;
+                const phone = document.getElementById('phone').value;
+
+                if (!amount || !email) {
+                    showResult('❌ Please fill in amount and email', 'error');
+                    return;
+                }
+
+                if (paymentMethod === 'mobile_money' && !phone) {
+                    showResult('❌ Please enter phone number for mobile money', 'error');
+                    return;
+                }
+
+                showResult('Creating payment...', 'info');
+
+                const paymentData = {
+                    amount: parseFloat(amount),
+                    email: email,
+                    description: description,
+                    payment_method: paymentMethod
+                };
+
+                if (paymentMethod === 'mobile_money') {
+                    paymentData.phone_number = phone;
+                    paymentData.provider = selectedProvider;
+                }
+
+                const response = await fetch(`${API_BASE}/paystack/create/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    currentPaymentReference = data.payment.reference;
+                    
+                    let resultHtml = `
+                        <h4>✅ Payment Created Successfully</h4>
+                        <p><strong>Reference:</strong> ${data.payment.reference}</p>
+                        <p><strong>Amount:</strong> GHS ${data.payment.amount}</p>
+                        <p><strong>Status:</strong> ${data.payment.status}</p>
+                    `;
+
+                    if (paymentMethod === 'card' && data.paystack.authorization_url) {
+                        resultHtml += `
+                            <p><strong>Authorization URL:</strong></p>
+                            <p><a href="${data.paystack.authorization_url}" target="_blank">Complete Payment</a></p>
+                            <button onclick="window.open('${data.paystack.authorization_url}', '_blank')">Open Payment Page</button>
+                        `;
+                    } else if (paymentMethod === 'mobile_money') {
+                        resultHtml += `
+                            <p><strong>Mobile Money:</strong> ${data.paystack.display_text || 'Check your phone for payment prompt'}</p>
+                        `;
+                    }
+
+                    showResult(resultHtml, 'success');
+                    
+                    // Show payment status section
+                    document.getElementById('payment-reference').textContent = currentPaymentReference;
+                    document.getElementById('payment-status').style.display = 'block';
+                    
+                } else {
+                    showResult(`❌ Payment creation failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function verifyPayment() {
+            if (!currentPaymentReference) {
+                showResult('❌ No payment reference to verify', 'error');
+                return;
+            }
+
+            try {
+                showResult('Verifying payment...', 'info');
+
+                const response = await fetch(`${API_BASE}/paystack/verify/${currentPaymentReference}/`);
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    const resultHtml = `
+                        <h4>✅ Payment Verification</h4>
+                        <p><strong>Reference:</strong> ${data.payment.reference}</p>
+                        <p><strong>Status:</strong> ${data.payment.status}</p>
+                        <p><strong>Amount:</strong> GHS ${data.payment.amount}</p>
+                        <p><strong>Processed At:</strong> ${data.payment.processed_at || 'Not yet processed'}</p>
+                        ${data.paystack_data ? `<p><strong>Paystack Status:</strong> ${data.paystack_data.status}</p>` : ''}
+                    `;
+                    showResult(resultHtml, 'success');
+                } else {
+                    showResult(`❌ Payment verification failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-verify payment every 5 seconds if there's a current payment
+        setInterval(() => {
+            if (currentPaymentReference) {
+                verifyPayment();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

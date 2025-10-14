@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .info { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .error { background: #ffe7e7; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .success { background: #e7ffe7; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Token Debug Tool</h1>
+    <p>Debug localStorage tokens and test dashboard API</p>
+
+    <div class="info">
+        <h3>LocalStorage Contents:</h3>
+        <div id="localStorage-content"></div>
+    </div>
+
+    <div class="info">
+        <h3>Token Information:</h3>
+        <div id="token-info"></div>
+    </div>
+
+    <button onclick="testDashboardAPI()">Test Dashboard API</button>
+    <button onclick="clearTokens()">Clear All Tokens</button>
+    <button onclick="setTestToken()">Set Test Token</button>
+
+    <div id="api-result" style="display: none;">
+        <h3>API Test Result:</h3>
+        <div id="api-content"></div>
+    </div>
+
+    <script>
+        function displayLocalStorage() {
+            const content = document.getElementById('localStorage-content');
+            const items = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                items.push(`<strong>${key}:</strong> ${value}`);
+            }
+            
+            if (items.length === 0) {
+                content.innerHTML = '<p>No items in localStorage</p>';
+            } else {
+                content.innerHTML = items.join('<br>');
+            }
+        }
+
+        function displayTokenInfo() {
+            const tokenInfo = document.getElementById('token-info');
+            
+            const authToken = localStorage.getItem('auth_token');
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            let html = '';
+            
+            if (authToken) {
+                html += `<p>✅ <strong>auth_token:</strong> ${authToken}</p>`;
+            } else {
+                html += `<p>❌ <strong>auth_token:</strong> Not found</p>`;
+            }
+            
+            if (token) {
+                html += `<p>✅ <strong>token:</strong> ${token}</p>`;
+            } else {
+                html += `<p>❌ <strong>token:</strong> Not found</p>`;
+            }
+            
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    html += `<p>✅ <strong>user:</strong> ${userData.email || 'No email'}</p>`;
+                } catch (e) {
+                    html += `<p>⚠️ <strong>user:</strong> Invalid JSON</p>`;
+                }
+            } else {
+                html += `<p>❌ <strong>user:</strong> Not found</p>`;
+            }
+            
+            tokenInfo.innerHTML = html;
+        }
+
+        async function testDashboardAPI() {
+            const resultDiv = document.getElementById('api-result');
+            const contentDiv = document.getElementById('api-content');
+            
+            resultDiv.style.display = 'block';
+            contentDiv.innerHTML = '<p>⏳ Testing API...</p>';
+            
+            const authToken = localStorage.getItem('auth_token');
+            
+            if (!authToken) {
+                contentDiv.innerHTML = '<div class="error"><p>❌ No auth_token found in localStorage</p></div>';
+                return;
+            }
+            
+            try {
+                const headers = {
+                    'Authorization': `Token ${authToken}`,
+                    'Content-Type': 'application/json',
+                };
+                
+                const response = await fetch('http://localhost:8000/api/dashboard/overview/', { headers });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    contentDiv.innerHTML = `
+                        <div class="success">
+                            <p>✅ <strong>API Success!</strong></p>
+                            <p>Total Bookings: ${data.total_bookings}</p>
+                            <p>Total Spent: GH₵${data.total_spent}</p>
+                            <p>Member Level: ${data.member_level}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    contentDiv.innerHTML = `
+                        <div class="error">
+                            <p>❌ <strong>API Error:</strong></p>
+                            <p>Status: ${response.status}</p>
+                            <pre>${errorText}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                contentDiv.innerHTML = `
+                    <div class="error">
+                        <p>❌ <strong>Network Error:</strong></p>
+                        <pre>${error.message}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        function clearTokens() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            refresh();
+        }
+
+        function setTestToken() {
+            // Set the test token for wyarquah@gmail.com
+            localStorage.setItem('auth_token', '4092804f48dd73d9a240c9faa7d655880d7b20f7');
+            localStorage.setItem('user', JSON.stringify({
+                email: 'wyarquah@gmail.com',
+                name: 'William Yarquah',
+                first_name: 'William',
+                last_name: 'Yarquah'
+            }));
+            refresh();
+        }
+
+        function refresh() {
+            displayLocalStorage();
+            displayTokenInfo();
+        }
+
+        // Initialize on page load
+        window.onload = refresh;
+    </script>
+</body>
+</html>

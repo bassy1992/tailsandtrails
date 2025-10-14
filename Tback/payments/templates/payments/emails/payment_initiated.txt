@@ -1,0 +1,20 @@
+Dear {{ user.first_name|default:user.email }},
+
+Your payment has been initiated successfully.
+
+Payment Details:
+- Reference: {{ payment.reference }}
+- Amount: {{ payment.currency }} {{ payment.amount }}
+- Method: {{ payment.get_payment_method_display }}
+- Status: {{ payment.get_status_display }}
+
+{% if payment.booking %}
+Booking: {{ payment.booking }}
+{% endif %}
+
+You will receive another email once the payment is processed.
+
+Thank you for using {{ site_name }}.
+
+Best regards,
+{{ site_name }} Team

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Dashboard API Test</h1>
+        <p>Testing dashboard API endpoints for wyarquah@gmail.com</p>
+        
+        <div class="test-section">
+            <h3>Authentication Token</h3>
+            <p>Token: <code id="token">4092804f48dd73d9a240c9faa7d655880d7b20f7</code></p>
+            <p>User: <code>wyarquah@gmail.com</code></p>
+        </div>
+
+        <button onclick="testOverview()">Test Overview API</button>
+        <button onclick="testBookings()">Test Bookings API</button>
+        <button onclick="testActivity()">Test Activity API</button>
+        <button onclick="testAll()">Test All APIs</button>
+
+        <div id="overview-result" class="test-section" style="display: none;">
+            <h3>📊 Overview API Result</h3>
+            <div id="overview-content"></div>
+        </div>
+
+        <div id="bookings-result" class="test-section" style="display: none;">
+            <h3>📅 Bookings API Result</h3>
+            <div id="bookings-content"></div>
+        </div>
+
+        <div id="activity-result" class="test-section" style="display: none;">
+            <h3>📋 Activity API Result</h3>
+            <div id="activity-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const token = '4092804f48dd73d9a240c9faa7d655880d7b20f7';
+        const baseUrl = 'http://localhost:8000/api/dashboard';
+        
+        const headers = {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json',
+        };
+
+        function showResult(elementId, success, data) {
+            const element = document.getElementById(elementId);
+            const content = document.getElementById(elementId.replace('-result', '-content'));
+            
+            element.style.display = 'block';
+            element.className = `test-section ${success ? 'success' : 'error'}`;
+            
+            if (success) {
+                content.innerHTML = `
+                    <p>✅ <strong>Success!</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } else {
+                content.innerHTML = `
+                    <p>❌ <strong>Error:</strong></p>
+                    <pre>${data}</pre>
+                `;
+            }
+        }
+
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            const content = document.getElementById(elementId.replace('-result', '-content'));
+            
+            element.style.display = 'block';
+            element.className = 'test-section loading';
+            content.innerHTML = '<p>⏳ Loading...</p>';
+        }
+
+        async function testOverview() {
+            showLoading('overview-result');
+            
+            try {
+                const response = await fetch(`${baseUrl}/overview/`, { headers });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('overview-result', true, data);
+                } else {
+                    const errorText = await response.text();
+                    showResult('overview-result', false, `Status: ${response.status}\n${errorText}`);
+                }
+            } catch (error) {
+                showResult('overview-result', false, `Network Error: ${error.message}`);
+            }
+        }
+
+        async function testBookings() {
+            showLoading('bookings-result');
+            
+            try {
+                const response = await fetch(`${baseUrl}/bookings/`, { headers });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('bookings-result', true, {
+                        count: data.length,
+                        bookings: data.slice(0, 3) // Show first 3 for brevity
+                    });
+                } else {
+                    const errorText = await response.text();
+                    showResult('bookings-result', false, `Status: ${response.status}\n${errorText}`);
+                }
+            } catch (error) {
+                showResult('bookings-result', false, `Network Error: ${error.message}`);
+            }
+        }
+
+        async function testActivity() {
+            showLoading('activity-result');
+            
+            try {
+                const response = await fetch(`${baseUrl}/activity/`, { headers });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('activity-result', true, {
+                        count: data.length,
+                        activities: data.slice(0, 3) // Show first 3 for brevity
+                    });
+                } else {
+                    const errorText = await response.text();
+                    showResult('activity-result', false, `Status: ${response.status}\n${errorText}`);
+                }
+            } catch (error) {
+                showResult('activity-result', false, `Network Error: ${error.message}`);
+            }
+        }
+
+        async function testAll() {
+            await testOverview();
+            await testBookings();
+            await testActivity();
+        }
+
+        // Test on page load
+        window.onload = function() {
+            console.log('Dashboard API Test Page Loaded');
+            console.log('Token:', token);
+            console.log('Base URL:', baseUrl);
+        };
+    </script>
+</body>
+</html>

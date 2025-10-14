@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .info { background-color: #e7f3ff; border-color: #b3d9ff; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+        h3 { color: #2c3e50; margin-top: 0; }
+        .button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .data-path { font-family: monospace; background: #f1f1f1; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Payment Success Data Debug</h1>
+        <p>Debug tool to understand what data is being passed to the PaymentSuccess component</p>
+        
+        <div class="section info">
+            <h3>📋 Instructions</h3>
+            <ol>
+                <li><strong>Complete a booking</strong> and payment process</li>
+                <li><strong>Open browser DevTools</strong> (F12) and go to Console tab</li>
+                <li><strong>Look for logs</strong> starting with "PaymentSuccess - Received payment data:"</li>
+                <li><strong>Copy the data</strong> and paste it in the textarea below</li>
+                <li><strong>Click "Analyze Data"</strong> to see the structure</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h3>📊 Data Input</h3>
+            <textarea id="paymentData" rows="10" style="width: 100%; font-family: monospace; font-size: 12px;" 
+                placeholder="Paste the payment data JSON from browser console here..."></textarea>
+            <br><br>
+            <button class="button btn-primary" onclick="analyzeData()">🔍 Analyze Data</button>
+            <button class="button btn-warning" onclick="loadSampleData()">📝 Load Sample Data</button>
+            <button class="button btn-success" onclick="clearData()">🗑️ Clear</button>
+        </div>
+
+        <div id="analysis-result" class="section" style="display: none;">
+            <h3>🔬 Data Analysis</h3>
+            <div id="analysis-content"></div>
+        </div>
+
+        <div class="section warning">
+            <h3>🎯 Expected Data Structure</h3>
+            <p>The PaymentSuccess component expects data in this structure:</p>
+            <pre>
+{
+  // Basic info
+  "tourName": "Kakum Canopy Walk Adventure",
+  "total": 520,
+  "paymentMethod": "mobile_money",
+  
+  // Booking details (main location)
+  "bookingDetails": {
+    "bookingData": {
+      "tourId": "4",
+      "tourName": "Kakum Canopy Walk Adventure",
+      "duration": "3 Days",
+      "basePrice": 520,
+      "selectedDate": "2025-10-13",
+      "travelers": {
+        "adults": 1,
+        "children": 0
+      }
+    },
+    "selectedOptions": {
+      "accommodation": "standard",
+      "transport": "shared",
+      "meals": "standard",
+      "medical": "basic"
+    },
+    "addOns": []
+  },
+  
+  // Alternative locations (snake_case)
+  "booking_details": { /* same structure */ },
+  
+  // Customer info
+  "customerInfo": {
+    "name": "William Yarquah",
+    "email": "wyarquah@gmail.com",
+    "phone": "+233240381084"
+  },
+  
+  // Payment details
+  "paymentDetails": {
+    "method": "Mobile Money",
+    "provider": "MTN",
+    "transactionId": "PAY-20251012202902-HWNZS2",
+    "timestamp": "2025-10-12T20:29:02Z"
+  }
+}
+            </pre>
+        </div>
+
+        <div class="section info">
+            <h3>🔧 Troubleshooting</h3>
+            <div id="troubleshooting">
+                <p><strong>Common Issues:</strong></p>
+                <ul>
+                    <li><strong>Missing booking details:</strong> Check if data is in <span class="data-path">bookingDetails</span>, <span class="data-path">booking_details</span>, or <span class="data-path">bookingData</span></li>
+                    <li><strong>Wrong data format:</strong> Ensure dates are in ISO format and numbers are not strings</li>
+                    <li><strong>Missing customer info:</strong> Check <span class="data-path">customerInfo</span> object</li>
+                    <li><strong>Payment details missing:</strong> Verify <span class="data-path">paymentDetails</span> object structure</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function analyzeData() {
+            const textarea = document.getElementById('paymentData');
+            const resultDiv = document.getElementById('analysis-result');
+            const contentDiv = document.getElementById('analysis-content');
+            
+            try {
+                const data = JSON.parse(textarea.value);
+                
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'section success';
+                
+                let analysis = '<h4>✅ Data Structure Analysis</h4>';
+                
+                // Check basic info
+                analysis += '<h5>📋 Basic Information</h5><ul>';
+                analysis += `<li><strong>Tour/Event Name:</strong> ${data.tourName || data.eventName || 'Not found'}</li>`;
+                analysis += `<li><strong>Total Amount:</strong> ${data.total || 'Not found'}</li>`;
+                analysis += `<li><strong>Payment Method:</strong> ${data.paymentMethod || 'Not found'}</li>`;
+                analysis += '</ul>';
+                
+                // Check booking details locations
+                analysis += '<h5>🏞️ Booking Details Locations</h5><ul>';
+                analysis += `<li><strong>bookingDetails:</strong> ${data.bookingDetails ? '✅ Found' : '❌ Missing'}</li>`;
+                analysis += `<li><strong>booking_details:</strong> ${data.booking_details ? '✅ Found' : '❌ Missing'}</li>`;
+                analysis += `<li><strong>bookingData:</strong> ${data.bookingData ? '✅ Found' : '❌ Missing'}</li>`;
+                analysis += '</ul>';
+                
+                // Analyze booking details structure
+                const bookingDetails = data.bookingDetails || data.booking_details || data.bookingData;
+                if (bookingDetails) {
+                    analysis += '<h5>📊 Booking Details Structure</h5><ul>';
+                    analysis += `<li><strong>bookingData:</strong> ${bookingDetails.bookingData ? '✅ Found' : '❌ Missing'}</li>`;
+                    analysis += `<li><strong>selectedOptions:</strong> ${bookingDetails.selectedOptions ? '✅ Found' : '❌ Missing'}</li>`;
+                    analysis += `<li><strong>addOns:</strong> ${bookingDetails.addOns ? '✅ Found' : '❌ Missing'}</li>`;
+                    
+                    if (bookingDetails.bookingData) {
+                        const bd = bookingDetails.bookingData;
+                        analysis += '<li><strong>Booking Data Contents:</strong><ul>';
+                        analysis += `<li>Tour Name: ${bd.tourName || 'Missing'}</li>`;
+                        analysis += `<li>Duration: ${bd.duration || 'Missing'}</li>`;
+                        analysis += `<li>Selected Date: ${bd.selectedDate || 'Missing'}</li>`;
+                        analysis += `<li>Base Price: ${bd.basePrice || 'Missing'}</li>`;
+                        analysis += `<li>Travelers: ${bd.travelers ? JSON.stringify(bd.travelers) : 'Missing'}</li>`;
+                        analysis += '</ul></li>';
+                    }
+                    analysis += '</ul>';
+                }
+                
+                // Check customer info
+                analysis += '<h5>👤 Customer Information</h5><ul>';
+                analysis += `<li><strong>customerInfo:</strong> ${data.customerInfo ? '✅ Found' : '❌ Missing'}</li>`;
+                if (data.customerInfo) {
+                    analysis += `<li><strong>Name:</strong> ${data.customerInfo.name || 'Missing'}</li>`;
+                    analysis += `<li><strong>Email:</strong> ${data.customerInfo.email || 'Missing'}</li>`;
+                    analysis += `<li><strong>Phone:</strong> ${data.customerInfo.phone || 'Missing'}</li>`;
+                }
+                analysis += '</ul>';
+                
+                // Check payment details
+                analysis += '<h5>💳 Payment Information</h5><ul>';
+                analysis += `<li><strong>paymentDetails:</strong> ${data.paymentDetails ? '✅ Found' : '❌ Missing'}</li>`;
+                if (data.paymentDetails) {
+                    analysis += `<li><strong>Method:</strong> ${data.paymentDetails.method || 'Missing'}</li>`;
+                    analysis += `<li><strong>Provider:</strong> ${data.paymentDetails.provider || 'Missing'}</li>`;
+                    analysis += `<li><strong>Transaction ID:</strong> ${data.paymentDetails.transactionId || 'Missing'}</li>`;
+                }
+                analysis += '</ul>';
+                
+                // Raw data
+                analysis += '<h5>📄 Raw Data Structure</h5>';
+                analysis += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                contentDiv.innerHTML = analysis;
+                
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'section error';
+                contentDiv.innerHTML = `
+                    <h4>❌ JSON Parse Error</h4>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Please ensure the data is valid JSON format.</p>
+                `;
+            }
+        }
+        
+        function loadSampleData() {
+            const sampleData = {
+                "tourName": "Kakum Canopy Walk Adventure",
+                "total": 520,
+                "paymentMethod": "mobile_money",
+                "bookingDetails": {
+                    "bookingData": {
+                        "tourId": "4",
+                        "tourName": "Kakum Canopy Walk Adventure",
+                        "duration": "3 Days",
+                        "basePrice": 520,
+                        "selectedDate": "2025-10-13",
+                        "travelers": {
+                            "adults": 1,
+                            "children": 0
+                        }
+                    },
+                    "selectedOptions": {
+                        "accommodation": "standard",
+                        "transport": "shared",
+                        "meals": "standard",
+                        "medical": "basic"
+                    },
+                    "addOns": []
+                },
+                "customerInfo": {
+                    "name": "William Yarquah",
+                    "email": "wyarquah@gmail.com",
+                    "phone": "+233240381084"
+                },
+                "paymentDetails": {
+                    "method": "Mobile Money",
+                    "provider": "MTN",
+                    "transactionId": "PAY-20251012202902-HWNZS2",
+                    "timestamp": "2025-10-12T20:29:02Z"
+                }
+            };
+            
+            document.getElementById('paymentData').value = JSON.stringify(sampleData, null, 2);
+        }
+        
+        function clearData() {
+            document.getElementById('paymentData').value = '';
+            document.getElementById('analysis-result').style.display = 'none';
+        }
+        
+        console.log('Payment Success Debug Tool Loaded');
+        console.log('Complete a booking and check browser console for payment data logs');
+    </script>
+</body>
+</html>

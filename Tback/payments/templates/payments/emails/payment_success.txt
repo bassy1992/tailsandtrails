@@ -1,0 +1,18 @@
+Dear {{ user.first_name|default:user.email }},
+
+Great news! Your payment has been processed successfully.
+
+Payment Details:
+- Reference: {{ payment.reference }}
+- Amount: {{ payment.currency }} {{ payment.amount }}
+- Method: {{ payment.get_payment_method_display }}
+- Processed: {{ payment.processed_at|date:"F d, Y H:i" }}
+
+{% if payment.booking %}
+Your booking {{ payment.booking }} is now confirmed.
+{% endif %}
+
+Thank you for your payment!
+
+Best regards,
+{{ site_name }} Team

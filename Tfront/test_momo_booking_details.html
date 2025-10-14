@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoMo Booking Details Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .info { background-color: #e7f3ff; border-color: #b3d9ff; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .detail-row { display: flex; justify-content: space-between; margin: 8px 0; padding: 5px 0; border-bottom: 1px solid #eee; }
+        .detail-label { font-weight: bold; color: #666; }
+        .detail-value { color: #333; }
+        h3 { color: #2c3e50; margin-top: 0; }
+        .button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧾 MoMo Booking Details Test</h1>
+        <p>Test the enhanced booking details display for Mobile Money checkout</p>
+        
+        <div class="section info">
+            <h3>📋 Sample Booking Data Structure</h3>
+            <p>This shows what data should be displayed in the MoMo checkout:</p>
+            
+            <h4>🏞️ Tour Booking Example:</h4>
+            <div class="detail-row">
+                <span class="detail-label">Destination:</span>
+                <span class="detail-value">Cape Coast Castle Heritage Tour</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Duration:</span>
+                <span class="detail-value">2 Days, 1 Night</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Travel Date:</span>
+                <span class="detail-value">15/12/2024</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Travelers:</span>
+                <span class="detail-value">2 Adults, 1 Child</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Base Price:</span>
+                <span class="detail-value">GH¢450 per person</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Booking Reference:</span>
+                <span class="detail-value">TNB79D68</span>
+            </div>
+        </div>
+
+        <div class="section info">
+            <h4>🎫 Event Ticket Example:</h4>
+            <div class="detail-row">
+                <span class="detail-label">Event:</span>
+                <span class="detail-value">Afrobeats Night Live Concert</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Artist:</span>
+                <span class="detail-value">Sarkodie & Friends</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Venue:</span>
+                <span class="detail-value">National Theatre of Ghana</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date:</span>
+                <span class="detail-value">20/12/2024</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Time:</span>
+                <span class="detail-value">8:00 PM</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Ticket Type:</span>
+                <span class="detail-value">VIP</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Quantity:</span>
+                <span class="detail-value">2 tickets</span>
+            </div>
+        </div>
+
+        <div class="section success">
+            <h3>✅ Enhanced Features Added</h3>
+            <ul>
+                <li><strong>📍 Destination Details</strong> - Tour name, duration, travel dates</li>
+                <li><strong>👥 Traveler Information</strong> - Number of adults and children</li>
+                <li><strong>🎫 Event Information</strong> - Artist, venue, date, time, ticket type</li>
+                <li><strong>💰 Price Breakdown</strong> - Base price, add-ons, total calculation</li>
+                <li><strong>🎁 Add-ons & Extras</strong> - Selected additional services</li>
+                <li><strong>👤 Customer Information</strong> - Name, email, phone number</li>
+                <li><strong>🔢 Reference Numbers</strong> - Booking/ticket reference codes</li>
+                <li><strong>📊 Payment Summary</strong> - Detailed cost breakdown</li>
+            </ul>
+        </div>
+
+        <div class="section warning">
+            <h3>🔧 Implementation Details</h3>
+            <p><strong>Files Modified:</strong></p>
+            <ul>
+                <li><code>Tfront/client/pages/MomoCheckout.tsx</code> - Enhanced booking details display</li>
+            </ul>
+            
+            <p><strong>Data Structure Expected:</strong></p>
+            <pre>
+paymentData = {
+  // Tour data
+  tourName: "Cape Coast Castle Heritage Tour",
+  bookingReference: "TNB79D68",
+  bookingDetails: {
+    bookingData: {
+      tourName: "Cape Coast Castle Heritage Tour",
+      duration: "2 Days, 1 Night",
+      selectedDate: "2024-12-15",
+      travelers: { adults: 2, children: 1 },
+      basePrice: 450
+    },
+    addOns: [
+      { name: "Airport Transfer", price: 50 },
+      { name: "Travel Insurance", price: 25 }
+    ]
+  },
+  
+  // Event data (alternative)
+  eventName: "Afrobeats Night Live Concert",
+  artist: "Sarkodie & Friends",
+  venue: "National Theatre of Ghana",
+  date: "2024-12-20",
+  time: "8:00 PM",
+  ticketType: "VIP",
+  quantity: 2,
+  unitPrice: 150,
+  ticketReference: "TKT123456",
+  
+  // Customer info
+  customerInfo: {
+    name: "William Yarquah",
+    email: "wyarquah@gmail.com",
+    phone: "+233240381084"
+  },
+  
+  // Payment
+  total: 1350,
+  paymentMethod: "mobile_money"
+}
+            </pre>
+        </div>
+
+        <div class="section info">
+            <h3>🧪 Testing Instructions</h3>
+            <ol>
+                <li><strong>Navigate to a tour</strong> (e.g., http://localhost:8080/tour/1)</li>
+                <li><strong>Click "Book Now"</strong> and fill in booking details</li>
+                <li><strong>Select "Mobile Money"</strong> as payment method</li>
+                <li><strong>Check MoMo checkout page</strong> for enhanced booking details</li>
+                <li><strong>Verify all sections display:</strong>
+                    <ul>
+                        <li>Destination/Event information</li>
+                        <li>Travel dates and travelers</li>
+                        <li>Price breakdown</li>
+                        <li>Customer information</li>
+                        <li>Add-ons (if any)</li>
+                        <li>Total amount</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="section success">
+            <h3>🎯 Expected Result</h3>
+            <p>The MoMo checkout page should now display comprehensive booking details including:</p>
+            <ul>
+                <li>✅ Complete destination/event information</li>
+                <li>✅ Travel dates and participant counts</li>
+                <li>✅ Detailed price breakdown</li>
+                <li>✅ Customer contact information</li>
+                <li>✅ Booking/ticket reference numbers</li>
+                <li>✅ Add-ons and extras (if selected)</li>
+                <li>✅ Professional, organized layout</li>
+            </ul>
+            
+            <p><strong>Before:</strong> Only showed customer name, email, phone</p>
+            <p><strong>After:</strong> Shows complete booking summary with all relevant details</p>
+        </div>
+
+        <div class="section">
+            <h3>🔗 Quick Links</h3>
+            <button class="button btn-primary" onclick="window.open('http://localhost:8080/', '_blank')">
+                🏠 Homepage
+            </button>
+            <button class="button btn-primary" onclick="window.open('http://localhost:8080/destinations', '_blank')">
+                🏞️ Destinations
+            </button>
+            <button class="button btn-success" onclick="window.open('http://localhost:8080/tour/1', '_blank')">
+                🧪 Test Booking
+            </button>
+        </div>
+    </div>
+
+    <script>
+        console.log('MoMo Booking Details Test Page Loaded');
+        console.log('Enhanced booking details should now display in MoMo checkout');
+    </script>
+</body>
+</html>
