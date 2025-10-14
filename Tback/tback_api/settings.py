@@ -160,18 +160,20 @@ AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
 
-# Use Spaces for media storage
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# Use the CDN endpoint for serving files
-MEDIA_URL = 'https://tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com/'
-
-# Fallback local media settings for development
-if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
-    # Use local storage if Spaces credentials are not configured
+# Configure storage based on credentials availability
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+    # Use DigitalOcean Spaces for media storage
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = 'https://tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com/'
+    
+    # Force Django to use S3 storage by clearing any cached storage
+    import django.core.files.storage
+    django.core.files.storage._default_storage = None
+else:
+    # Fallback to local storage for development
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
