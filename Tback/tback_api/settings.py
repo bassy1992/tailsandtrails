@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
+    'storages',  # For DigitalOcean Spaces
     'authentication',
     'destinations',
     'tickets',
@@ -148,9 +149,29 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# DigitalOcean Spaces Configuration
+AWS_ACCESS_KEY_ID = os.getenv('SPACES_KEY')
+AWS_SECRET_ACCESS_KEY = os.getenv('SPACES_SECRET')
+AWS_STORAGE_BUCKET_NAME = 'tailsandtrailsmedia'
+AWS_S3_REGION_NAME = 'sfo3'
+AWS_S3_ENDPOINT_URL = 'https://sfo3.digitaloceanspaces.com'
+AWS_DEFAULT_ACL = 'public-read'  # allows CDN access
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+
+# Use Spaces for media storage
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# Use the CDN endpoint for serving files
+MEDIA_URL = 'https://tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com/'
+
+# Fallback local media settings for development
+if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
+    # Use local storage if Spaces credentials are not configured
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
