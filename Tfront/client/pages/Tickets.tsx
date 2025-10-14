@@ -10,7 +10,7 @@ import {
   Search, Filter, Ticket, Zap, Heart, Share2, Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ticketsApi, EventTicket, TicketCategory } from "@/lib/api.ts";
+import { ticketsApi, EventTicket, TicketCategory } from "../lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Types are now imported from api.ts

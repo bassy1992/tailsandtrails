@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiClient, User as ApiUser, RegisterRequest } from '@/lib/api.ts';
+import { apiClient, User as ApiUser, RegisterRequest } from '../lib/api';
 import { useToast } from './ToastContext';
 
 interface User {
