@@ -44,6 +44,7 @@ export default function Destinations() {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filteredDestinations, setFilteredDestinations] = useState<Destination[]>([]);
   const { showError } = useToast();
 
   // Fetch destinations and categories on component mount
@@ -57,6 +58,7 @@ export default function Destinations() {
         ]);
         setDestinations(destinationsData);
         setCategories(categoriesData);
+        setFilteredDestinations(destinationsData);
       } catch (error) {
         console.error('Error fetching destinations:', error);
         showError('Failed to load destinations. Please try again.');
@@ -68,31 +70,80 @@ export default function Destinations() {
     fetchData();
   }, [showError]);
 
-  // Fetch destinations when filters change
+  // Filter destinations when filters change
   useEffect(() => {
-    const fetchFilteredDestinations = async () => {
-      try {
-        const params: any = {};
-        
-        if (searchTerm) params.search = searchTerm;
-        if (priceFilter !== "all") params.price_category = priceFilter;
-        if (durationFilter !== "all") params.duration_category = durationFilter;
+    if (!loading && destinations.length > 0) {
+      let filtered = [...destinations];
 
-        const data = await destinationsApi.getDestinations(params);
-        setDestinations(data);
-      } catch (error) {
-        console.error('Error filtering destinations:', error);
-        showError('Failed to filter destinations. Please try again.');
+      // Apply search filter
+      if (searchTerm) {
+        filtered = filtered.filter(dest => 
+          dest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dest.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dest.description.toLowerCase().includes(searchTerm.toLowerCase())
+        );
       }
-    };
 
-    // Only fetch if not initial load
-    if (!loading) {
-      fetchFilteredDestinations();
+      // Apply category filter
+      if (categoryFilter !== "all") {
+        const selectedCategory = categories.find(cat => cat.name === categoryFilter);
+        if (selectedCategory) {
+          filtered = filtered.filter(dest => dest.category.id === selectedCategory.id);
+        }
+      }
+
+      // Apply price filter
+      if (priceFilter !== "all") {
+        filtered = filtered.filter(dest => {
+          const price = parseFloat(dest.price);
+          switch (priceFilter) {
+            case "budget":
+              return price < 300;
+            case "mid":
+              return price >= 300 && price <= 600;
+            case "luxury":
+              return price > 600;
+            default:
+              return true;
+          }
+        });
+      }
+
+      // Apply duration filter
+      if (durationFilter !== "all") {
+        filtered = filtered.filter(dest => {
+          const duration = dest.duration;
+          switch (durationFilter) {
+            case "day":
+              return duration === "1_day";
+            case "weekend":
+              return ["2_days", "3_days"].includes(duration);
+            case "week":
+              return ["4_days", "5_days", "6_days", "7_days", "7_plus_days"].includes(duration);
+            default:
+              return true;
+          }
+        });
+      }
+
+      setFilteredDestinations(filtered);
     }
-  }, [searchTerm, priceFilter, durationFilter, loading, showError]);
+  }, [searchTerm, categoryFilter, priceFilter, durationFilter, destinations, categories, loading]);
   // Dynamic categories from API
   const categoryNames = ["All", ...categories.map(cat => cat.name)];
+
+  // Handle category click
+  const handleCategoryClick = (categoryName: string) => {
+    setCategoryFilter(categoryName === "All" ? "all" : categoryName);
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setPriceFilter("all");
+    setDurationFilter("all");
+    setCategoryFilter("all");
+  };
 
   return (
     <Layout>
@@ -161,15 +212,37 @@ export default function Destinations() {
 
           {/* Category Tags */}
           <div className="flex flex-wrap gap-2 mt-6">
-            {categoryNames.map((category) => (
-              <Badge
-                key={category}
-                variant={category === "All" ? "default" : "secondary"}
-                className="cursor-pointer hover:bg-ghana-green hover:text-white transition-colors px-3 py-1"
+            {categoryNames.map((category) => {
+              const isActive = (category === "All" && categoryFilter === "all") || 
+                              (category !== "All" && categoryFilter === category);
+              
+              return (
+                <Badge
+                  key={category}
+                  variant={isActive ? "default" : "secondary"}
+                  className={`cursor-pointer transition-colors px-3 py-1 ${
+                    isActive 
+                      ? "bg-ghana-green text-white hover:bg-ghana-green/90" 
+                      : "hover:bg-ghana-green hover:text-white"
+                  }`}
+                  onClick={() => handleCategoryClick(category)}
+                >
+                  {category}
+                </Badge>
+              );
+            })}
+            
+            {/* Clear filters button */}
+            {(searchTerm || categoryFilter !== "all" || priceFilter !== "all" || durationFilter !== "all") && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="text-gray-500 hover:text-gray-700 ml-2"
               >
-                {category}
-              </Badge>
-            ))}
+                Clear All Filters
+              </Button>
+            )}
           </div>
         </div>
       </section>
@@ -188,14 +261,22 @@ export default function Destinations() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {destinations.length} Tour{destinations.length !== 1 ? 's' : ''} Available
+                {filteredDestinations.length} Tour{filteredDestinations.length !== 1 ? 's' : ''} Available
+                {categoryFilter !== "all" && (
+                  <span className="text-ghana-green"> in {categoryFilter}</span>
+                )}
               </h2>
-              <p className="text-gray-600">Choose your perfect Ghana adventure</p>
+              <p className="text-gray-600">
+                {categoryFilter !== "all" 
+                  ? `Showing ${categoryFilter.toLowerCase()} tours` 
+                  : "Choose your perfect Ghana adventure"
+                }
+              </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {destinations.map((destination) => (
+            {filteredDestinations.map((destination) => (
               <Card key={destination.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
                 <div className="relative overflow-hidden">
                   <img
@@ -282,7 +363,7 @@ export default function Destinations() {
             ))}
           </div>
 
-          {!loading && destinations.length === 0 && (
+          {!loading && filteredDestinations.length === 0 && destinations.length > 0 && (
             <div className="text-center py-12">
               <div className="text-gray-500 mb-4">
                 <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
@@ -290,15 +371,21 @@ export default function Destinations() {
                 <p>Try adjusting your search or filter criteria</p>
               </div>
               <Button 
-                onClick={() => {
-                  setSearchTerm("");
-                  setPriceFilter("all");
-                  setDurationFilter("all");
-                }}
+                onClick={clearAllFilters}
                 variant="outline"
               >
-                Clear Filters
+                Clear All Filters
               </Button>
+            </div>
+          )}
+
+          {!loading && destinations.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-500 mb-4">
+                <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-xl font-semibold mb-2">No destinations available</h3>
+                <p>Please check back later for new tour packages</p>
+              </div>
             </div>
           )}
           </>
