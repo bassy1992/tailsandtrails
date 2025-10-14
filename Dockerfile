@@ -4,6 +4,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PORT=8000
 
 # Set work directory
 WORKDIR /app
@@ -16,19 +17,22 @@ RUN apt-get update \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy requirements and install Python dependencies ONLY
 COPY Tback/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Copy the entire project
 COPY . /app/
+
+# Copy and make start script executable
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
 
 # Create staticfiles directory
 RUN mkdir -p /app/Tback/staticfiles
 
 # Expose port
-EXPOSE 8000
+EXPOSE $PORT
 
-# Change to Tback directory and start the application
-WORKDIR /app/Tback
-CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn tback_api.wsgi:application --bind 0.0.0.0:$PORT"]
+# Use the startup script
+CMD ["/app/start.sh"]

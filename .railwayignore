@@ -1,5 +1,0 @@
-# Ignore files that might trigger Django auto-detection
-Tfront/
-*.md
-.git/
-.gitignore
