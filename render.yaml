@@ -1,0 +1,45 @@
+services:
+  # Backend Django API
+  - type: web
+    name: tailsandtrails-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: |
+      cd Tback
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: |
+      cd Tback
+      gunicorn tback_api.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: tback_api.settings
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: "*"
+    
+  # Frontend React App
+  - type: web
+    name: tailsandtrails-frontend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: |
+      cd Tfront
+      npm install
+      npm run build:client
+    startCommand: |
+      cd Tfront
+      npm run preview
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: VITE_API_BASE_URL
+        value: https://tailsandtrails-backend.onrender.com
+      - key: VITE_API_URL
+        value: https://tailsandtrails-backend.onrender.com/api

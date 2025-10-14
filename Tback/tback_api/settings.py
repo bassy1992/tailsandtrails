@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-hsm8&34rih(!&y@(o9fk%2ye5x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '.onrender.com']
 
 
 # Application definition
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -128,7 +129,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -152,6 +158,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:5173",  # Vite dev server default (backup)
     "http://127.0.0.1:5173",
+    "https://tailsandtrails-frontend.onrender.com",  # Render frontend
+    "https://tfront-rktr1dcet-bassys-projects-fca17413.vercel.app",  # Vercel frontend
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -196,12 +204,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-]
-
-# Disable CSRF for API endpoints
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
+    "https://tailsandtrails-frontend.onrender.com",
+    "https://tfront-rktr1dcet-bassys-projects-fca17413.vercel.app",
 ]
 
 # Custom user model
