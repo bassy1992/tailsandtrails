@@ -160,15 +160,20 @@ AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
 
-# Configure storage based on credentials availability
-if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
-    # Use DigitalOcean Spaces for media storage
+# Media storage configuration - Force S3 when credentials exist
+# Check credentials at import time
+_spaces_key = os.getenv('SPACES_KEY')
+_spaces_secret = os.getenv('SPACES_SECRET')
+
+if _spaces_key and _spaces_secret:
+    # Force DigitalOcean Spaces storage
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = 'https://tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com/'
     
-    # Force Django to use S3 storage by clearing any cached storage
-    import django.core.files.storage
-    django.core.files.storage._default_storage = None
+    # Additional S3 settings to ensure proper configuration
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_CUSTOM_DOMAIN = 'tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com'
+    AWS_LOCATION = ''  # No subdirectory
 else:
     # Fallback to local storage for development
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
