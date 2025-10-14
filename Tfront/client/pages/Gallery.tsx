@@ -79,7 +79,7 @@ export default function Gallery() {
   // Create category options for filtering
   const categoryOptions = [
     { key: "all", label: "All" },
-    ...categories.map(cat => ({ key: cat.slug, label: cat.name }))
+    ...(categories || []).map(cat => ({ key: cat.slug, label: cat.name }))
   ];
 
   const getTabCounts = () => {
@@ -216,7 +216,7 @@ export default function Gallery() {
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
                               <div className="absolute top-3 left-3">
                                 <Badge className="bg-ghana-gold text-black font-semibold">
-                                  {image.category.name}
+                                  {image.category?.name || 'Uncategorized'}
                                 </Badge>
                               </div>
                               {image.is_featured && (
@@ -265,7 +265,7 @@ export default function Gallery() {
                                   )}
                                 </div>
                                 <Badge className="bg-ghana-gold text-black font-semibold ml-4">
-                                  {image.category.name}
+                                  {image.category?.name || 'Uncategorized'}
                                 </Badge>
                               </div>
                             </div>
@@ -380,7 +380,7 @@ export default function Gallery() {
                           </div>
                           <div className="absolute top-3 left-3">
                             <Badge className="bg-ghana-gold text-black font-semibold">
-                              {video.category.name}
+                              {video.category?.name || 'Uncategorized'}
                             </Badge>
                           </div>
                           {video.is_featured && (
