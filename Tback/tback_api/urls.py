@@ -19,6 +19,8 @@ from django.urls import path, include
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.conf import settings
+from django.conf.urls.static import static
 
 @csrf_exempt
 def health_check(request):
@@ -59,3 +61,7 @@ urlpatterns = [
     path('api/payments/', include('payments.urls')),
     path('api/tickets/', include('tickets.urls')),
 ]
+
+# Serve media files during development and production
+# Note: In production, you should use a proper media server like Nginx or a CDN
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-hsm8&34rih(!&y@(o9fk%2ye5x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '.railway.app', '.up.railway.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver', '.railway.app', '.up.railway.app', 'tailsandtrails-production.up.railway.app']
 
 
 # Application definition
@@ -167,13 +167,22 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # CORS settings for frontend integration
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",  # Frontend dev server
     "http://127.0.0.1:8080",
     "http://localhost:5173",  # Vite dev server default (backup)
     "http://127.0.0.1:5173",
-    "https://tfront-rktr1dcet-bassys-projects-fca17413.vercel.app",  # Vercel frontend
+    "https://tfront-rktr1dcet-bassys-projects-fca17413.vercel.app",  # Vercel frontend (old)
+    "https://tfront-nxcxxw7cr-bassys-projects-fca17413.vercel.app",  # Vercel frontend (previous)
+    "https://tfront-b30j1teg7-bassys-projects-fca17413.vercel.app",  # Vercel frontend (current)
+    "https://tailsandtrails.vercel.app",  # Vercel frontend (main)
+    "https://tailsandtrails-production.up.railway.app",  # Railway production backend
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -219,6 +228,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://tfront-rktr1dcet-bassys-projects-fca17413.vercel.app",
+    "https://tfront-nxcxxw7cr-bassys-projects-fca17413.vercel.app",
+    "https://tfront-b30j1teg7-bassys-projects-fca17413.vercel.app",
+    "https://tailsandtrails.vercel.app",
+    "https://tailsandtrails-production.up.railway.app",
 ]
 
 # Custom user model

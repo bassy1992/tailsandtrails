@@ -46,7 +46,7 @@ class Venue(models.Model):
     longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     capacity = models.PositiveIntegerField(blank=True, null=True)
     description = models.TextField(blank=True)
-    image = models.URLField(max_length=500, blank=True)
+    image = models.ImageField(upload_to='venues/', blank=True, null=True)
     contact_phone = models.CharField(max_length=20, blank=True)
     contact_email = models.EmailField(blank=True)
     website = models.URLField(blank=True)
@@ -108,7 +108,7 @@ class Ticket(models.Model):
     sale_end_date = models.DateTimeField()
     
     # Media
-    image = models.URLField(max_length=500, blank=True)
+    image = models.ImageField(upload_to='tickets/', blank=True, null=True)
     gallery_images = models.JSONField(default=list, blank=True)
     
     # Features

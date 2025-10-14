@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Image Upload</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .result { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .preview { max-width: 200px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Test Image Upload for Destinations</h1>
+    
+    <!-- Create Destination Form -->
+    <div class="form-group">
+        <h2>1. Create a Destination First</h2>
+        <form id="createDestinationForm">
+            <div class="form-group">
+                <label for="name">Destination Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="price">Price (GHS):</label>
+                <input type="number" id="price" name="price" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="duration">Duration:</label>
+                <select id="duration" name="duration" required>
+                    <option value="1_day">1 Day</option>
+                    <option value="2_days">2 Days</option>
+                    <option value="3_days">3 Days</option>
+                    <option value="7_plus_days">7+ Days</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="max_group_size">Max Group Size:</label>
+                <input type="number" id="max_group_size" name="max_group_size" min="1" required>
+            </div>
+            <button type="submit">Create Destination</button>
+        </form>
+        <div id="createResult"></div>
+    </div>
+
+    <!-- Upload Main Image Form -->
+    <div class="form-group">
+        <h2>2. Upload Main Destination Image</h2>
+        <form id="uploadMainImageForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="destinationId">Destination ID:</label>
+                <input type="number" id="destinationId" name="destinationId" required>
+            </div>
+            <div class="form-group">
+                <label for="mainImage">Main Image:</label>
+                <input type="file" id="mainImage" name="image" accept="image/*" required>
+                <img id="mainImagePreview" class="preview" style="display: none;">
+            </div>
+            <button type="submit">Upload Main Image</button>
+        </form>
+        <div id="uploadMainResult"></div>
+    </div>
+
+    <!-- Upload Gallery Image Form -->
+    <div class="form-group">
+        <h2>3. Upload Gallery Images</h2>
+        <form id="uploadGalleryForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="galleryDestinationId">Destination ID:</label>
+                <input type="number" id="galleryDestinationId" name="destination" required>
+            </div>
+            <div class="form-group">
+                <label for="galleryImage">Gallery Image:</label>
+                <input type="file" id="galleryImage" name="image" accept="image/*" required>
+                <img id="galleryImagePreview" class="preview" style="display: none;">
+            </div>
+            <div class="form-group">
+                <label for="altText">Alt Text:</label>
+                <input type="text" id="altText" name="alt_text">
+            </div>
+            <div class="form-group">
+                <label for="isPrimary">Is Primary:</label>
+                <input type="checkbox" id="isPrimary" name="is_primary">
+            </div>
+            <div class="form-group">
+                <label for="order">Order:</label>
+                <input type="number" id="order" name="order" value="0">
+            </div>
+            <button type="submit">Upload Gallery Image</button>
+        </form>
+        <div id="uploadGalleryResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Image preview functionality
+        document.getElementById('mainImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('mainImagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('galleryImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('galleryImagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Create destination
+        document.getElementById('createDestinationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            data.category = 1; // Default category
+            
+            try {
+                const response = await fetch(`${API_BASE}/destinations/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Token YOUR_TOKEN_HERE' // You'll need to get this from admin
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('createResult');
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">Destination created successfully! ID: ${result.id}</div>`;
+                    document.getElementById('destinationId').value = result.id;
+                    document.getElementById('galleryDestinationId').value = result.id;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Error: ${JSON.stringify(result)}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('createResult').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+
+        // Upload main image
+        document.getElementById('uploadMainImageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const destinationId = formData.get('destinationId');
+            
+            try {
+                const response = await fetch(`${API_BASE}/destinations/${destinationId}/upload-image/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': 'Token YOUR_TOKEN_HERE' // You'll need to get this from admin
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('uploadMainResult');
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">Main image uploaded successfully!<br>URL: ${result.image_url}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Error: ${JSON.stringify(result)}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('uploadMainResult').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+
+        // Upload gallery image
+        document.getElementById('uploadGalleryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch(`${API_BASE}/destinations/gallery/upload/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Token YOUR_TOKEN_HERE' // You'll need to get this from admin
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('uploadGalleryResult');
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">Gallery image uploaded successfully!<br>Image ID: ${result.id}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Error: ${JSON.stringify(result)}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('uploadGalleryResult').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -37,7 +37,7 @@ class Destination(models.Model):
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     location = models.CharField(max_length=100)
     description = models.TextField()
-    image = models.URLField(max_length=500)
+    image = models.ImageField(upload_to='destinations/', blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     duration = models.CharField(max_length=20, choices=DURATION_CHOICES)
     max_group_size = models.PositiveIntegerField(validators=[MinValueValidator(1)])
@@ -112,7 +112,7 @@ class DestinationInclude(models.Model):
 
 class DestinationImage(models.Model):
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='images')
-    image_url = models.URLField(max_length=500)
+    image = models.ImageField(upload_to='destinations/gallery/', blank=True, null=True)
     alt_text = models.CharField(max_length=200, blank=True)
     is_primary = models.BooleanField(default=False)
     order = models.PositiveIntegerField(default=0)

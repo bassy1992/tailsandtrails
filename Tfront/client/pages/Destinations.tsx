@@ -10,6 +10,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MapPin, Search, Star, Clock, Users, DollarSign, Filter } from "lucide-react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
+// Helper function to get placeholder images
+const getPlaceholderImage = (name: string, location: string): string => {
+  const placeholder_images = {
+    'volta': 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&h=600&fit=crop&crop=center',  // Waterfall
+    'kumasi': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center',  // Cultural heritage
+    'labadi': 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&h=600&fit=crop&crop=center',  // Beach
+    'mole': 'https://images.unsplash.com/photo-1549366021-9f761d040a94?w=800&h=600&fit=crop&crop=center',  // Safari/Wildlife
+    'cape coast': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center',  // Castle/Historical
+    'kakum': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center',  // Forest/Canopy
+  };
+  
+  // Find matching placeholder based on destination name or location
+  const name_lower = name.toLowerCase();
+  const location_lower = location.toLowerCase();
+  
+  for (const [key, image_url] of Object.entries(placeholder_images)) {
+    if (name_lower.includes(key) || location_lower.includes(key)) {
+      return image_url;
+    }
+  }
+  
+  // Default placeholder if no match found
+  return 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center';
+};
+
 export default function Destinations() {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
@@ -174,9 +199,13 @@ export default function Destinations() {
               <Card key={destination.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
                 <div className="relative overflow-hidden">
                   <img
-                    src={destination.image}
+                    src={destination.image_url || destination.image || getPlaceholderImage(destination.name, destination.location)}
                     alt={destination.name}
                     className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = getPlaceholderImage(destination.name, destination.location);
+                    }}
                   />
                   <div className="absolute top-4 left-4">
                     <Badge className="bg-ghana-gold text-black font-semibold">

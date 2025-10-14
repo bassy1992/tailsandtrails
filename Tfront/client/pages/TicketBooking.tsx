@@ -119,7 +119,7 @@ export default function TicketBooking() {
         console.log('Fetching ticket details for ID:', id);
         
         // Try to get ticket details by ID from the list endpoint first
-        let response = await fetch(`http://localhost:8000/api/tickets/?id=${id}`);
+        let response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/?id=${id}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch ticket');
@@ -136,7 +136,7 @@ export default function TicketBooking() {
         // Now fetch the full details using the slug if available, otherwise use the basic data
         if (ticket.slug) {
           try {
-            const detailResponse = await fetch(`http://localhost:8000/api/tickets/${ticket.slug}/`);
+            const detailResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/${ticket.slug}/`);
             if (detailResponse.ok) {
               const detailData = await detailResponse.json();
               // Ensure we have all required fields with defaults

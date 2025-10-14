@@ -21,9 +21,70 @@ class DestinationIncludeSerializer(serializers.ModelSerializer):
         fields = ['item']
 
 class DestinationImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = DestinationImage
-        fields = ['image_url', 'alt_text', 'is_primary']
+        fields = ['id', 'image', 'image_url', 'alt_text', 'is_primary', 'order']
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+class ImageUploadSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to destinations"""
+    
+    class Meta:
+        model = DestinationImage
+        fields = ['destination', 'image', 'alt_text', 'is_primary', 'order']
+    
+    def validate_image(self, value):
+        """Validate uploaded image"""
+        if value:
+            # Check file size (max 5MB)
+            if value.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Image file too large. Maximum size is 5MB.")
+            
+            # Check file type
+            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+            if value.content_type not in allowed_types:
+                raise serializers.ValidationError("Invalid image format. Allowed formats: JPEG, PNG, WebP.")
+        
+        return value
+
+class DestinationImageUploadSerializer(serializers.ModelSerializer):
+    """Serializer for uploading main destination image"""
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Destination
+        fields = ['id', 'image', 'image_url']
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+    
+    def validate_image(self, value):
+        """Validate uploaded image"""
+        if value:
+            # Check file size (max 5MB)
+            if value.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Image file too large. Maximum size is 5MB.")
+            
+            # Check file type
+            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+            if value.content_type not in allowed_types:
+                raise serializers.ValidationError("Invalid image format. Allowed formats: JPEG, PNG, WebP.")
+        
+        return value
 
 class AddOnCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -55,15 +116,44 @@ class DestinationListSerializer(serializers.ModelSerializer):
     includes = DestinationIncludeSerializer(many=True, read_only=True)
     duration_display = serializers.CharField(read_only=True)
     price_category = serializers.CharField(read_only=True)
+    image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Destination
         fields = [
-            'id', 'name', 'slug', 'location', 'description', 'image',
+            'id', 'name', 'slug', 'location', 'description', 'image', 'image_url',
             'price', 'duration', 'duration_display', 'max_group_size',
             'rating', 'reviews_count', 'category', 'highlights', 'includes',
             'price_category', 'is_featured'
         ]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        
+        # Return placeholder image based on destination name/location
+        placeholder_images = {
+            'volta': 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&h=600&fit=crop&crop=center',  # Waterfall
+            'kumasi': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center',  # Cultural heritage
+            'labadi': 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&h=600&fit=crop&crop=center',  # Beach
+            'mole': 'https://images.unsplash.com/photo-1549366021-9f761d040a94?w=800&h=600&fit=crop&crop=center',  # Safari/Wildlife
+            'cape coast': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center',  # Castle/Historical
+            'kakum': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center',  # Forest/Canopy
+        }
+        
+        # Find matching placeholder based on destination name or location
+        name_lower = obj.name.lower()
+        location_lower = obj.location.lower()
+        
+        for key, image_url in placeholder_images.items():
+            if key in name_lower or key in location_lower:
+                return image_url
+        
+        # Default placeholder if no match found
+        return 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center'
 
 class DestinationDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -74,16 +164,45 @@ class DestinationDetailSerializer(serializers.ModelSerializer):
     experience_addons = ExperienceAddOnSerializer(many=True, read_only=True)
     duration_display = serializers.CharField(read_only=True)
     price_category = serializers.CharField(read_only=True)
+    image_url = serializers.SerializerMethodField()
     
     class Meta:
         model = Destination
         fields = [
-            'id', 'name', 'slug', 'location', 'description', 'image',
+            'id', 'name', 'slug', 'location', 'description', 'image', 'image_url',
             'price', 'duration', 'duration_display', 'max_group_size',
             'rating', 'reviews_count', 'category', 'highlights', 'includes',
             'images', 'addon_options', 'experience_addons', 'price_category', 
             'is_featured', 'created_at'
         ]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        
+        # Return placeholder image based on destination name/location
+        placeholder_images = {
+            'volta': 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&h=600&fit=crop&crop=center',  # Waterfall
+            'kumasi': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center',  # Cultural heritage
+            'labadi': 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&h=600&fit=crop&crop=center',  # Beach
+            'mole': 'https://images.unsplash.com/photo-1549366021-9f761d040a94?w=800&h=600&fit=crop&crop=center',  # Safari/Wildlife
+            'cape coast': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center',  # Castle/Historical
+            'kakum': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center',  # Forest/Canopy
+        }
+        
+        # Find matching placeholder based on destination name or location
+        name_lower = obj.name.lower()
+        location_lower = obj.location.lower()
+        
+        for key, image_url in placeholder_images.items():
+            if key in name_lower or key in location_lower:
+                return image_url
+        
+        # Default placeholder if no match found
+        return 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center'
 
 class ReviewSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.first_name', read_only=True)

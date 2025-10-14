@@ -36,13 +36,13 @@ export default function Tickets() {
         
         // Fetch tickets using direct fetch (public access)
         const [ticketsResponse, categoriesResponse] = await Promise.all([
-          fetch('http://localhost:8000/api/tickets/', {
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
             },
           }),
-          fetch('http://localhost:8000/api/tickets/categories/', {
+          fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/categories/`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

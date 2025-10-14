@@ -117,7 +117,7 @@ export default function MomoCheckout() {
       // Get customer email (use a default if not available)
       const customerEmail = paymentData.customerInfo?.email || 'customer@example.com';
       
-      const response = await fetch('http://localhost:8000/api/payments/paystack/create/', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/paystack/create/`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -194,7 +194,7 @@ export default function MomoCheckout() {
         }
         
         // Use Paystack verification endpoint
-        const response = await fetch(`http://localhost:8000/api/payments/paystack/verify/${paymentReference}/`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/paystack/verify/${paymentReference}/`, {
           headers
         });
         
@@ -294,7 +294,7 @@ export default function MomoCheckout() {
         headers['Authorization'] = `Token ${authToken}`;
       }
       
-      const response = await fetch(`http://localhost:8000/api/payments/${paymentReference}/complete/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/${paymentReference}/complete/`, {
         method: 'POST',
         headers
       });

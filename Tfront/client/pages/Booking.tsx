@@ -154,7 +154,7 @@ export default function Booking() {
   useEffect(() => {
     const loadPaymentMethods = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/payments/checkout/methods/');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/checkout/methods/`);
         const data = await response.json();
         setPaymentMethods(data.payment_methods || []);
       } catch (error) {

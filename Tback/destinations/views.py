@@ -1,13 +1,14 @@
 from rest_framework import generics, filters, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
-from .models import Category, Destination, Review, Booking
+from .models import Category, Destination, Review, Booking, DestinationImage
 from .serializers import (
     CategorySerializer, DestinationListSerializer, DestinationDetailSerializer,
-    ReviewSerializer, BookingSerializer
+    ReviewSerializer, BookingSerializer, ImageUploadSerializer, DestinationImageUploadSerializer
 )
 
 class CategoryListView(generics.ListAPIView):
@@ -119,3 +120,61 @@ class BookingDetailView(generics.RetrieveUpdateAPIView):
     
     def get_queryset(self):
         return Booking.objects.filter(user=self.request.user).select_related('destination')
+
+# Image Upload Views
+class DestinationImageUploadView(generics.UpdateAPIView):
+    """Upload main image for a destination"""
+    queryset = Destination.objects.all()
+    serializer_class = DestinationImageUploadSerializer
+    permission_classes = [IsAdminUser]  # Only admin can upload images
+    parser_classes = [MultiPartParser, FormParser]
+    
+    def patch(self, request, *args, **kwargs):
+        """Handle image upload via PATCH request"""
+        return self.partial_update(request, *args, **kwargs)
+
+class DestinationGalleryUploadView(generics.CreateAPIView):
+    """Upload gallery images for a destination"""
+    queryset = DestinationImage.objects.all()
+    serializer_class = ImageUploadSerializer
+    permission_classes = [IsAdminUser]  # Only admin can upload images
+    parser_classes = [MultiPartParser, FormParser]
+    
+    def create(self, request, *args, **kwargs):
+        """Handle gallery image upload"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Save the image
+        image_instance = serializer.save()
+        
+        # Return the created image data
+        response_serializer = self.get_serializer(image_instance)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+class DestinationGalleryListView(generics.ListAPIView):
+    """List all gallery images for a destination"""
+    serializer_class = ImageUploadSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        destination_id = self.kwargs['destination_id']
+        return DestinationImage.objects.filter(destination_id=destination_id).order_by('order', 'id')
+
+class DestinationGalleryDeleteView(generics.DestroyAPIView):
+    """Delete a gallery image"""
+    queryset = DestinationImage.objects.all()
+    permission_classes = [IsAdminUser]
+    
+    def delete(self, request, *args, **kwargs):
+        """Delete the image file and database record"""
+        instance = self.get_object()
+        
+        # Delete the actual file
+        if instance.image:
+            instance.image.delete(save=False)
+        
+        # Delete the database record
+        instance.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)

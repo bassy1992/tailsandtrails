@@ -109,7 +109,7 @@ export default function TicketCheckout() {
 
         try {
             // Step 1: Create payment using Paystack
-            const paymentResponse = await fetch('http://localhost:8000/api/payments/paystack/create/', {
+            const paymentResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/paystack/create/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export default function TicketCheckout() {
 
                 const pollPaymentStatus = async () => {
                     try {
-                        const statusResponse = await fetch(`http://localhost:8000/api/payments/paystack/verify/${paymentReference}/`);
+                        const statusResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/paystack/verify/${paymentReference}/`);
                         const statusResult = await statusResponse.json();
                         
                         const paymentStatus = statusResult.payment?.status;
@@ -157,7 +157,7 @@ export default function TicketCheckout() {
                         if (paymentStatus === 'successful') {
                             setStatusMessage('Payment successful! Creating your tickets...');
                             // Step 3: Create ticket purchase after successful payment
-                            const ticketResponse = await fetch('http://localhost:8000/api/tickets/purchase/direct/', {
+                            const ticketResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/purchase/direct/`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',

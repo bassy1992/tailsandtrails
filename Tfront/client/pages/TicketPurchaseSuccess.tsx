@@ -64,7 +64,7 @@ export default function TicketPurchaseSuccess() {
 
   const fetchTicketCodes = async (purchaseId: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tickets/purchase/${purchaseId}/details/`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/purchase/${purchaseId}/details/`);
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.ticket_codes) {

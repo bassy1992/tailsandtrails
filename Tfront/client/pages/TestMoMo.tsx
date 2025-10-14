@@ -29,7 +29,7 @@ export default function TestMoMo() {
 
     try {
       // Step 1: Create payment
-      const response = await fetch('http://localhost:8000/api/payments/paystack/create/', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/paystack/create/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ export default function TestMoMo() {
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         // Step 3: Complete payment (simulate user authorization)
-        const completeResponse = await fetch(`http://localhost:8000/api/payments/${paymentRef}/complete/`, {
+        const completeResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/${paymentRef}/complete/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

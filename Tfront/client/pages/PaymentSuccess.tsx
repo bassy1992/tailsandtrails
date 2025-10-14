@@ -81,7 +81,7 @@ export default function PaymentSuccess() {
           }
           
           const response = await fetch(
-            `http://localhost:8000/api/payments/payment/${paymentData.paymentDetails.transactionId}/`,
+            `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/payment/${paymentData.paymentDetails.transactionId}/`,
             {
               headers: {
                 'Authorization': `Token ${token}`,

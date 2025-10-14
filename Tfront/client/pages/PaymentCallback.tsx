@@ -26,7 +26,7 @@ export default function PaymentCallback() {
         }
 
         // Verify payment with backend
-        const response = await fetch(`http://localhost:8000/api/payments/paystack/verify/${paymentRef}/`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/paystack/verify/${paymentRef}/`);
         const result = await response.json();
 
         if (result.success && result.payment) {

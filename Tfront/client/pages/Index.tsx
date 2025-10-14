@@ -77,7 +77,7 @@ export default function Index() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/categories/');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/categories/`);
       if (response.ok) {
         const data = await response.json();
         setCategories(data);
@@ -97,7 +97,7 @@ export default function Index() {
       if (durationFilter) params.append('duration_category', durationFilter);
       if (categoryFilter) params.append('category', categoryFilter);
       
-      const response = await fetch(`http://localhost:8000/api/destinations/?${params.toString()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/destinations/?${params.toString()}`);
       
       if (response.ok) {
         const data = await response.json();

@@ -74,11 +74,14 @@ const Dashboard: React.FC = () => {
 
       console.log('Dashboard: Making API calls with headers:', headers);
 
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      console.log('Dashboard: Using API URL:', apiUrl);
+
       // Fetch all dashboard data in parallel
       const [overviewRes, bookingsRes, activitiesRes] = await Promise.all([
-        fetch('http://localhost:8000/api/dashboard/overview/', { headers }),
-        fetch('http://localhost:8000/api/dashboard/bookings/', { headers }),
-        fetch('http://localhost:8000/api/dashboard/activity/', { headers })
+        fetch(`${apiUrl}/dashboard/overview/`, { headers }),
+        fetch(`${apiUrl}/dashboard/bookings/`, { headers }),
+        fetch(`${apiUrl}/dashboard/activity/`, { headers })
       ]);
 
       console.log('Dashboard: API responses:', {
