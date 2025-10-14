@@ -45,7 +45,7 @@ function AppRoutes() {
       <Route path="/destinations" element={<Destinations />} />
       <Route path="/gallery" element={<Gallery />} />
       <Route path="/videos" element={<Gallery />} />
-      <Route path="/destinations/:id" element={<Placeholder />} />
+      <Route path="/destinations/:id" element={<TourDetails />} />
       <Route path="/tour/:id" element={<TourDetails />} />
       <Route path="/tickets" element={<Tickets />} />
       <Route path="/tickets/:slug" element={<TicketBooking />} />

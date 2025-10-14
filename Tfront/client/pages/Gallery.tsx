@@ -298,93 +298,137 @@ export default function Gallery() {
                 <p className="text-gray-600">{videoCount} video{videoCount !== 1 ? 's' : ''} found</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredVideos.map((video) => (
-                  <Card key={video.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                    <div className="relative cursor-pointer">
-                      <img
-                        src={video.thumbnail}
-                        alt={video.title}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              size="lg"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-ghana-gold hover:bg-ghana-gold/90 text-black"
-                            >
-                              <Play className="h-5 w-5 mr-2" />
-                              Play
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-                            <VisuallyHidden>
-                              <DialogTitle>{video.title}</DialogTitle>
-                            </VisuallyHidden>
-                            <div className="relative">
-                              <video
-                                controls
-                                autoPlay
-                                className="w-full h-auto max-h-[80vh]"
-                                poster={video.thumbnail}
-                              >
-                                <source src={video.videoUrl} type="video/mp4" />
-                                Your browser does not support the video tag.
-                              </video>
-                              <div className="p-6 bg-white">
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2">{video.title}</h3>
-                                <div className="flex items-center text-gray-600 mb-3">
-                                  <MapPin className="h-5 w-5 mr-2" />
-                                  <span className="mr-4">{video.location}</span>
-                                  <Clock className="h-5 w-5 mr-2" />
-                                  <span className="mr-4">{video.duration}</span>
-                                  <Eye className="h-5 w-5 mr-2" />
-                                  <span>{video.views} views</span>
+              {videoLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="overflow-hidden animate-pulse">
+                      <div className="w-full h-48 bg-gray-300"></div>
+                      <CardHeader className="pb-2">
+                        <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="h-3 bg-gray-300 rounded"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {videos.map((video) => (
+                      <Card key={video.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
+                        <div className="relative cursor-pointer">
+                          <img
+                            src={video.thumbnail_url}
+                            alt={video.title}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = 'https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=600';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="lg"
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-ghana-gold hover:bg-ghana-gold/90 text-black"
+                                >
+                                  <Play className="h-5 w-5 mr-2" />
+                                  Play
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+                                <VisuallyHidden>
+                                  <DialogTitle>{video.title}</DialogTitle>
+                                </VisuallyHidden>
+                                <div className="relative">
+                                  {video.video_url ? (
+                                    <video
+                                      controls
+                                      autoPlay
+                                      className="w-full h-auto max-h-[80vh]"
+                                      poster={video.thumbnail_url}
+                                    >
+                                      <source src={video.video_url} type="video/mp4" />
+                                      Your browser does not support the video tag.
+                                    </video>
+                                  ) : (
+                                    <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
+                                      <p className="text-gray-500">Video not available</p>
+                                    </div>
+                                  )}
+                                  <div className="p-6 bg-white">
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{video.title}</h3>
+                                    <div className="flex items-center text-gray-600 mb-3">
+                                      <MapPin className="h-5 w-5 mr-2" />
+                                      <span className="mr-4">{video.location}</span>
+                                      <Clock className="h-5 w-5 mr-2" />
+                                      <span className="mr-4">{video.duration}</span>
+                                      <Eye className="h-5 w-5 mr-2" />
+                                      <span>{video.formatted_views} views</span>
+                                    </div>
+                                    <p className="text-gray-700">{video.description}</p>
+                                    {video.videographer && (
+                                      <p className="text-sm text-gray-500 mt-2">Video by: {video.videographer}</p>
+                                    )}
+                                  </div>
                                 </div>
-                                <p className="text-gray-700">{video.description}</p>
-                              </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                          <div className="absolute top-3 left-3">
+                            <Badge className="bg-ghana-gold text-black font-semibold">
+                              {video.category.name}
+                            </Badge>
+                          </div>
+                          {video.is_featured && (
+                            <div className="absolute top-3 right-3">
+                              <Badge className="bg-red-500 text-white">
+                                Featured
+                              </Badge>
                             </div>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-ghana-gold text-black font-semibold">
-                          {video.category.charAt(0).toUpperCase() + video.category.slice(1)}
-                        </Badge>
-                      </div>
-                      <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded text-sm">
-                        {video.duration}
-                      </div>
-                    </div>
+                          )}
+                          <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded text-sm">
+                            {video.duration}
+                          </div>
+                        </div>
 
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg leading-tight group-hover:text-ghana-green transition-colors">
-                        {video.title}
-                      </CardTitle>
-                      <div className="flex items-center text-gray-600 text-sm">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span className="mr-3">{video.location}</span>
-                        <Eye className="h-4 w-4 mr-1" />
-                        <span>{video.views} views</span>
-                      </div>
-                    </CardHeader>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg leading-tight group-hover:text-ghana-green transition-colors">
+                            {video.title}
+                          </CardTitle>
+                          <div className="flex items-center text-gray-600 text-sm">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            <span className="mr-3">{video.location}</span>
+                            <Eye className="h-4 w-4 mr-1" />
+                            <span>{video.formatted_views} views</span>
+                          </div>
+                        </CardHeader>
 
-                    <CardContent className="pt-0">
-                      <CardDescription className="text-sm leading-relaxed">
-                        {video.description}
-                      </CardDescription>
-                    </CardContent>
-                  </Card>
+                        <CardContent className="pt-0">
+                          <CardDescription className="text-sm leading-relaxed line-clamp-2">
+                            {video.description}
+                          </CardDescription>
+                        </CardContent>
+                      </Card>
                 ))}
               </div>
 
-              {filteredVideos.length === 0 && (
-                <div className="text-center py-12">
-                  <Video className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No videos found</h3>
-                  <p className="text-gray-500">Try selecting a different category</p>
-                </div>
+                  {videos.length === 0 && !videoLoading && (
+                    <div className="text-center py-12">
+                      <Video className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-xl font-semibold text-gray-600 mb-2">No videos found</h3>
+                      <p className="text-gray-500">
+                        {selectedCategory === "all" 
+                          ? "No videos available at the moment" 
+                          : "No videos found in this category"
+                        }
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </TabsContent>
           </Tabs>
