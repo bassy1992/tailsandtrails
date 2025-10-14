@@ -149,7 +149,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# DigitalOcean Spaces Configuration
+# DigitalOcean Spaces Configuration - Updated credentials
 AWS_ACCESS_KEY_ID = os.getenv('SPACES_KEY')
 AWS_SECRET_ACCESS_KEY = os.getenv('SPACES_SECRET')
 AWS_STORAGE_BUCKET_NAME = 'tailsandtrailsmedia'
