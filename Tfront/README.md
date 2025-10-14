@@ -67,23 +67,9 @@ npm run build
 
 This creates optimized production files in the `dist/spa` directory.
 
-### Deploy to Vercel
-
-1. Install Vercel CLI:
-```bash
-npm i -g vercel
-```
-
-2. Deploy:
-```bash
-vercel --prod
-```
-
-Or connect your GitHub repository to Vercel for automatic deployments.
-
 ### Environment Variables for Production
 
-Set these environment variables in your Vercel dashboard:
+Set these environment variables in your deployment platform:
 
 - `VITE_API_BASE_URL`: Your backend API base URL
 - `VITE_API_URL`: Your backend API endpoint URL

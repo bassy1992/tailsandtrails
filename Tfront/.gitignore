@@ -26,6 +26,4 @@ dist-ssr
 .config/
 !.env
 
-.vercel
 
-.vercel
