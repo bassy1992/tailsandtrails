@@ -156,6 +156,7 @@ AWS_STORAGE_BUCKET_NAME = 'tailsandtrailsmedia'
 AWS_S3_REGION_NAME = 'sfo3'
 AWS_S3_ENDPOINT_URL = 'https://sfo3.digitaloceanspaces.com'
 AWS_DEFAULT_ACL = 'public-read'  # allows CDN access
+AWS_QUERYSTRING_AUTH = False  # Don't add auth parameters to URLs
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
