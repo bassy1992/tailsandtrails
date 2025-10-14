@@ -1,1 +1,1 @@
-web: cd Tback && python manage.py collectstatic --noinput && python manage.py migrate && gunicorn tback_api.wsgi --bind 0.0.0.0:$PORT
+web: cd Tback && python manage.py collectstatic --noinput && python manage.py railway_migrate && gunicorn tback_api.wsgi --bind 0.0.0.0:$PORT

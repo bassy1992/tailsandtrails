@@ -91,7 +91,7 @@ import dj_database_url
 
 # Database configuration with build-time fallback
 DATABASE_URL = os.getenv('DATABASE_URL')
-IS_BUILD_TIME = os.getenv('RAILWAY_ENVIRONMENT') is None
+IS_BUILD_TIME = os.getenv('RAILWAY_SKIP_BUILD_MIGRATIONS') == 'true'
 
 if DATABASE_URL and not IS_BUILD_TIME:
     DATABASES = {
