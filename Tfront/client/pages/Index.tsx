@@ -10,6 +10,7 @@ import { Calendar, MapPin, Search, Star, Users, Clock, Car, Hotel, Utensils, Shi
 import { Link, useNavigate } from "react-router-dom";
 import VideoSection from "@/components/VideoSection";
 import Currency from "@/lib/currency";
+import { destinationsApi, Destination } from "../lib/api.ts";
 
 interface SearchResult {
   id: number;
@@ -33,12 +34,15 @@ export default function Index() {
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
+  const [featuredTours, setFeaturedTours] = useState<Destination[]>([]);
+  const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const searchResultsRef = useRef<HTMLDivElement>(null);
 
-  // Fetch categories on component mount
+  // Fetch categories and featured tours on component mount
   useEffect(() => {
     fetchCategories();
+    fetchFeaturedTours();
   }, []);
 
   // Handle search with debouncing
@@ -77,44 +81,63 @@ export default function Index() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/categories/`);
-      if (response.ok) {
-        const data = await response.json();
-        setCategories(data);
-      }
+      const data = await destinationsApi.getCategories();
+      setCategories(data);
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchFeaturedTours = async () => {
+    try {
+      setIsLoadingFeatured(true);
+      // Fetch destinations and filter for featured ones, or get first 4 if no featured flag
+      const destinations = await destinationsApi.getDestinations({ ordering: '-rating' });
+      
+      // Get featured destinations or top-rated ones
+      const featured = destinations.filter(dest => dest.is_featured).slice(0, 4);
+      
+      // If we don't have enough featured destinations, fill with top-rated ones
+      if (featured.length < 4) {
+        const topRated = destinations.slice(0, 4 - featured.length);
+        setFeaturedTours([...featured, ...topRated]);
+      } else {
+        setFeaturedTours(featured);
+      }
+    } catch (error) {
+      console.error('Error fetching featured tours:', error);
+      // Fallback to empty array if API fails
+      setFeaturedTours([]);
+    } finally {
+      setIsLoadingFeatured(false);
     }
   };
 
   const performSearch = async () => {
     setIsSearching(true);
     try {
-      const params = new URLSearchParams();
+      const searchParams: any = {};
       
-      if (searchTerm) params.append('search', searchTerm);
-      if (priceFilter) params.append('price_category', priceFilter);
-      if (durationFilter) params.append('duration_category', durationFilter);
-      if (categoryFilter) params.append('category', categoryFilter);
+      if (searchTerm) searchParams.search = searchTerm;
+      if (priceFilter) searchParams.price_category = priceFilter;
+      if (durationFilter) searchParams.duration_category = durationFilter;
+      if (categoryFilter) searchParams.category = parseInt(categoryFilter);
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/destinations/?${params.toString()}`);
+      const destinations = await destinationsApi.getDestinations(searchParams);
       
-      if (response.ok) {
-        const data = await response.json();
-        const formattedResults = data.results?.map((dest: any) => ({
-          id: dest.id,
-          name: dest.name,
-          location: dest.location,
-          price: Currency.format(dest.price),
-          duration: formatDuration(dest.duration),
-          rating: dest.rating,
-          image: dest.image || dest.images?.[0]?.image_url || '',
-          category: dest.category?.name || ''
-        })) || [];
-        
-        setSearchResults(formattedResults);
-        setShowResults(formattedResults.length > 0);
-      }
+      const formattedResults = destinations.map((dest: Destination) => ({
+        id: dest.id,
+        name: dest.name,
+        location: dest.location,
+        price: Currency.format(dest.price),
+        duration: dest.duration_display,
+        rating: parseFloat(dest.rating),
+        image: dest.image_url || '',
+        category: dest.category?.name || ''
+      }));
+      
+      setSearchResults(formattedResults);
+      setShowResults(formattedResults.length > 0);
     } catch (error) {
       console.error('Error searching destinations:', error);
     } finally {
@@ -157,56 +180,7 @@ export default function Index() {
     setShowResults(false);
   };
 
-  const featuredTours = [
-    {
-      id: 1,
-      name: "Cape Coast Castle Heritage Tour",
-      location: "Cape Coast",
-      image: "https://images.pexels.com/photos/16136199/pexels-photo-16136199.jpeg?auto=compress&cs=tinysrgb&w=800",
-      price: "GH¢450",
-      duration: "2 Days",
-      rating: 4.8,
-      reviews: 124,
-      description: "Explore the historic Cape Coast Castle and learn about Ghana's rich heritage.",
-      includes: ["Transport", "Accommodation", "Meals", "Guide"]
-    },
-    {
-      id: 2,
-      name: "Aburi Gardens Nature Escape",
-      location: "Aburi",
-      image: "https://images.pexels.com/photos/27116488/pexels-photo-27116488.jpeg?auto=compress&cs=tinysrgb&w=800",
-      price: "GH¢280",
-      duration: "1 Day",
-      rating: 4.6,
-      reviews: 89,
-      description: "Relax in the beautiful botanical gardens with stunning mountain views.",
-      includes: ["Transport", "Lunch", "Guide"]
-    },
-    {
-      id: 3,
-      name: "Manhyia Palace Cultural Tour",
-      location: "Kumasi",
-      image: "https://images.pexels.com/photos/33033556/pexels-photo-33033556.jpeg?auto=compress&cs=tinysrgb&w=800",
-      price: "GH¢350",
-      duration: "1 Day",
-      rating: 4.7,
-      reviews: 156,
-      description: "Visit the seat of the Asantehene and learn about Ashanti culture.",
-      includes: ["Transport", "Cultural Guide", "Lunch"]
-    },
-    {
-      id: 4,
-      name: "Kakum Canopy Walk Adventure",
-      location: "Kakum National Park",
-      image: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=800",
-      price: "GH¢520",
-      duration: "3 Days",
-      rating: 4.9,
-      reviews: 203,
-      description: "Experience the thrilling canopy walk and explore the rainforest.",
-      includes: ["Transport", "Accommodation", "All Meals", "Park Fees"]
-    }
-  ];
+
 
   const featuredVideos = [
     {
@@ -476,57 +450,103 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredTours.map((tour) => (
-              <Card key={tour.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  <img
-                    src={tour.image}
-                    alt={tour.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <Badge className="absolute top-2 right-2 bg-ghana-gold text-black">
-                    {tour.duration}
-                  </Badge>
-                </div>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{tour.name}</CardTitle>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-ghana-green">{tour.price}</div>
-                      <div className="text-sm text-gray-500">per person</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-1 text-sm text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span>{tour.location}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <CardDescription className="mb-3">{tour.description}</CardDescription>
-                  <div className="flex items-center space-x-1 mb-3">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{tour.rating}</span>
-                    <span className="text-gray-500">({tour.reviews} reviews)</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {tour.includes.map((item, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {item}
+          {isLoadingFeatured ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[...Array(4)].map((_, index) => (
+                <Card key={index} className="overflow-hidden animate-pulse">
+                  <div className="w-full h-48 bg-gray-300"></div>
+                  <CardHeader className="pb-2">
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="h-3 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-3/4"></div>
+                  </CardContent>
+                  <CardFooter>
+                    <div className="w-full h-10 bg-gray-300 rounded"></div>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : featuredTours.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {featuredTours.map((tour) => (
+                <Card key={tour.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    <img
+                      src={tour.image_url || 'https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=800'}
+                      alt={tour.name}
+                      className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=800';
+                      }}
+                    />
+                    <Badge className="absolute top-2 right-2 bg-ghana-gold text-black">
+                      {tour.duration_display}
+                    </Badge>
+                    {tour.is_featured && (
+                      <Badge className="absolute top-2 left-2 bg-red-500 text-white">
+                        Featured
                       </Badge>
-                    ))}
+                    )}
                   </div>
-                </CardContent>
-                <CardFooter>
-                  <Link to={`/tour/${tour.id}`} className="w-full">
-                    <Button className="w-full bg-ghana-green hover:bg-ghana-green/90">
-                      Book Now
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg line-clamp-2">{tour.name}</CardTitle>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-ghana-green">
+                          {Currency.format(tour.price)}
+                        </div>
+                        <div className="text-sm text-gray-500">per person</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1 text-sm text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      <span>{tour.location}</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <CardDescription className="mb-3 line-clamp-2">
+                      {tour.description}
+                    </CardDescription>
+                    <div className="flex items-center space-x-1 mb-3">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-semibold">{tour.rating}</span>
+                      <span className="text-gray-500">({tour.reviews_count} reviews)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {tour.category.name}
+                      </Badge>
+                      {tour.highlights.slice(0, 2).map((highlight, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {highlight.highlight}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Link to={`/destinations/${tour.slug}`} className="w-full">
+                      <Button className="w-full bg-ghana-green hover:bg-ghana-green/90">
+                        Book Now
+                      </Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No featured tours available at the moment.</p>
+              <Link to="/destinations">
+                <Button className="mt-4 bg-ghana-green hover:bg-ghana-green/90">
+                  View All Destinations
+                </Button>
+              </Link>
+            </div>
+          )}
 
           <div className="text-center mt-12">
             <Link to="/destinations">
