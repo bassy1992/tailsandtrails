@@ -32,7 +32,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./client"),
       "@shared": path.resolve(__dirname, "./shared"),
     },
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
 }));
 
