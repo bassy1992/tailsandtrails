@@ -164,20 +164,22 @@ AWS_S3_OBJECT_PARAMETERS = {
 # Media storage configuration
 # Always try to use DigitalOcean Spaces if credentials are available
 if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+    # Store files at root level (no subfolder)
+    AWS_LOCATION = ''
+    
     # DigitalOcean Spaces configuration
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    MEDIA_URL = 'https://tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com/'
+    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.sfo3.cdn.digitaloceanspaces.com/'
     
     # Additional S3 settings
     AWS_S3_FILE_OVERWRITE = False
-    AWS_S3_CUSTOM_DOMAIN = 'tailsandtrailsmedia.sfo3.cdn.digitaloceanspaces.com'
-    AWS_LOCATION = ''
     
     # Debug: Print storage configuration (remove in production)
     print(f"🔧 Using DigitalOcean Spaces storage")
     print(f"   Bucket: {AWS_STORAGE_BUCKET_NAME}")
     print(f"   Region: {AWS_S3_REGION_NAME}")
     print(f"   Endpoint: {AWS_S3_ENDPOINT_URL}")
+    print(f"   Media URL: {MEDIA_URL}")
 else:
     # Fallback to local storage
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
