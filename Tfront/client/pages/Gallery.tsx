@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Camera, MapPin, Calendar, Filter, Video, Play, Clock, Eye, Loader2 } from "lucide-react";
+import { Camera, MapPin, Calendar, Filter, Video, Play, Clock, Eye, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { galleryApi, GalleryCategory, ImageGallery, GalleryVideo } from "../lib/api.ts";
 import { useToast } from "@/contexts/ToastContext";
@@ -19,6 +19,7 @@ export default function Gallery() {
   const [videos, setVideos] = useState<GalleryVideo[]>([]);
   const [selectedGallery, setSelectedGallery] = useState<ImageGallery | null>(null);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [galleryLoading, setGalleryLoading] = useState(false);
   const [videoLoading, setVideoLoading] = useState(false);
@@ -37,6 +38,24 @@ export default function Gallery() {
       fetchVideos();
     }
   }, [selectedCategory, categories]);
+
+  // Keyboard navigation for slider
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (isGalleryModalOpen && selectedGallery?.images) {
+        if (event.key === 'ArrowLeft') {
+          prevImage();
+        } else if (event.key === 'ArrowRight') {
+          nextImage();
+        } else if (event.key === 'Escape') {
+          setIsGalleryModalOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isGalleryModalOpen, selectedGallery]);
 
   const fetchInitialData = async () => {
     try {
@@ -80,13 +99,17 @@ export default function Gallery() {
   };
 
   const fetchGalleryDetails = async (slug: string) => {
+    console.log('🔍 Fetching gallery details for slug:', slug);
     try {
       setGalleryDetailLoading(true);
+      console.log('📡 Making API call to:', `/gallery/galleries/${slug}/`);
       const galleryDetails = await galleryApi.getGallery(slug);
+      console.log('✅ Received gallery details:', galleryDetails);
+      console.log('📸 Images count:', galleryDetails.images?.length || 0);
       setSelectedGallery(galleryDetails);
       setIsGalleryModalOpen(true);
     } catch (error) {
-      console.error('Error fetching gallery details:', error);
+      console.error('❌ Error fetching gallery details:', error);
       showError('Failed to load gallery details. Please try again.');
     } finally {
       setGalleryDetailLoading(false);
@@ -94,7 +117,58 @@ export default function Gallery() {
   };
 
   const handleGalleryClick = (gallery: ImageGallery) => {
+    console.log('👆 Gallery clicked:', gallery.title, 'Slug:', gallery.slug);
+    setCurrentImageIndex(0); // Reset to first image
     fetchGalleryDetails(gallery.slug);
+  };
+
+  const nextImage = () => {
+    if (selectedGallery?.images) {
+      setCurrentImageIndex((prev) => 
+        prev === selectedGallery.images!.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const prevImage = () => {
+    if (selectedGallery?.images) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? selectedGallery.images!.length - 1 : prev - 1
+      );
+    }
+  };
+
+  const goToImage = (index: number) => {
+    setCurrentImageIndex(index);
+  };
+
+  // Touch/swipe support for mobile
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      nextImage();
+    } else if (isRightSwipe) {
+      prevImage();
+    }
   };
 
   // Create category options for filtering
@@ -481,7 +555,7 @@ export default function Gallery() {
 
           {/* Gallery Detail Modal */}
           <Dialog open={isGalleryModalOpen} onOpenChange={setIsGalleryModalOpen}>
-            <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+            <DialogContent className="max-w-7xl max-h-[95vh] p-0 overflow-hidden">
               <VisuallyHidden>
                 <DialogTitle>{selectedGallery?.title || 'Gallery'}</DialogTitle>
               </VisuallyHidden>
@@ -512,41 +586,113 @@ export default function Gallery() {
                       </Badge>
                     </div>
                   </div>
-                  <div className="max-h-[60vh] overflow-y-auto p-6">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {selectedGallery.images && selectedGallery.images.length > 0 ? (
-                        selectedGallery.images.map((image, index) => (
-                          <div key={image.id} className="relative group">
-                            <img
-                              src={image.image_url}
-                              alt={image.caption || `Image ${index + 1}`}
-                              className="w-full h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-200"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = 'https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=800';
-                              }}
-                            />
-                            {image.is_main && (
-                              <div className="absolute top-2 left-2">
-                                <Badge className="bg-blue-500 text-white text-xs">
-                                  Main
-                                </Badge>
-                              </div>
-                            )}
-                            {image.caption && (
-                              <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg">
-                                <p className="text-xs">{image.caption}</p>
-                              </div>
-                            )}
+                  {/* Image Slider */}
+                  <div className="relative">
+                    {selectedGallery.images && selectedGallery.images.length > 0 ? (
+                      <>
+                        {/* Main Image Display */}
+                        <div 
+                          className="relative h-[60vh] bg-black flex items-center justify-center"
+                          onTouchStart={onTouchStart}
+                          onTouchMove={onTouchMove}
+                          onTouchEnd={onTouchEnd}
+                        >
+                          <img
+                            key={currentImageIndex} // Force re-render for transition
+                            src={selectedGallery.images[currentImageIndex]?.image_url}
+                            alt={selectedGallery.images[currentImageIndex]?.caption || `Image ${currentImageIndex + 1}`}
+                            className="max-h-full max-w-full object-contain select-none transition-opacity duration-300 ease-in-out"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = 'https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=800';
+                            }}
+                            draggable={false}
+                          />
+                          
+                          {/* Navigation Arrows */}
+                          {selectedGallery.images.length > 1 && (
+                            <>
+                              <button
+                                onClick={prevImage}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200"
+                                aria-label="Previous image"
+                              >
+                                <ChevronLeft className="h-6 w-6" />
+                              </button>
+                              <button
+                                onClick={nextImage}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200"
+                                aria-label="Next image"
+                              >
+                                <ChevronRight className="h-6 w-6" />
+                              </button>
+                            </>
+                          )}
+
+                          {/* Image Counter and Instructions */}
+                          <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                            {currentImageIndex + 1} / {selectedGallery.images.length}
                           </div>
-                        ))
-                      ) : (
-                        <div className="col-span-full text-center py-8">
-                          <Camera className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                          <p className="text-gray-500">No images available for this gallery</p>
+                          
+                          {/* Navigation Instructions */}
+                          {selectedGallery.images.length > 1 && (
+                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-xs">
+                              Use ← → keys or swipe to navigate
+                            </div>
+                          )}
+
+                          {/* Main Image Badge */}
+                          {selectedGallery.images[currentImageIndex]?.is_main && (
+                            <div className="absolute top-4 left-4">
+                              <Badge className="bg-blue-500 text-white">
+                                Main Image
+                              </Badge>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
+
+                        {/* Image Caption */}
+                        {selectedGallery.images[currentImageIndex]?.caption && (
+                          <div className="bg-gray-50 px-6 py-4 border-t">
+                            <p className="text-gray-700 text-center">
+                              {selectedGallery.images[currentImageIndex].caption}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Thumbnail Navigation */}
+                        {selectedGallery.images.length > 1 && (
+                          <div className="p-4 bg-gray-50 border-t">
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                              {selectedGallery.images.map((image, index) => (
+                                <button
+                                  key={image.id}
+                                  onClick={() => goToImage(index)}
+                                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                                    index === currentImageIndex
+                                      ? 'border-ghana-green shadow-lg'
+                                      : 'border-gray-300 hover:border-gray-400'
+                                  }`}
+                                >
+                                  <img
+                                    src={image.thumbnail_url || image.image_url}
+                                    alt={`Thumbnail ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="h-[60vh] flex items-center justify-center bg-gray-50">
+                        <div className="text-center">
+                          <Camera className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                          <p className="text-gray-500 text-lg">No images available for this gallery</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : null}
