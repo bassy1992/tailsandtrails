@@ -103,7 +103,8 @@ class GalleryVideo(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField(blank=True)
-    video_file = models.FileField(upload_to='gallery/videos/%Y/%m/', null=True, blank=True)
+    video_file = models.FileField(upload_to='gallery/videos/%Y/%m/', null=True, blank=True, help_text="Upload video file (optional if using video URL)")
+    video_url = models.URLField(max_length=500, null=True, blank=True, help_text="External video URL (MP4, WebM, etc.) - alternative to file upload")
     thumbnail = models.URLField(max_length=500, help_text="Video thumbnail URL")
     
     # Video metadata
@@ -156,6 +157,31 @@ class GalleryVideo(models.Model):
         if self.views >= 1000:
             return f"{self.views / 1000:.1f}K"
         return str(self.views)
+    
+    def get_video_url(self):
+        """Get video URL - either from uploaded file or external URL"""
+        if self.video_url:
+            return self.video_url
+        elif self.video_file:
+            return self.video_file.url
+        return None
+    
+    def clean(self):
+        """Validate that either video_file or video_url is provided"""
+        from django.core.exceptions import ValidationError
+        if not self.video_file and not self.video_url:
+            raise ValidationError("Either upload a video file or provide a video URL.")
+        if self.video_file and self.video_url:
+            raise ValidationError("Please provide either a video file OR a video URL, not both.")
+    
+    @property
+    def video_source_type(self):
+        """Return the type of video source"""
+        if self.video_url:
+            return "url"
+        elif self.video_file:
+            return "file"
+        return "none"
 
 class GalleryTag(models.Model):
     """Tags for gallery items"""

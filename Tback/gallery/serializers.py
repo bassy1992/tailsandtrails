@@ -123,11 +123,15 @@ class GalleryVideoSerializer(serializers.ModelSerializer):
         ]
     
     def get_video_url(self, obj):
-        if obj.video_file:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.video_file.url)
-            return obj.video_file.url
+        # Use the model's get_video_url method which handles both file and URL
+        video_url = obj.get_video_url()
+        if video_url:
+            # If it's a file URL, make it absolute
+            if obj.video_file and not video_url.startswith(('http://', 'https://')):
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(video_url)
+            return video_url
         return None
     
     def get_thumbnail_url(self, obj):

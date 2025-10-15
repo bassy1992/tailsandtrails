@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from .models import GalleryCategory, ImageGallery, GalleryImage, GalleryVideo, GalleryTag, ImageTag, VideoTag
 from .admin_helpers import MultiImageUploadMixin, add_bulk_upload_button
+from .forms import GalleryVideoAdminForm
 
 @admin.register(GalleryCategory)
 class GalleryCategoryAdmin(admin.ModelAdmin):
@@ -114,7 +115,8 @@ class VideoTagInline(admin.TabularInline):
 
 @admin.register(GalleryVideo)
 class GalleryVideoAdmin(admin.ModelAdmin):
-    list_display = ['title', 'location', 'category', 'duration', 'views', 'is_featured', 'is_active', 'thumbnail_preview', 'created_at']
+    form = GalleryVideoAdminForm
+    list_display = ['title', 'location', 'category', 'duration', 'views', 'video_source_display', 'is_featured', 'is_active', 'thumbnail_preview', 'created_at']
     list_filter = ['category', 'is_featured', 'is_active', 'created_at', 'destination']
     list_editable = ['is_featured', 'is_active']
     search_fields = ['title', 'location', 'description', 'videographer']
@@ -122,9 +124,16 @@ class GalleryVideoAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     inlines = [VideoTagInline]
     
+    class Media:
+        js = ('admin/js/video_admin.js',)
+    
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'slug', 'description', 'video_file', 'thumbnail')
+            'fields': ('title', 'slug', 'description')
+        }),
+        ('Video Source', {
+            'fields': ('video_file', 'video_url', 'thumbnail'),
+            'description': 'Provide either a video file OR a video URL, not both.'
         }),
         ('Video Details', {
             'fields': ('duration', 'file_size', 'resolution')
@@ -149,6 +158,14 @@ class GalleryVideoAdmin(admin.ModelAdmin):
             )
         return "No thumbnail"
     thumbnail_preview.short_description = 'Thumbnail'
+    
+    def video_source_display(self, obj):
+        if obj.video_url:
+            return format_html('<span style="color: #28a745;">🔗 URL</span>')
+        elif obj.video_file:
+            return format_html('<span style="color: #007bff;">📁 File</span>')
+        return format_html('<span style="color: #dc3545;">❌ None</span>')
+    video_source_display.short_description = 'Source'
 
 @admin.register(GalleryTag)
 class GalleryTagAdmin(admin.ModelAdmin):
