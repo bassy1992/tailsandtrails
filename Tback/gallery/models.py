@@ -103,7 +103,7 @@ class GalleryVideo(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField(blank=True)
-    video_file = models.FileField(upload_to='gallery/videos/%Y/%m/')
+    video_file = models.FileField(upload_to='gallery/videos/%Y/%m/', null=True, blank=True)
     thumbnail = models.URLField(max_length=500, help_text="Video thumbnail URL")
     
     # Video metadata

@@ -10,7 +10,7 @@ import { Calendar, MapPin, Search, Star, Users, Clock, Car, Hotel, Utensils, Shi
 import { Link, useNavigate } from "react-router-dom";
 import VideoSection from "@/components/VideoSection";
 import Currency from "@/lib/currency";
-import { destinationsApi, Destination } from "../lib/api.ts";
+import { destinationsApi, Destination, galleryApi, GalleryVideo } from "../lib/api.ts";
 
 interface SearchResult {
   id: number;
@@ -36,13 +36,16 @@ export default function Index() {
   const [categories, setCategories] = useState<any[]>([]);
   const [featuredTours, setFeaturedTours] = useState<Destination[]>([]);
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
+  const [featuredVideos, setFeaturedVideos] = useState<any[]>([]);
+  const [isLoadingVideos, setIsLoadingVideos] = useState(true);
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
   const searchResultsRef = useRef<HTMLDivElement>(null);
 
-  // Fetch categories and featured tours on component mount
+  // Fetch categories, featured tours, and videos on component mount
   useEffect(() => {
     fetchCategories();
     fetchFeaturedTours();
+    fetchFeaturedVideos();
   }, []);
 
   // Handle search with debouncing
@@ -110,6 +113,117 @@ export default function Index() {
       setFeaturedTours([]);
     } finally {
       setIsLoadingFeatured(false);
+    }
+  };
+
+  const fetchFeaturedVideos = async () => {
+    try {
+      setIsLoadingVideos(true);
+      
+      // Try to fetch featured videos from gallery API
+      const galleryVideos = await galleryApi.getVideos({ 
+        featured: true, 
+        ordering: '-views' 
+      });
+      
+      if (galleryVideos && galleryVideos.length > 0) {
+        // Transform GalleryVideo to Video interface expected by VideoSection
+        const transformedVideos = galleryVideos.slice(0, 3).map((video: GalleryVideo) => ({
+          id: video.id,
+          title: video.title,
+          description: video.description,
+          thumbnail: video.thumbnail_url,
+          videoUrl: video.video_url,
+          duration: video.duration,
+          views: video.formatted_views,
+          category: video.category?.name || 'general',
+          location: video.location
+        }));
+        
+        setFeaturedVideos(transformedVideos);
+      } else {
+        // Fallback to hardcoded videos if no gallery videos available
+        const fallbackVideos = [
+          {
+            id: 1,
+            title: "Volta Region Waterfalls Discovery",
+            description: "Discover the magnificent Wli Waterfalls and other hidden gems in the Volta Region. A perfect blend of nature, hiking, and local culture.",
+            thumbnail: "https://images.pexels.com/photos/33475234/pexels-photo-33475234.jpeg?auto=compress&cs=tinysrgb&w=600",
+            videoUrl: "https://videos.pexels.com/video-files/31934467/13602616_360_640_25fps.mp4",
+            duration: "10:15",
+            views: "15.2K",
+            category: "nature",
+            location: "Volta Region"
+          },
+          {
+            id: 2,
+            title: "Cape Coast Castle - A Journey Through History",
+            description: "Explore the historic Cape Coast Castle and learn about its significance in Ghana's heritage.",
+            thumbnail: "https://images.pexels.com/photos/16136199/pexels-photo-16136199.jpeg?auto=compress&cs=tinysrgb&w=600",
+            videoUrl: "https://videos.pexels.com/video-files/29603787/12740641_640_360_60fps.mp4",
+            duration: "8:45",
+            views: "12.5K",
+            category: "heritage",
+            location: "Cape Coast"
+          },
+          {
+            id: 3,
+            title: "Kakum National Park Canopy Adventure",
+            description: "Experience the breathtaking canopy walk 40 meters above the forest floor.",
+            thumbnail: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=600",
+            videoUrl: "https://videos.pexels.com/video-files/17844988/17844988-sd_240_426_30fps.mp4",
+            duration: "6:30",
+            views: "8.9K",
+            category: "adventure",
+            location: "Kakum National Park"
+          }
+        ];
+        
+        setFeaturedVideos(fallbackVideos);
+      }
+    } catch (error) {
+      console.error('Error fetching featured videos:', error);
+      
+      // Fallback to hardcoded videos if API fails
+      const fallbackVideos = [
+        {
+          id: 1,
+          title: "Volta Region Waterfalls Discovery",
+          description: "Discover the magnificent Wli Waterfalls and other hidden gems in the Volta Region. A perfect blend of nature, hiking, and local culture.",
+          thumbnail: "https://images.pexels.com/photos/33475234/pexels-photo-33475234.jpeg?auto=compress&cs=tinysrgb&w=600",
+          videoUrl: "https://videos.pexels.com/video-files/31934467/13602616_360_640_25fps.mp4",
+          duration: "10:15",
+          views: "15.2K",
+          category: "nature",
+          location: "Volta Region"
+        },
+        {
+          id: 2,
+          title: "Cape Coast Castle - A Journey Through History",
+          description: "Explore the historic Cape Coast Castle and learn about its significance in Ghana's heritage.",
+          thumbnail: "https://images.pexels.com/photos/16136199/pexels-photo-16136199.jpeg?auto=compress&cs=tinysrgb&w=600",
+          videoUrl: "https://videos.pexels.com/video-files/29603787/12740641_640_360_60fps.mp4",
+          duration: "8:45",
+          views: "12.5K",
+          category: "heritage",
+          location: "Cape Coast"
+        },
+        {
+          id: 3,
+          title: "Kakum National Park Canopy Adventure",
+          description: "Experience the breathtaking canopy walk 40 meters above the forest floor.",
+          thumbnail: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=600",
+          videoUrl: "https://videos.pexels.com/video-files/17844988/17844988-sd_240_426_30fps.mp4",
+          duration: "6:30",
+          views: "8.9K",
+          category: "adventure",
+          location: "Kakum National Park"
+        }
+      ];
+      
+      setFeaturedVideos(fallbackVideos);
+    } finally {
+      setIsLoadingVideos(false);
     }
   };
 
@@ -182,41 +296,7 @@ export default function Index() {
 
 
 
-  const featuredVideos = [
-    {
-      id: 1,
-      title: "Volta Region Waterfalls Discovery",
-      description: "Discover the magnificent Wli Waterfalls and other hidden gems in the Volta Region. A perfect blend of nature, hiking, and local culture.",
-      thumbnail: "https://images.pexels.com/photos/33475234/pexels-photo-33475234.jpeg?auto=compress&cs=tinysrgb&w=600",
-      videoUrl: "https://videos.pexels.com/video-files/31934467/13602616_360_640_25fps.mp4",
-      duration: "10:15",
-      views: "15.2K",
-      category: "nature",
-      location: "Volta Region"
-    },
-    {
-      id: 2,
-      title: "Cape Coast Castle - A Journey Through History",
-      description: "Explore the historic Cape Coast Castle and learn about its significance in Ghana's heritage.",
-      thumbnail: "https://images.pexels.com/photos/16136199/pexels-photo-16136199.jpeg?auto=compress&cs=tinysrgb&w=600",
-      videoUrl: "https://videos.pexels.com/video-files/29603787/12740641_640_360_60fps.mp4",
-      duration: "8:45",
-      views: "12.5K",
-      category: "heritage",
-      location: "Cape Coast"
-    },
-    {
-      id: 3,
-      title: "Kakum National Park Canopy Adventure",
-      description: "Experience the breathtaking canopy walk 40 meters above the forest floor.",
-      thumbnail: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=600",
-      videoUrl: "https://videos.pexels.com/video-files/17844988/17844988-sd_240_426_30fps.mp4",
-      duration: "6:30",
-      views: "8.9K",
-      category: "adventure",
-      location: "Kakum National Park"
-    }
-  ];
+
 
   const testimonials = [
     {
@@ -583,13 +663,58 @@ export default function Index() {
       </section>
 
       {/* Featured Videos */}
-      <VideoSection
-        title="Experience Ghana Through Video"
-        subtitle="Watch immersive videos of our most popular destinations and get inspired for your next adventure"
-        videos={featuredVideos}
-        maxVideos={3}
-        layout="grid"
-      />
+      {isLoadingVideos ? (
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Experience Ghana Through Video</h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Watch immersive videos of our most popular destinations and get inspired for your next adventure
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(3)].map((_, index) => (
+                <Card key={index} className="overflow-hidden animate-pulse">
+                  <div className="w-full h-48 bg-gray-300"></div>
+                  <CardHeader className="pb-2">
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="h-3 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-300 rounded w-3/4"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : featuredVideos.length > 0 ? (
+        <VideoSection
+          title="Experience Ghana Through Video"
+          subtitle="Watch immersive videos of our most popular destinations and get inspired for your next adventure"
+          videos={featuredVideos}
+          maxVideos={3}
+          layout="grid"
+        />
+      ) : (
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Experience Ghana Through Video</h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+                Watch immersive videos of our most popular destinations and get inspired for your next adventure
+              </p>
+              <p className="text-gray-500 text-lg">No featured videos available at the moment.</p>
+              <Link to="/videos">
+                <Button className="mt-4 bg-ghana-green hover:bg-ghana-green/90">
+                  View All Videos
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Testimonials */}
       <section className="py-16 bg-gray-50">
