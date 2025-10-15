@@ -95,9 +95,23 @@ class DestinationAdmin(admin.ModelAdmin):
 @admin.register(DestinationImage)
 class DestinationImageAdmin(admin.ModelAdmin):
     list_display = ('destination', 'image_preview', 'alt_text', 'is_primary', 'order', 'created_at')
-    list_filter = ('is_primary', 'created_at')
+    list_filter = ('is_primary', 'created_at', 'destination')
     search_fields = ('destination__name', 'alt_text')
-    readonly_fields = ('image_preview',)
+    readonly_fields = ('image_preview', 'created_at')
+    list_editable = ('alt_text', 'is_primary', 'order')
+    
+    fieldsets = (
+        ('Image Information', {
+            'fields': ('destination', 'image', 'image_preview', 'alt_text')
+        }),
+        ('Display Settings', {
+            'fields': ('is_primary', 'order')
+        }),
+        ('Metadata', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        })
+    )
     
     def image_preview(self, obj):
         if obj.image:
