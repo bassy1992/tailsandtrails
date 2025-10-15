@@ -8,17 +8,17 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, MapPin, Calendar, Filter, Video, Play, Clock, Eye, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { galleryApi, GalleryCategory, GalleryImage, GalleryVideo } from "../lib/api.ts";
+import { galleryApi, GalleryCategory, ImageGallery, GalleryVideo } from "../lib/api.ts";
 import { useToast } from "@/contexts/ToastContext";
 
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [activeTab, setActiveTab] = useState("photos");
   const [categories, setCategories] = useState<GalleryCategory[]>([]);
-  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [galleries, setGalleries] = useState<ImageGallery[]>([]);
   const [videos, setVideos] = useState<GalleryVideo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [imageLoading, setImageLoading] = useState(false);
+  const [galleryLoading, setGalleryLoading] = useState(false);
   const [videoLoading, setVideoLoading] = useState(false);
   const { showError } = useToast();
 
@@ -30,7 +30,7 @@ export default function Gallery() {
   // Fetch data when category changes
   useEffect(() => {
     if (categories.length > 0) {
-      fetchImages();
+      fetchGalleries();
       fetchVideos();
     }
   }, [selectedCategory, categories]);
@@ -48,17 +48,17 @@ export default function Gallery() {
     }
   };
 
-  const fetchImages = async () => {
+  const fetchGalleries = async () => {
     try {
-      setImageLoading(true);
+      setGalleryLoading(true);
       const params = selectedCategory !== "all" ? { category: selectedCategory } : {};
-      const imagesData = await galleryApi.getImages(params);
-      setImages(imagesData);
+      const galleriesData = await galleryApi.getGalleries(params);
+      setGalleries(galleriesData);
     } catch (error) {
-      console.error('Error fetching images:', error);
-      showError('Failed to load images. Please try again.');
+      console.error('Error fetching galleries:', error);
+      showError('Failed to load galleries. Please try again.');
     } finally {
-      setImageLoading(false);
+      setGalleryLoading(false);
     }
   };
 
@@ -83,8 +83,9 @@ export default function Gallery() {
   ];
 
   const getTabCounts = () => {
+    const totalImages = galleries.reduce((sum, gallery) => sum + gallery.image_count, 0);
     return { 
-      imageCount: images.length, 
+      imageCount: totalImages, 
       videoCount: videos.length 
     };
   };
@@ -112,7 +113,7 @@ export default function Gallery() {
               </div>
               <div className="flex items-center space-x-2">
                 <Camera className="h-5 w-5" />
-                <span>{loading ? '...' : images.length} Photos</span>
+                <span>{loading ? '...' : imageCount} Photos</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Video className="h-5 w-5" />
@@ -183,7 +184,7 @@ export default function Gallery() {
                 <p className="text-gray-600">{imageCount} photo{imageCount !== 1 ? 's' : ''} found</p>
               </div>
 
-              {imageLoading ? (
+              {galleryLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {[...Array(8)].map((_, i) => (
                     <Card key={i} className="overflow-hidden animate-pulse">
@@ -199,14 +200,14 @@ export default function Gallery() {
               ) : (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {images.map((image) => (
-                      <Dialog key={image.id}>
+                    {galleries.map((gallery) => (
+                      <Dialog key={gallery.id}>
                         <DialogTrigger asChild>
                           <Card className="overflow-hidden cursor-pointer group hover:shadow-xl transition-all duration-300">
                             <div className="relative">
                               <img
-                                src={image.thumbnail_url || image.image_url}
-                                alt={image.title}
+                                src={gallery.main_image_url}
+                                alt={gallery.title}
                                 className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
@@ -216,57 +217,82 @@ export default function Gallery() {
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
                               <div className="absolute top-3 left-3">
                                 <Badge className="bg-ghana-gold text-black font-semibold">
-                                  {image.category?.name || 'Uncategorized'}
+                                  {gallery.category_name || 'Uncategorized'}
                                 </Badge>
                               </div>
-                              {image.is_featured && (
+                              {gallery.is_featured && (
                                 <div className="absolute top-3 right-3">
                                   <Badge className="bg-red-500 text-white">
                                     Featured
                                   </Badge>
                                 </div>
                               )}
+                              <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded text-sm">
+                                {gallery.image_count} photos
+                              </div>
                             </div>
                             <CardContent className="p-4">
                               <h3 className="font-semibold text-lg mb-1 group-hover:text-ghana-green transition-colors">
-                                {image.title}
+                                {gallery.title}
                               </h3>
                               <div className="flex items-center text-gray-600 mb-2">
                                 <MapPin className="h-4 w-4 mr-1" />
-                                <span className="text-sm">{image.location}</span>
+                                <span className="text-sm">{gallery.location}</span>
                               </div>
                               <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
-                                {image.description}
+                                {gallery.description}
                               </p>
                             </CardContent>
                           </Card>
                         </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+                        <DialogContent className="max-w-6xl max-h-[90vh] p-0">
                           <VisuallyHidden>
-                            <DialogTitle>{image.title}</DialogTitle>
+                            <DialogTitle>{gallery.title}</DialogTitle>
                           </VisuallyHidden>
                           <div className="relative">
-                            <img
-                              src={image.image_url}
-                              alt={image.title}
-                              className="w-full h-auto max-h-[80vh] object-contain"
-                            />
-                            <div className="p-6 bg-white">
+                            <div className="p-6 bg-white border-b">
                               <div className="flex items-start justify-between">
                                 <div>
-                                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{image.title}</h3>
+                                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{gallery.title}</h3>
                                   <div className="flex items-center text-gray-600 mb-3">
                                     <MapPin className="h-5 w-5 mr-2" />
-                                    <span className="text-lg">{image.location}</span>
+                                    <span className="text-lg mr-4">{gallery.location}</span>
+                                    <Camera className="h-5 w-5 mr-2" />
+                                    <span>{gallery.image_count} photos</span>
                                   </div>
-                                  <p className="text-gray-700 leading-relaxed">{image.description}</p>
-                                  {image.photographer && (
-                                    <p className="text-sm text-gray-500 mt-2">Photo by: {image.photographer}</p>
+                                  <p className="text-gray-700 leading-relaxed">{gallery.description}</p>
+                                  {gallery.photographer && (
+                                    <p className="text-sm text-gray-500 mt-2">Photos by: {gallery.photographer}</p>
                                   )}
                                 </div>
                                 <Badge className="bg-ghana-gold text-black font-semibold ml-4">
-                                  {image.category?.name || 'Uncategorized'}
+                                  {gallery.category_name || 'Uncategorized'}
                                 </Badge>
+                              </div>
+                            </div>
+                            <div className="max-h-[60vh] overflow-y-auto p-6">
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {gallery.images.map((image, index) => (
+                                  <div key={image.id} className="relative group">
+                                    <img
+                                      src={image.image_url}
+                                      alt={image.caption || `Image ${index + 1}`}
+                                      className="w-full h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-200"
+                                    />
+                                    {image.is_main && (
+                                      <div className="absolute top-2 left-2">
+                                        <Badge className="bg-blue-500 text-white text-xs">
+                                          Main
+                                        </Badge>
+                                      </div>
+                                    )}
+                                    {image.caption && (
+                                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg">
+                                        <p className="text-xs">{image.caption}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           </div>
@@ -275,14 +301,14 @@ export default function Gallery() {
                     ))}
                   </div>
 
-                  {images.length === 0 && !imageLoading && (
+                  {galleries.length === 0 && !galleryLoading && (
                     <div className="text-center py-12">
                       <Camera className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-                      <h3 className="text-xl font-semibold text-gray-600 mb-2">No photos found</h3>
+                      <h3 className="text-xl font-semibold text-gray-600 mb-2">No galleries found</h3>
                       <p className="text-gray-500">
                         {selectedCategory === "all" 
-                          ? "No photos available at the moment" 
-                          : "No photos found in this category"
+                          ? "No photo galleries available at the moment" 
+                          : "No photo galleries found in this category"
                         }
                       </p>
                     </div>
