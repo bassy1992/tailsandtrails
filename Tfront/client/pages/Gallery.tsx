@@ -403,57 +403,6 @@ export default function Gallery() {
                           </p>
                         </CardContent>
                       </Card>
-                        <DialogContent className="max-w-6xl max-h-[90vh] p-0">
-                          <VisuallyHidden>
-                            <DialogTitle>{gallery.title}</DialogTitle>
-                          </VisuallyHidden>
-                          <div className="relative">
-                            <div className="p-6 bg-white border-b">
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{gallery.title}</h3>
-                                  <div className="flex items-center text-gray-600 mb-3">
-                                    <MapPin className="h-5 w-5 mr-2" />
-                                    <span className="text-lg mr-4">{gallery.location}</span>
-                                    <Camera className="h-5 w-5 mr-2" />
-                                    <span>{gallery.image_count} photos</span>
-                                  </div>
-                                  <p className="text-gray-700 leading-relaxed">{gallery.description}</p>
-                                  {gallery.photographer && (
-                                    <p className="text-sm text-gray-500 mt-2">Photos by: {gallery.photographer}</p>
-                                  )}
-                                </div>
-                                <Badge className="bg-ghana-gold text-black font-semibold ml-4">
-                                  {gallery.category_name || 'Uncategorized'}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="max-h-[60vh] overflow-y-auto p-6">
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {gallery.images.map((image, index) => (
-                                  <div key={image.id} className="relative group">
-                                    <img
-                                      src={image.image_url}
-                                      alt={image.caption || `Image ${index + 1}`}
-                                      className="w-full h-32 object-cover rounded-lg group-hover:scale-105 transition-transform duration-200"
-                                    />
-                                    {image.is_main && (
-                                      <div className="absolute top-2 left-2">
-                                        <Badge className="bg-blue-500 text-white text-xs">
-                                          Main
-                                        </Badge>
-                                      </div>
-                                    )}
-                                    {image.caption && (
-                                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b-lg">
-                                        <p className="text-xs">{image.caption}</p>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
                     ))}
                   </div>
 
