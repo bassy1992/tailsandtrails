@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, MapPin, Calendar, Filter, Video, Play, Clock, Eye, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
@@ -118,8 +118,16 @@ export default function Gallery() {
 
   const handleGalleryClick = (gallery: ImageGallery) => {
     console.log('👆 Gallery clicked:', gallery.title, 'Slug:', gallery.slug);
+    console.log('📊 Gallery data:', gallery);
     setCurrentImageIndex(0); // Reset to first image
-    fetchGalleryDetails(gallery.slug);
+    
+    // Add error boundary
+    try {
+      fetchGalleryDetails(gallery.slug);
+    } catch (error) {
+      console.error('❌ Error in handleGalleryClick:', error);
+      showError('Failed to open gallery. Please try again.');
+    }
   };
 
   const nextImage = () => {
@@ -294,6 +302,60 @@ export default function Gallery() {
                 </div>
               ) : (
                 <>
+                  {/* Debug Test Button */}
+                  <div className="mb-4 p-4 bg-blue-100 rounded">
+                    <button 
+                      onClick={() => {
+                        console.log('🧪 Testing modal with sample data');
+                        setSelectedGallery({
+                          id: 999,
+                          title: "Test Gallery",
+                          slug: "test",
+                          description: "Test description",
+                          location: "Test Location",
+                          category_name: "Test Category",
+                          is_featured: false,
+                          main_image_url: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg",
+                          image_count: 3,
+                          created_at: new Date().toISOString(),
+                          images: [
+                            {
+                              id: 1,
+                              image_url: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg",
+                              thumbnail_url: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg",
+                              caption: "Test Image 1",
+                              is_main: true,
+                              order: 0,
+                              created_at: new Date().toISOString()
+                            },
+                            {
+                              id: 2,
+                              image_url: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg",
+                              thumbnail_url: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg",
+                              caption: "Test Image 2",
+                              is_main: false,
+                              order: 1,
+                              created_at: new Date().toISOString()
+                            },
+                            {
+                              id: 3,
+                              image_url: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg",
+                              thumbnail_url: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg",
+                              caption: "Test Image 3",
+                              is_main: false,
+                              order: 2,
+                              created_at: new Date().toISOString()
+                            }
+                          ]
+                        });
+                        setIsGalleryModalOpen(true);
+                      }}
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    >
+                      🧪 Test Slider (3 images)
+                    </button>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {galleries.map((gallery) => (
                       <Card 
@@ -558,6 +620,9 @@ export default function Gallery() {
             <DialogContent className="max-w-7xl max-h-[95vh] p-0 overflow-hidden">
               <VisuallyHidden>
                 <DialogTitle>{selectedGallery?.title || 'Gallery'}</DialogTitle>
+                <DialogDescription>
+                  View multiple images of {selectedGallery?.title || 'this gallery'}
+                </DialogDescription>
               </VisuallyHidden>
               {galleryDetailLoading ? (
                 <div className="p-6 text-center">
@@ -595,8 +660,15 @@ export default function Gallery() {
                       Images Array: {selectedGallery.images ? `${selectedGallery.images.length} images` : 'undefined'}<br/>
                       Image Count Property: {selectedGallery.image_count}<br/>
                       Current Index: {currentImageIndex}<br/>
+                      Modal Open: {isGalleryModalOpen ? 'Yes' : 'No'}<br/>
+                      Loading: {galleryDetailLoading ? 'Yes' : 'No'}<br/>
                       {selectedGallery.images && selectedGallery.images.length > 0 && (
                         <>Current Image URL: {selectedGallery.images[currentImageIndex]?.image_url?.substring(0, 50)}...</>
+                      )}
+                      {!selectedGallery.images && (
+                        <div className="text-red-600 mt-2">
+                          ⚠️ Images array is missing! Check API response.
+                        </div>
                       )}
                     </div>
 
