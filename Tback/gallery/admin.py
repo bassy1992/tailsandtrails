@@ -30,6 +30,7 @@ class GalleryImageAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title', 'location')}
     date_hierarchy = 'created_at'
     inlines = [ImageTagInline]
+    actions = ['duplicate_images']
     
     fieldsets = (
         ('Basic Information', {
@@ -55,6 +56,28 @@ class GalleryImageAdmin(admin.ModelAdmin):
             )
         return "No image"
     image_preview.short_description = 'Preview'
+    
+    def duplicate_images(self, request, queryset):
+        """Admin action to duplicate selected images for easy bulk creation"""
+        duplicated_count = 0
+        for image in queryset:
+            # Create a copy with modified title
+            new_image = GalleryImage.objects.create(
+                title=f"{image.title} (Copy)",
+                description=image.description,
+                image="",  # Empty image URL to be filled
+                location=image.location,
+                category=image.category,
+                destination=image.destination,
+                photographer=image.photographer,
+                is_featured=False,  # Copies are not featured
+                is_active=False,  # Inactive until image URL is added
+                order=image.order + 1000  # Put at end
+            )
+            duplicated_count += 1
+        
+        self.message_user(request, f'Successfully duplicated {duplicated_count} images. Please add image URLs to the copies.')
+    duplicate_images.short_description = "Duplicate selected images for bulk creation"
 
 class VideoTagInline(admin.TabularInline):
     model = VideoTag

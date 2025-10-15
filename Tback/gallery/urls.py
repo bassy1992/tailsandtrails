@@ -9,6 +9,7 @@ urlpatterns = [
     
     # Images
     path('images/', views.GalleryImageListView.as_view(), name='image-list'),
+    path('images/bulk-add/', views.bulk_add_gallery_images, name='images-bulk-add'),
     path('images/<slug:slug>/', views.GalleryImageDetailView.as_view(), name='image-detail'),
     
     # Videos

@@ -118,7 +118,7 @@ export default function Layout({ children }: LayoutProps) {
                 Gallery
               </Link>
               <Link to="/tickets" className="text-gray-700 hover:text-ghana-green transition-colors">
-                Tickets
+                Events
               </Link>
               <Link to="/about" className="text-gray-700 hover:text-ghana-green transition-colors">
                 About
@@ -185,7 +185,7 @@ export default function Layout({ children }: LayoutProps) {
                   Media Gallery
                 </Link>
                 <Link to="/tickets" className="block text-gray-300 hover:text-ghana-gold transition-colors">
-                  Event Tickets
+                  Events
                 </Link>
                 <Link to="/about" className="block text-gray-300 hover:text-ghana-gold transition-colors">
                   About Us

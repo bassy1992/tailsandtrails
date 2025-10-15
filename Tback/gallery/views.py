@@ -1,9 +1,11 @@
 from rest_framework import generics, filters, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from .models import GalleryCategory, GalleryImage, GalleryVideo
+from destinations.models import Destination
 from .serializers import (
     GalleryCategorySerializer, GalleryImageSerializer, GalleryVideoSerializer,
     GalleryImageListSerializer, GalleryVideoListSerializer
@@ -147,3 +149,98 @@ def gallery_mixed_feed(request):
         'total_videos': len(video_data),
         'category': category
     })
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def bulk_add_gallery_images(request):
+    """Bulk add multiple images to gallery via URLs"""
+    image_urls = request.data.get('image_urls', [])
+    category_id = request.data.get('category_id')
+    location = request.data.get('location', '')
+    destination_id = request.data.get('destination_id')
+    photographer = request.data.get('photographer', '')
+    is_featured = request.data.get('is_featured', False)
+    
+    # Validation
+    if not image_urls or not isinstance(image_urls, list):
+        return Response(
+            {'error': 'image_urls must be a list of URLs'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not category_id:
+        return Response(
+            {'error': 'category_id is required'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if not location:
+        return Response(
+            {'error': 'location is required'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Get category
+    try:
+        category = GalleryCategory.objects.get(id=category_id)
+    except GalleryCategory.DoesNotExist:
+        return Response(
+            {'error': 'Category not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    # Get destination if provided
+    destination = None
+    if destination_id:
+        try:
+            destination = Destination.objects.get(id=destination_id)
+        except Destination.DoesNotExist:
+            return Response(
+                {'error': 'Destination not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    created_images = []
+    errors = []
+    
+    for i, url in enumerate(image_urls):
+        try:
+            # Validate URL
+            if not url.startswith(('http://', 'https://')):
+                errors.append(f"Invalid URL format: {url}")
+                continue
+            
+            # Create the image
+            image = GalleryImage.objects.create(
+                title=f"{location} - Image {i + 1}",
+                description=f"Beautiful view from {location}",
+                image=url,
+                location=location,
+                category=category,
+                destination=destination,
+                photographer=photographer,
+                is_featured=is_featured and i == 0,  # Only first image is featured
+                order=i + 1
+            )
+            
+            created_images.append({
+                'id': image.id,
+                'title': image.title,
+                'image': image.image,
+                'location': image.location,
+                'order': image.order
+            })
+            
+        except Exception as e:
+            errors.append(f"Error creating image from {url}: {str(e)}")
+    
+    response_data = {
+        'created_count': len(created_images),
+        'created_images': created_images,
+        'total_images': GalleryImage.objects.filter(category=category, location=location).count()
+    }
+    
+    if errors:
+        response_data['errors'] = errors
+    
+    return Response(response_data, status=status.HTTP_201_CREATED)
