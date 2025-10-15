@@ -53,7 +53,7 @@ class ImageGalleryDetailView(generics.RetrieveAPIView):
 
 class GalleryVideoListView(generics.ListAPIView):
     """List gallery videos with filtering"""
-    serializer_class = GalleryVideoListSerializer
+    serializer_class = GalleryVideoSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category', 'is_featured', 'destination']
     search_fields = ['title', 'location', 'description', 'videographer']
