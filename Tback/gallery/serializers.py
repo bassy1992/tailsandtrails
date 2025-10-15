@@ -37,18 +37,14 @@ class GalleryImageSerializer(serializers.ModelSerializer):
     
     def get_image_url(self, obj):
         if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
+            # obj.image is now a URL string, not a file
+            return obj.image
         return None
     
     def get_thumbnail_url(self, obj):
         if obj.thumbnail:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.thumbnail.url)
-            return obj.thumbnail.url
+            # obj.thumbnail is now a URL string, not a file
+            return obj.thumbnail
         return self.get_image_url(obj)  # Fallback to main image
     
     def get_tags(self, obj):
@@ -82,10 +78,8 @@ class GalleryVideoSerializer(serializers.ModelSerializer):
     
     def get_thumbnail_url(self, obj):
         if obj.thumbnail:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.thumbnail.url)
-            return obj.thumbnail.url
+            # obj.thumbnail is now a URL string, not a file
+            return obj.thumbnail
         return None
     
     def get_tags(self, obj):
@@ -107,18 +101,14 @@ class GalleryImageListSerializer(serializers.ModelSerializer):
     
     def get_image_url(self, obj):
         if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
+            # obj.image is now a URL string, not a file
+            return obj.image
         return None
     
     def get_thumbnail_url(self, obj):
         if obj.thumbnail:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.thumbnail.url)
-            return obj.thumbnail.url
+            # obj.thumbnail is now a URL string, not a file
+            return obj.thumbnail
         return self.get_image_url(obj)
 
 class GalleryVideoListSerializer(serializers.ModelSerializer):
@@ -137,8 +127,6 @@ class GalleryVideoListSerializer(serializers.ModelSerializer):
     
     def get_thumbnail_url(self, obj):
         if obj.thumbnail:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.thumbnail.url)
-            return obj.thumbnail.url
+            # obj.thumbnail is now a URL string, not a file
+            return obj.thumbnail
         return None

@@ -29,35 +29,28 @@ class DestinationImageSerializer(serializers.ModelSerializer):
     
     def get_image_url(self, obj):
         if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
+            # obj.image is now a URL string, not a file
+            return obj.image
         return None
 
 class ImageUploadSerializer(serializers.ModelSerializer):
-    """Serializer for uploading images to destinations"""
+    """Serializer for setting image URLs for destinations"""
     
     class Meta:
         model = DestinationImage
         fields = ['destination', 'image', 'alt_text', 'is_primary', 'order']
     
     def validate_image(self, value):
-        """Validate uploaded image"""
+        """Validate image URL"""
         if value:
-            # Check file size (max 5MB)
-            if value.size > 5 * 1024 * 1024:
-                raise serializers.ValidationError("Image file too large. Maximum size is 5MB.")
-            
-            # Check file type
-            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-            if value.content_type not in allowed_types:
-                raise serializers.ValidationError("Invalid image format. Allowed formats: JPEG, PNG, WebP.")
+            # Basic URL validation - Django URLField already handles most validation
+            if not value.startswith(('http://', 'https://')):
+                raise serializers.ValidationError("Image must be a valid URL starting with http:// or https://")
         
         return value
 
 class DestinationImageUploadSerializer(serializers.ModelSerializer):
-    """Serializer for uploading main destination image"""
+    """Serializer for setting main destination image URL"""
     image_url = serializers.SerializerMethodField()
     
     class Meta:
@@ -66,23 +59,16 @@ class DestinationImageUploadSerializer(serializers.ModelSerializer):
     
     def get_image_url(self, obj):
         if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
+            # obj.image is now a URL string, not a file
+            return obj.image
         return None
     
     def validate_image(self, value):
-        """Validate uploaded image"""
+        """Validate image URL"""
         if value:
-            # Check file size (max 5MB)
-            if value.size > 5 * 1024 * 1024:
-                raise serializers.ValidationError("Image file too large. Maximum size is 5MB.")
-            
-            # Check file type
-            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-            if value.content_type not in allowed_types:
-                raise serializers.ValidationError("Invalid image format. Allowed formats: JPEG, PNG, WebP.")
+            # Basic URL validation - Django URLField already handles most validation
+            if not value.startswith(('http://', 'https://')):
+                raise serializers.ValidationError("Image must be a valid URL starting with http:// or https://")
         
         return value
 
@@ -129,10 +115,8 @@ class DestinationListSerializer(serializers.ModelSerializer):
     
     def get_image_url(self, obj):
         if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
+            # obj.image is now a URL string, not a file
+            return obj.image
         
         # Return placeholder image based on destination name/location
         placeholder_images = {
@@ -178,10 +162,8 @@ class DestinationDetailSerializer(serializers.ModelSerializer):
     
     def get_image_url(self, obj):
         if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
+            # obj.image is now a URL string, not a file
+            return obj.image
         
         # Return placeholder image based on destination name/location
         placeholder_images = {
