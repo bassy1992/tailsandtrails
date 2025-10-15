@@ -75,6 +75,36 @@ class ImageGalleryListSerializer(serializers.ModelSerializer):
         main_img = obj.main_image
         return main_img.image if main_img else None
 
+class LegacyImageSerializer(serializers.ModelSerializer):
+    """Legacy serializer that mimics the old GalleryImage format for backward compatibility"""
+    image_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    destination_name = serializers.CharField(source='destination.name', read_only=True)
+    
+    class Meta:
+        model = ImageGallery
+        fields = [
+            'id', 'title', 'slug', 'description', 'image_url', 'thumbnail_url',
+            'location', 'category', 'destination_name', 'photographer', 
+            'date_taken', 'is_featured', 'created_at'
+        ]
+    
+    def get_image_url(self, obj):
+        main_img = obj.main_image
+        return main_img.image if main_img else None
+    
+    def get_thumbnail_url(self, obj):
+        main_img = obj.main_image
+        return main_img.thumbnail if main_img and main_img.thumbnail else self.get_image_url(obj)
+    
+    def get_category(self, obj):
+        return {
+            'id': obj.category.id,
+            'name': obj.category.name,
+            'slug': obj.category.slug
+        } if obj.category else None
+
 class GalleryVideoSerializer(serializers.ModelSerializer):
     category = GalleryCategorySerializer(read_only=True)
     video_url = serializers.SerializerMethodField()

@@ -8,7 +8,7 @@ from .models import GalleryCategory, ImageGallery, GalleryImage, GalleryVideo
 from destinations.models import Destination
 from .serializers import (
     GalleryCategorySerializer, ImageGallerySerializer, GalleryImageSerializer, GalleryVideoSerializer,
-    ImageGalleryListSerializer, GalleryVideoListSerializer
+    ImageGalleryListSerializer, GalleryVideoListSerializer, LegacyImageSerializer
 )
 
 class GalleryCategoryListView(generics.ListAPIView):
@@ -275,3 +275,37 @@ def bulk_add_gallery_images(request):
             {'error': f'Error creating gallery: {str(e)}'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+class LegacyImageListView(generics.ListAPIView):
+    """Legacy view that returns galleries in old image format for backward compatibility"""
+    serializer_class = LegacyImageSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['is_featured', 'destination']
+    search_fields = ['title', 'location', 'description', 'photographer']
+    ordering_fields = ['created_at', 'title', 'order']
+    ordering = ['-is_featured', 'order', '-created_at']
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        queryset = ImageGallery.objects.filter(is_active=True)
+        
+        # Filter by category slug or name
+        category = self.request.query_params.get('category')
+        if category and category != 'all':
+            queryset = queryset.filter(
+                Q(category__slug=category) | Q(category__name__iexact=category)
+            )
+        
+        # Filter featured only
+        featured = self.request.query_params.get('featured')
+        if featured and featured.lower() == 'true':
+            queryset = queryset.filter(is_featured=True)
+        
+        return queryset
+
+class LegacyImageDetailView(generics.RetrieveAPIView):
+    """Legacy view that returns gallery in old image format for backward compatibility"""
+    queryset = ImageGallery.objects.filter(is_active=True)
+    serializer_class = LegacyImageSerializer
+    lookup_field = 'slug'
+    permission_classes = [AllowAny]

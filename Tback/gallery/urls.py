@@ -12,6 +12,10 @@ urlpatterns = [
     path('galleries/bulk-add/', views.bulk_add_gallery_images, name='galleries-bulk-add'),
     path('galleries/<slug:slug>/', views.ImageGalleryDetailView.as_view(), name='gallery-detail'),
     
+    # Backward compatibility - old image endpoints return galleries in legacy format
+    path('images/', views.LegacyImageListView.as_view(), name='legacy-image-list'),
+    path('images/<slug:slug>/', views.LegacyImageDetailView.as_view(), name='legacy-image-detail'),
+    
     # Videos
     path('videos/', views.GalleryVideoListView.as_view(), name='video-list'),
     path('videos/<slug:slug>/', views.GalleryVideoDetailView.as_view(), name='video-detail'),
