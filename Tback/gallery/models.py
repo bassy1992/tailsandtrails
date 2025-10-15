@@ -21,23 +21,20 @@ class GalleryCategory(models.Model):
     def __str__(self):
         return self.name
 
-class GalleryImage(models.Model):
-    """Gallery images model"""
+class ImageGallery(models.Model):
+    """Main gallery item that can contain multiple images"""
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField(blank=True)
-    image = models.URLField(max_length=500, help_text="Image URL")
-    thumbnail = models.URLField(max_length=500, blank=True, null=True, help_text="Thumbnail URL")
     
     # Location and categorization
     location = models.CharField(max_length=200)
-    category = models.ForeignKey(GalleryCategory, on_delete=models.CASCADE, related_name='images')
-    destination = models.ForeignKey(Destination, on_delete=models.SET_NULL, null=True, blank=True, related_name='gallery_images')
+    category = models.ForeignKey(GalleryCategory, on_delete=models.CASCADE, related_name='image_galleries')
+    destination = models.ForeignKey(Destination, on_delete=models.SET_NULL, null=True, blank=True, related_name='image_galleries')
     
     # Metadata
     photographer = models.CharField(max_length=100, blank=True)
     date_taken = models.DateField(null=True, blank=True)
-    camera_info = models.CharField(max_length=200, blank=True)
     
     # Display options
     is_featured = models.BooleanField(default=False)
@@ -50,8 +47,8 @@ class GalleryImage(models.Model):
     
     class Meta:
         ordering = ['-is_featured', 'order', '-created_at']
-        verbose_name = "Gallery Image"
-        verbose_name_plural = "Gallery Images"
+        verbose_name = "Image Gallery"
+        verbose_name_plural = "Image Galleries"
     
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -60,6 +57,46 @@ class GalleryImage(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.location}"
+    
+    @property
+    def main_image(self):
+        """Get the first/main image for this gallery"""
+        return self.images.filter(is_main=True).first() or self.images.first()
+    
+    @property
+    def image_count(self):
+        """Get total number of images in this gallery"""
+        return self.images.count()
+
+class GalleryImage(models.Model):
+    """Individual images within a gallery"""
+    gallery = models.ForeignKey(ImageGallery, on_delete=models.CASCADE, related_name='images')
+    image = models.URLField(max_length=500, help_text="Image URL")
+    thumbnail = models.URLField(max_length=500, blank=True, null=True, help_text="Thumbnail URL")
+    caption = models.CharField(max_length=300, blank=True)
+    
+    # Image specific metadata
+    camera_info = models.CharField(max_length=200, blank=True)
+    is_main = models.BooleanField(default=False, help_text="Main image for the gallery")
+    order = models.PositiveIntegerField(default=0)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_main', 'order', 'created_at']
+        verbose_name = "Gallery Image"
+        verbose_name_plural = "Gallery Images"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one main image per gallery
+        if self.is_main:
+            GalleryImage.objects.filter(gallery=self.gallery, is_main=True).update(is_main=False)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.gallery.title} - Image {self.order}"
 
 class GalleryVideo(models.Model):
     """Gallery videos model"""

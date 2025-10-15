@@ -7,10 +7,10 @@ urlpatterns = [
     # Categories
     path('categories/', views.GalleryCategoryListView.as_view(), name='category-list'),
     
-    # Images
-    path('images/', views.GalleryImageListView.as_view(), name='image-list'),
-    path('images/bulk-add/', views.bulk_add_gallery_images, name='images-bulk-add'),
-    path('images/<slug:slug>/', views.GalleryImageDetailView.as_view(), name='image-detail'),
+    # Image Galleries
+    path('galleries/', views.ImageGalleryListView.as_view(), name='gallery-list'),
+    path('galleries/bulk-add/', views.bulk_add_gallery_images, name='galleries-bulk-add'),
+    path('galleries/<slug:slug>/', views.ImageGalleryDetailView.as_view(), name='gallery-detail'),
     
     # Videos
     path('videos/', views.GalleryVideoListView.as_view(), name='video-list'),
