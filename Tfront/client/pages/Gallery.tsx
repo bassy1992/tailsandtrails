@@ -588,6 +588,18 @@ export default function Gallery() {
                   </div>
                   {/* Image Slider */}
                   <div className="relative">
+                    {/* Debug Information */}
+                    <div className="p-4 bg-yellow-100 border-b text-sm">
+                      <strong>🐛 Debug Info:</strong><br/>
+                      Gallery Title: {selectedGallery.title}<br/>
+                      Images Array: {selectedGallery.images ? `${selectedGallery.images.length} images` : 'undefined'}<br/>
+                      Image Count Property: {selectedGallery.image_count}<br/>
+                      Current Index: {currentImageIndex}<br/>
+                      {selectedGallery.images && selectedGallery.images.length > 0 && (
+                        <>Current Image URL: {selectedGallery.images[currentImageIndex]?.image_url?.substring(0, 50)}...</>
+                      )}
+                    </div>
+
                     {selectedGallery.images && selectedGallery.images.length > 0 ? (
                       <>
                         {/* Main Image Display */}
@@ -690,6 +702,9 @@ export default function Gallery() {
                         <div className="text-center">
                           <Camera className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                           <p className="text-gray-500 text-lg">No images available for this gallery</p>
+                          <p className="text-red-500 text-sm mt-2">
+                            API returned {selectedGallery.image_count} images but images array is {selectedGallery.images ? 'empty' : 'undefined'}
+                          </p>
                         </div>
                       </div>
                     )}
