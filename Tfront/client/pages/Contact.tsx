@@ -252,9 +252,9 @@ export default function Contact() {
                   <div>
                     <div className="font-medium">Office Address</div>
                     <div className="text-sm text-gray-600">
-                      123 Independence Avenue<br />
-                      Accra, Ghana<br />
-                      West Africa
+                      Aviation Highway<br />
+                      Accra Spintex Road<br />
+                      Accra, Ghana
                     </div>
                   </div>
                 </div>
@@ -356,7 +356,7 @@ export default function Contact() {
                 <div className="text-center text-gray-500">
                   <MapPin className="h-12 w-12 mx-auto mb-4 text-ghana-green" />
                   <p className="font-medium">Interactive Map</p>
-                  <p className="text-sm">123 Independence Avenue, Accra, Ghana</p>
+                  <p className="text-sm">Aviation Highway, Accra Spintex Road, Ghana</p>
                   <p className="text-xs mt-2">Map integration would be implemented here</p>
                 </div>
               </div>
