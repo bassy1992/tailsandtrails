@@ -167,14 +167,66 @@ class DestinationGalleryDeleteView(generics.DestroyAPIView):
     permission_classes = [IsAdminUser]
     
     def delete(self, request, *args, **kwargs):
-        """Delete the image file and database record"""
+        """Delete the image and database record"""
         instance = self.get_object()
-        
-        # Delete the actual file
-        if instance.image:
-            instance.image.delete(save=False)
-        
-        # Delete the database record
         instance.delete()
-        
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def bulk_add_destination_images(request, destination_id):
+    """Bulk add multiple images to a destination via URLs"""
+    try:
+        destination = Destination.objects.get(id=destination_id)
+    except Destination.DoesNotExist:
+        return Response(
+            {'error': 'Destination not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    image_urls = request.data.get('image_urls', [])
+    if not image_urls or not isinstance(image_urls, list):
+        return Response(
+            {'error': 'image_urls must be a list of URLs'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    created_images = []
+    errors = []
+    
+    for i, url in enumerate(image_urls):
+        try:
+            # Validate URL
+            if not url.startswith(('http://', 'https://')):
+                errors.append(f"Invalid URL format: {url}")
+                continue
+            
+            # Create the image
+            image = DestinationImage.objects.create(
+                destination=destination,
+                image=url,
+                alt_text=f"{destination.name} - Gallery Image {i + 1}",
+                order=destination.images.count() + 1,
+                is_primary=False  # Gallery images are not primary
+            )
+            
+            created_images.append({
+                'id': image.id,
+                'image': image.image,
+                'alt_text': image.alt_text,
+                'order': image.order
+            })
+            
+        except Exception as e:
+            errors.append(f"Error creating image from {url}: {str(e)}")
+    
+    response_data = {
+        'created_count': len(created_images),
+        'created_images': created_images,
+        'total_images': destination.images.count()
+    }
+    
+    if errors:
+        response_data['errors'] = errors
+    
+    return Response(response_data, status=status.HTTP_201_CREATED)

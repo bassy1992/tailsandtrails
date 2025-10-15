@@ -29,8 +29,8 @@ class DestinationIncludeInline(admin.TabularInline):
 
 class DestinationImageInline(admin.TabularInline):
     model = DestinationImage
-    extra = 1
-    fields = ('image', 'alt_text', 'is_primary', 'order')
+    extra = 3  # Show 3 empty forms for adding multiple images
+    fields = ('image', 'alt_text', 'is_primary', 'order', 'image_preview')
     readonly_fields = ('image_preview',)
     
     def image_preview(self, obj):
