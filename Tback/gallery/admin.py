@@ -51,7 +51,7 @@ class GalleryImageAdmin(admin.ModelAdmin):
         if obj.image:
             return format_html(
                 '<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />',
-                obj.image.url
+                obj.image
             )
         return "No image"
     image_preview.short_description = 'Preview'
@@ -93,7 +93,7 @@ class GalleryVideoAdmin(admin.ModelAdmin):
         if obj.thumbnail:
             return format_html(
                 '<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />',
-                obj.thumbnail.url
+                obj.thumbnail
             )
         return "No thumbnail"
     thumbnail_preview.short_description = 'Thumbnail'

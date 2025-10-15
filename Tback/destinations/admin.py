@@ -35,7 +35,7 @@ class DestinationImageInline(admin.TabularInline):
     
     def image_preview(self, obj):
         if obj.image:
-            return format_html('<img src="{}" width="100" height="60" style="object-fit: cover;" />', obj.image.url)
+            return format_html('<img src="{}" width="100" height="60" style="object-fit: cover;" />', obj.image)
         return "No image"
     image_preview.short_description = 'Preview'
 
@@ -101,7 +101,7 @@ class DestinationImageAdmin(admin.ModelAdmin):
     
     def image_preview(self, obj):
         if obj.image:
-            return format_html('<img src="{}" width="100" height="60" style="object-fit: cover;" />', obj.image.url)
+            return format_html('<img src="{}" width="100" height="60" style="object-fit: cover;" />', obj.image)
         return "No image"
     image_preview.short_description = 'Preview'
 

@@ -26,8 +26,8 @@ class GalleryImage(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='gallery/images/%Y/%m/')
-    thumbnail = models.ImageField(upload_to='gallery/thumbnails/%Y/%m/', blank=True, null=True)
+    image = models.URLField(max_length=500, help_text="Image URL")
+    thumbnail = models.URLField(max_length=500, blank=True, null=True, help_text="Thumbnail URL")
     
     # Location and categorization
     location = models.CharField(max_length=200)
@@ -67,7 +67,7 @@ class GalleryVideo(models.Model):
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField(blank=True)
     video_file = models.FileField(upload_to='gallery/videos/%Y/%m/')
-    thumbnail = models.ImageField(upload_to='gallery/video_thumbnails/%Y/%m/')
+    thumbnail = models.URLField(max_length=500, help_text="Video thumbnail URL")
     
     # Video metadata
     duration = models.CharField(max_length=10, help_text="Format: MM:SS or HH:MM:SS")
