@@ -1,6 +1,6 @@
 from rest_framework import generics, filters, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, AllowAny
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
@@ -15,15 +15,17 @@ class GalleryCategoryListView(generics.ListAPIView):
     """List all gallery categories"""
     queryset = GalleryCategory.objects.all()
     serializer_class = GalleryCategorySerializer
+    permission_classes = [AllowAny]
 
 class ImageGalleryListView(generics.ListAPIView):
     """List image galleries with filtering"""
     serializer_class = ImageGalleryListSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['category', 'is_featured', 'destination']
+    filterset_fields = ['is_featured', 'destination']
     search_fields = ['title', 'location', 'description', 'photographer']
     ordering_fields = ['created_at', 'title', 'order']
     ordering = ['-is_featured', 'order', '-created_at']
+    permission_classes = [AllowAny]
     
     def get_queryset(self):
         queryset = ImageGallery.objects.filter(is_active=True)
@@ -47,6 +49,7 @@ class ImageGalleryDetailView(generics.RetrieveAPIView):
     queryset = ImageGallery.objects.filter(is_active=True)
     serializer_class = ImageGallerySerializer
     lookup_field = 'slug'
+    permission_classes = [AllowAny]
 
 class GalleryVideoListView(generics.ListAPIView):
     """List gallery videos with filtering"""
@@ -56,6 +59,7 @@ class GalleryVideoListView(generics.ListAPIView):
     search_fields = ['title', 'location', 'description', 'videographer']
     ordering_fields = ['created_at', 'title', 'views', 'order']
     ordering = ['-is_featured', 'order', '-created_at']
+    permission_classes = [AllowAny]
     
     def get_queryset(self):
         queryset = GalleryVideo.objects.filter(is_active=True)
@@ -79,6 +83,7 @@ class GalleryVideoDetailView(generics.RetrieveAPIView):
     queryset = GalleryVideo.objects.filter(is_active=True)
     serializer_class = GalleryVideoSerializer
     lookup_field = 'slug'
+    permission_classes = [AllowAny]
     
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -88,6 +93,7 @@ class GalleryVideoDetailView(generics.RetrieveAPIView):
         return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def gallery_stats(request):
     """Get gallery statistics"""
     stats = {
@@ -102,6 +108,7 @@ def gallery_stats(request):
     return Response(stats)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def gallery_mixed_feed(request):
     """Get mixed feed of galleries and videos"""
     category = request.query_params.get('category', 'all')
