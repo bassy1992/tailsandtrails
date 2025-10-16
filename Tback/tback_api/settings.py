@@ -219,7 +219,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://tfront-b30j1teg7-bassys-projects-fca17413.vercel.app",  # Vercel frontend (current)
     "https://tfront-kab228o9m-bassys-projects-fca17413.vercel.app",  # Vercel frontend (previous)
     "https://tfront-f3vp66ahp-bassys-projects-fca17413.vercel.app",  # Vercel frontend (protected)
-    "https://tfront-9s7ce4vtt-bassys-projects-fca17413.vercel.app",  # Vercel frontend (latest)
+    "https://tfront-9s7ce4vtt-bassys-projects-fca17413.vercel.app",  # Vercel frontend (previous)
+    "https://tfront-ef9jk4628-bassys-projects-fca17413.vercel.app",  # Vercel frontend (latest working)
     "https://tailsandtrails.vercel.app",  # Vercel frontend (main)
     "https://tailsandtrails-production.up.railway.app",  # Railway production backend
 ]
@@ -272,6 +273,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://tfront-kab228o9m-bassys-projects-fca17413.vercel.app",
     "https://tfront-f3vp66ahp-bassys-projects-fca17413.vercel.app",
     "https://tfront-9s7ce4vtt-bassys-projects-fca17413.vercel.app",
+    "https://tfront-ef9jk4628-bassys-projects-fca17413.vercel.app",
     "https://tailsandtrails.vercel.app",
     "https://tailsandtrails-production.up.railway.app",
 ]
