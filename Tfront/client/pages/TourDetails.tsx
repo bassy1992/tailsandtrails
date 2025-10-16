@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import DynamicPricing from "@/components/DynamicPricing";
+import TravelerSelector from "@/components/TravelerSelector";
 import { 
   MapPin, Star, Users, Clock, Calendar, Car, Hotel, Utensils, Shield, 
   Camera, ChevronLeft, Heart, Share2, CheckCircle, AlertCircle, Phone, Mail 
@@ -289,22 +290,11 @@ export default function TourDetails() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Number of Travelers
-                    </label>
-                    <select
-                      value={travelers}
-                      onChange={(e) => setTravelers(Number(e.target.value))}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-ghana-green focus:border-ghana-green"
-                    >
-                      {[...Array(tour.max_group_size)].map((_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          {i + 1} {i === 0 ? "person" : "people"}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <TravelerSelector
+                    destination={tour}
+                    selectedTravelers={travelers}
+                    onTravelersChange={setTravelers}
+                  />
 
                   <Button
                     onClick={() => {
