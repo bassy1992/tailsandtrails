@@ -30,13 +30,13 @@ const VALID_TICKETS: ValidItem[] = [
  * Current valid destinations in the system
  */
 const VALID_DESTINATIONS: ValidItem[] = [
-  { id: 1, title: 'Kakum National Park Canopy Walk', status: 'active' },
-  { id: 2, title: 'Cape Coast Castle Tour', status: 'active' },
-  { id: 3, title: 'Mole National Park Safari', status: 'active' },
-  { id: 4, title: 'Labadi Beach Experience', status: 'active' },
-  { id: 5, title: 'Kumasi Cultural Heritage Tour', status: 'active' },
-  { id: 6, title: 'Volta Region Waterfalls Adventure', status: 'active' },
-  { id: 7, title: 'Tent Xscape', status: 'active' }
+  { id: 1, title: 'Kakum National Park Canopy Walk', slug: 'kakum-national-park-canopy-walk', status: 'active' },
+  { id: 2, title: 'Cape Coast Castle Tour', slug: 'cape-coast-castle-tour', status: 'active' },
+  { id: 3, title: 'Mole National Park Safari', slug: 'mole-national-park-safari', status: 'active' },
+  { id: 4, title: 'Labadi Beach Experience', slug: 'labadi-beach-experience', status: 'active' },
+  { id: 5, title: 'Kumasi Cultural Heritage Tour', slug: 'kumasi-cultural-heritage-tour', status: 'active' },
+  { id: 6, title: 'Volta Region Waterfalls Adventure', slug: 'volta-region-waterfalls-adventure', status: 'active' },
+  { id: 7, title: 'Tent Xscape', slug: 'tent-xscape', status: 'active' }
 ];
 
 /**
@@ -83,6 +83,8 @@ export const getPathType = (currentPath: string): 'destination' | 'ticket' => {
  * Validate ID based on path type and provide comprehensive feedback
  */
 export const validateId = (id: string | number | undefined, pathType: 'destination' | 'ticket'): ValidationResult => {
+  console.log(`🚀 validateId called with ID: "${id}" (${typeof id}), pathType: ${pathType}`);
+  
   const isDestination = pathType === 'destination';
   const validIds = isDestination ? getValidDestinationIds() : getValidTicketIds();
   const defaultId = isDestination ? getDefaultDestinationId() : getDefaultTicketId();
@@ -99,31 +101,50 @@ export const validateId = (id: string | number | undefined, pathType: 'destinati
     };
   }
 
-  // Convert to number
-  const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
-
-  // Handle invalid number conversion
-  if (isNaN(numericId) || numericId <= 0) {
-    return {
-      isValid: false,
-      errorMessage: `Invalid ${itemType} ID format: ${id}`,
-      redirectPath: defaultPath,
-      suggestedIds: validIds
-    };
-  }
-
-  // Check if ID exists and is active
-  if (validIds.includes(numericId)) {
-    return {
-      isValid: true,
-      id: numericId
-    };
+  // Handle string IDs (could be slugs or numeric strings)
+  if (typeof id === 'string') {
+    // Try to parse as number first
+    const numericId = parseInt(id, 10);
+    
+    // If it's a valid number, validate as numeric ID
+    if (!isNaN(numericId) && numericId > 0) {
+      if (validIds.includes(numericId)) {
+        console.log(`✅ Valid numeric ID: ${numericId}`);
+        return {
+          isValid: true,
+          id: numericId
+        };
+      }
+    } else {
+      // It's likely a slug, validate against slug list
+      if (isDestination) {
+        const destinationBySlug = VALID_DESTINATIONS.find(dest => 
+          dest.slug === id && dest.status === 'active'
+        );
+        if (destinationBySlug) {
+          console.log(`✅ Valid slug "${id}" -> ID ${destinationBySlug.id}`);
+          return {
+            isValid: true,
+            id: destinationBySlug.id
+          };
+        }
+      }
+      // For tickets, we don't have slug support yet, so treat as invalid
+    }
+  } else {
+    // Handle numeric ID
+    if (validIds.includes(id)) {
+      return {
+        isValid: true,
+        id: id
+      };
+    }
   }
 
   // Invalid ID - provide helpful redirect
   return {
     isValid: false,
-    errorMessage: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} ID ${numericId} not found`,
+    errorMessage: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} ID ${id} not found`,
     redirectPath: defaultPath,
     suggestedIds: validIds
   };
