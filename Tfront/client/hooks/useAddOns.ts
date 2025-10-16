@@ -355,12 +355,18 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
     }));
 
     // Update selected add-ons
-    const option = addon.options.find(opt => opt.id.toString() === optionId);
-    if (option) {
-      setSelectedAddOns(prev => {
-        // Remove existing selection for this add-on
-        const filtered = prev.filter(item => item.addon_id !== addon.id);
-        
+    setSelectedAddOns(prev => {
+      // Remove existing selection for this add-on
+      const filtered = prev.filter(item => item.addon_id !== addon.id);
+      
+      // If optionId is empty, user selected "Skip this option"
+      if (!optionId) {
+        return filtered; // Just remove, don't add anything
+      }
+      
+      // Find the selected option
+      const option = addon.options.find(opt => opt.id.toString() === optionId);
+      if (option) {
         // Add new selection if it has a price
         if (option.price > 0) {
           filtered.push({
@@ -372,29 +378,37 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
             name: `${addon.name} - ${option.name}`
           });
         }
-        
-        return filtered;
-      });
-    }
+      }
+      
+      return filtered;
+    });
   };
 
   // Handle checkbox add-on toggle
   const handleAddOnToggle = (addon: AddOn, selected: boolean) => {
+    console.log(`🔄 Toggle add-on: ${addon.name}, selected: ${selected}`);
+    
     if (selected) {
       // Add to selected add-ons
-      setSelectedAddOns(prev => [
-        ...prev.filter(item => item.addon_id !== addon.id),
-        {
+      setSelectedAddOns(prev => {
+        const filtered = prev.filter(item => item.addon_id !== addon.id);
+        const newSelection = {
           addon_id: addon.id,
           quantity: 1,
           unit_price: Number(addon.calculated_price),
           total_price: Number(addon.calculated_price),
           name: addon.name
-        }
-      ]);
+        };
+        console.log(`➕ Adding add-on:`, newSelection);
+        return [...filtered, newSelection];
+      });
     } else {
       // Remove from selected add-ons
-      setSelectedAddOns(prev => prev.filter(item => item.addon_id !== addon.id));
+      setSelectedAddOns(prev => {
+        const filtered = prev.filter(item => item.addon_id !== addon.id);
+        console.log(`➖ Removing add-on: ${addon.name}`);
+        return filtered;
+      });
     }
   };
 

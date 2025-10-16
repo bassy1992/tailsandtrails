@@ -135,6 +135,22 @@ const AddOnSelector: React.FC<AddOnSelectorProps> = ({
                       onValueChange={(value) => handleOptionChange(addon.slug, value, addon)}
                       className="space-y-2"
                     >
+                      {/* Add a "None" option to allow deselection */}
+                      <div className="flex items-center space-x-2 p-3 border rounded-lg bg-gray-50">
+                        <RadioGroupItem value="" id={`${addon.slug}-none`} />
+                        <Label htmlFor={`${addon.slug}-none`} className="flex-1 cursor-pointer">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-gray-600">Skip this option</p>
+                              <p className="text-sm text-gray-500">No additional cost</p>
+                            </div>
+                            <span className="text-gray-500 font-medium">
+                              GH₵0
+                            </span>
+                          </div>
+                        </Label>
+                      </div>
+                      
                       {addon.options.map((option) => (
                         <div key={option.id} className="flex items-center space-x-2 p-3 border rounded-lg">
                           <RadioGroupItem value={option.id.toString()} id={`${addon.slug}-${option.id}`} />
