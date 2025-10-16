@@ -178,7 +178,7 @@ export default function Booking() {
 
   // Calculate total price
   const calculateTotal = () => {
-    const baseTotal = bookingData.basePrice * (bookingData.travelers.adults + bookingData.travelers.children);
+    const baseTotal = bookingData.basePrice * bookingData.travelers.adults;
     
     let addOnTotal = 0;
     
@@ -188,7 +188,7 @@ export default function Booking() {
       if (addOn?.options) {
         const option = addOn.options.find(o => o.id === optionId);
         if (option && option.price > 0) {
-          addOnTotal += option.price * (bookingData.travelers.adults + bookingData.travelers.children);
+          addOnTotal += option.price * bookingData.travelers.adults;
         }
       }
     });
@@ -444,79 +444,7 @@ export default function Booking() {
                     </div>
                   </div>
 
-                  {/* Travelers Section */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-gray-700 flex items-center">
-                      <Users className="h-4 w-4 mr-2 text-ghana-green" />
-                      Travelers
-                    </Label>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Adults */}
-                        <div className="flex items-center space-x-3">
-                          <span className="text-sm text-gray-600 min-w-[50px]">Adults:</span>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleTravelersChange('adults', false)}
-                              disabled={bookingData.travelers.adults <= 1}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="font-medium min-w-[20px] text-center">
-                              {bookingData.travelers.adults}
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleTravelersChange('adults', true)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        {/* Children */}
-                        <div className="flex items-center space-x-3">
-                          <span className="text-sm text-gray-600 min-w-[60px]">Children:</span>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleTravelersChange('children', false)}
-                              disabled={bookingData.travelers.children <= 0}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="font-medium min-w-[20px] text-center">
-                              {bookingData.travelers.children}
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleTravelersChange('children', true)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Total Travelers Summary */}
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <p className="text-sm text-gray-600">
-                          Total: <span className="font-medium text-gray-900">
-                            {bookingData.travelers.adults + bookingData.travelers.children} travelers
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+
                 </div>
               </CardContent>
             </Card>
@@ -881,11 +809,11 @@ export default function Booking() {
                     {/* Base Package */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Base Package ({bookingData.travelers.adults + bookingData.travelers.children} travelers)</span>
+                        <span>Base Package ({bookingData.travelers.adults} {bookingData.travelers.adults === 1 ? 'traveler' : 'travelers'})</span>
                         <span>GH₵{totals.baseTotal.toLocaleString()}</span>
                       </div>
                       <div className="text-xs text-gray-500">
-                        {bookingData.travelers.adults} Adults + {bookingData.travelers.children} Child × GH₵{bookingData.basePrice.toLocaleString()}
+                        {bookingData.travelers.adults} {bookingData.travelers.adults === 1 ? 'Adult' : 'Adults'} × GH₵{bookingData.basePrice.toLocaleString()}
                       </div>
                     </div>
 
@@ -899,7 +827,7 @@ export default function Booking() {
                       const option = addOn.options.find(o => o.id === optionId);
                       if (!option || option.price === 0) return null;
                       
-                      const upgradeTotal = option.price * (bookingData.travelers.adults + bookingData.travelers.children);
+                      const upgradeTotal = option.price * bookingData.travelers.adults;
                       
                       return (
                         <div key={category} className="flex justify-between text-sm">
