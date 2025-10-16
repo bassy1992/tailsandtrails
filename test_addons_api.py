@@ -36,9 +36,23 @@ def test_addons_api():
                 ticket_name = first_ticket.get('name', first_ticket.get('title', 'Unknown'))
                 print(f"Testing with ticket: {ticket_name} (ID: {ticket_id})")
                 
-                # Test the add-ons endpoint
-                print(f"\n2. Testing add-ons endpoint for ticket {ticket_id}...")
-                addons_url = f"{base_url}/tickets/{ticket_id}/addons/?travelers=2"
+                # List all available tickets
+                print(f"\n2. All available tickets:")
+                for i, ticket in enumerate(tickets_list):
+                    print(f"   ID: {ticket['id']}, Title: {ticket.get('title', 'Unknown')}")
+                
+                # Test the problematic ticket ID 7
+                print(f"\n3. Testing problematic ticket ID 7...")
+                problem_url = f"{base_url}/tickets/7/addons/?travelers=3"
+                print(f"URL: {problem_url}")
+                
+                problem_response = requests.get(problem_url)
+                print(f"Status: {problem_response.status_code}")
+                print(f"Response: {problem_response.text}")
+                
+                # Test the add-ons endpoint with existing ticket
+                print(f"\n4. Testing add-ons endpoint for existing ticket {ticket_id}...")
+                addons_url = f"{base_url}/tickets/{ticket_id}/addons/?travelers=3"
                 print(f"URL: {addons_url}")
                 
                 addons_response = requests.get(addons_url)
@@ -47,7 +61,7 @@ def test_addons_api():
                 if addons_response.status_code == 200:
                     addons_data = addons_response.json()
                     print("✅ Add-ons API is working!")
-                    print(f"Response: {json.dumps(addons_data, indent=2)}")
+                    print(f"Found {len(addons_data.get('categories', []))} categories")
                 else:
                     print("❌ Add-ons API failed!")
                     print(f"Error: {addons_response.text}")

@@ -89,7 +89,9 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
       );
       
       if (!response.ok) {
-        throw new Error('Failed to load add-ons');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Failed to load add-ons (${response.status})`;
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
@@ -250,7 +252,7 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
 
   // Load add-ons when ticketId changes
   useEffect(() => {
-    if (ticketId) {
+    if (ticketId && ticketId > 0) {
       loadAddOns(ticketId, travelers);
     }
   }, [ticketId, travelers]);
