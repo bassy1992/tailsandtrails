@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Search, Star, Clock, Users, DollarSign, Filter } from "lucide-react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
+import PricingDisplay from "@/components/PricingDisplay";
 
 // Helper function to get placeholder images
 const getPlaceholderImage = (name: string, location: string): string => {
@@ -312,8 +313,11 @@ export default function Destinations() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-ghana-green">GH¢{destination.price}</div>
-                      <div className="text-xs text-gray-500">per person</div>
+                      <PricingDisplay 
+                        destination={destination} 
+                        groupSize={1} 
+                        compact={true}
+                      />
                     </div>
                   </div>
                 </CardHeader>

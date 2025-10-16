@@ -141,6 +141,26 @@ export interface DestinationInclude {
   item: string;
 }
 
+export interface PricingTier {
+  id: number;
+  min_people: number;
+  max_people: number | null;
+  price_per_person: string;
+  group_size_display: string;
+  is_active: boolean;
+}
+
+export interface PricingResponse {
+  destination_id: number;
+  destination_name: string;
+  group_size: number;
+  price_per_person: string;
+  total_price: string;
+  base_price: string;
+  has_tiered_pricing: boolean;
+  pricing_tiers: PricingTier[];
+}
+
 export interface Destination {
   id: number;
   name: string;
@@ -158,6 +178,8 @@ export interface Destination {
   category: Category;
   highlights: DestinationHighlight[];
   includes: DestinationInclude[];
+  pricing_tiers: PricingTier[];
+  has_tiered_pricing: boolean;
   price_category: string;
   is_featured: boolean;
 }
@@ -303,6 +325,10 @@ export const destinationsApi = {
 
   async getDestination(slug: string): Promise<Destination> {
     return apiClient.request<Destination>(`/destinations/${slug}/`);
+  },
+
+  async getDestinationPricing(destinationId: number, groupSize: number): Promise<PricingResponse> {
+    return apiClient.request<PricingResponse>(`/destinations/${destinationId}/pricing/?group_size=${groupSize}`);
   },
 
   async getStats(): Promise<DestinationStats> {

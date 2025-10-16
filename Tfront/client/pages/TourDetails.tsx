@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import { destinationsApi, Destination } from "../lib/api.ts";
+import { destinationsApi, Destination, PricingResponse } from "../lib/api.ts";
 import { useToast } from "@/contexts/ToastContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import DynamicPricing from "@/components/DynamicPricing";
 import { 
   MapPin, Star, Users, Clock, Calendar, Car, Hotel, Utensils, Shield, 
   Camera, ChevronLeft, Heart, Share2, CheckCircle, AlertCircle, Phone, Mail 
@@ -34,6 +35,7 @@ export default function TourDetails() {
     return tomorrow.toISOString().split('T')[0];
   });
   const [travelers, setTravelers] = useState(1);
+  const [currentPricing, setCurrentPricing] = useState<PricingResponse | null>(null);
 
   // Fetch tour data from API
   useEffect(() => {
@@ -233,11 +235,15 @@ export default function TourDetails() {
             <Card className="sticky top-4">
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <div>
-                    <div className="text-3xl font-bold text-ghana-green">GH₵{tour.price}</div>
-                    <div className="text-sm text-gray-500">per person</div>
+                  <div className="flex-1">
+                    <DynamicPricing 
+                      destination={tour}
+                      groupSize={travelers}
+                      onPricingChange={setCurrentPricing}
+                      showTiers={true}
+                    />
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-1 ml-4">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <span className="font-semibold">{tour.rating}</span>
                     <span className="text-gray-500">({tour.reviews_count} reviews)</span>
@@ -326,12 +332,14 @@ export default function TourDetails() {
                           tourId: tour.id.toString(),
                           tourName: tour.name,
                           duration: tour.duration_display,
-                          basePrice: parseFloat(tour.price),
+                          basePrice: currentPricing ? parseFloat(currentPricing.price_per_person) : parseFloat(tour.price),
+                          totalPrice: currentPricing ? parseFloat(currentPricing.total_price) : parseFloat(tour.price) * travelers,
                           selectedDate: selectedDate,
                           travelers: {
                             adults: Math.max(1, travelers - (travelers > 2 ? 1 : 0)), // Assume children if more than 2
                             children: travelers > 2 ? 1 : 0
-                          }
+                          },
+                          pricingData: currentPricing
                         }
                       });
                     }}
@@ -368,12 +376,14 @@ export default function TourDetails() {
                           tourId: tour.id.toString(),
                           tourName: tour.name,
                           duration: tour.duration_display,
-                          basePrice: parseFloat(tour.price),
+                          basePrice: currentPricing ? parseFloat(currentPricing.price_per_person) : parseFloat(tour.price),
+                          totalPrice: currentPricing ? parseFloat(currentPricing.total_price) : parseFloat(tour.price) * travelers,
                           selectedDate: selectedDate,
                           travelers: {
                             adults: Math.max(1, travelers - (travelers > 2 ? 1 : 0)),
                             children: travelers > 2 ? 1 : 0
                           },
+                          pricingData: currentPricing,
                           isReservation: true
                         }
                       });

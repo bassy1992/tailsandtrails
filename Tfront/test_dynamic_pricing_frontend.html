@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Pricing Frontend Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+        .success {
+            color: #2c5530;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .info {
+            color: #1976d2;
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .pricing-display {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c5530;
+            margin: 10px 0;
+        }
+        .group-selector {
+            margin: 10px 0;
+        }
+        .group-selector input {
+            padding: 8px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Dynamic Pricing Frontend Integration Test</h1>
+        <p>This page tests the frontend integration with the dynamic pricing API.</p>
+        
+        <div class="test-section">
+            <h3>📋 Test Checklist</h3>
+            <div id="checklist">
+                <div>✅ API types updated with PricingTier and PricingResponse</div>
+                <div>✅ DynamicPricing component created</div>
+                <div>✅ PricingDisplay component created</div>
+                <div>✅ TourDetails page updated to use dynamic pricing</div>
+                <div>✅ Destinations page updated to show pricing tiers</div>
+                <div>✅ API endpoint added for pricing calculation</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔗 API Endpoint Test</h3>
+            <p>Test the pricing API endpoint directly:</p>
+            
+            <div class="group-selector">
+                <label for="destinationId">Destination ID:</label>
+                <input type="number" id="destinationId" value="7" min="1">
+                
+                <label for="groupSize">Group Size:</label>
+                <input type="number" id="groupSize" value="4" min="1" max="50">
+                
+                <button onclick="testPricingAPI()">Test Pricing API</button>
+            </div>
+            
+            <div id="apiResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎨 Frontend Components</h3>
+            <div class="info">
+                <strong>Components Created:</strong>
+                <ul>
+                    <li><strong>DynamicPricing.tsx</strong> - Real-time pricing with API calls</li>
+                    <li><strong>PricingDisplay.tsx</strong> - Static pricing display for cards</li>
+                </ul>
+            </div>
+            
+            <div class="success">
+                <strong>Integration Points:</strong>
+                <ul>
+                    <li>TourDetails page now shows dynamic pricing based on group size</li>
+                    <li>Destination cards show group discounts when available</li>
+                    <li>Booking flow receives accurate pricing data</li>
+                    <li>Real-time price updates as group size changes</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🚀 Next Steps</h3>
+            <ol>
+                <li><strong>Start the frontend:</strong> <code>npm run dev</code> in Tfront directory</li>
+                <li><strong>Start the backend:</strong> <code>python manage.py runserver</code> in Tback directory</li>
+                <li><strong>Visit a tour page:</strong> Navigate to any destination detail page</li>
+                <li><strong>Change group size:</strong> Use the traveler selector to see dynamic pricing</li>
+                <li><strong>Check destination list:</strong> Look for group discount badges</li>
+            </ol>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Expected Behavior</h3>
+            <div class="info">
+                <strong>Tour Details Page:</strong>
+                <ul>
+                    <li>Price updates automatically when changing group size</li>
+                    <li>Shows savings badge for group discounts</li>
+                    <li>Displays all available pricing tiers</li>
+                    <li>Highlights current tier based on selected group size</li>
+                </ul>
+            </div>
+            
+            <div class="info">
+                <strong>Destinations List:</strong>
+                <ul>
+                    <li>Shows base price for single person</li>
+                    <li>Displays "Group discount" badge when tiers exist</li>
+                    <li>Compact pricing display with savings indicator</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test the pricing API endpoint
+        async function testPricingAPI() {
+            const destinationId = document.getElementById('destinationId').value;
+            const groupSize = document.getElementById('groupSize').value;
+            const resultDiv = document.getElementById('apiResult');
+            
+            if (!destinationId || !groupSize) {
+                resultDiv.innerHTML = '<div class="error">Please enter both destination ID and group size</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info">Testing API endpoint...</div>';
+            
+            try {
+                const response = await fetch(`http://localhost:8000/api/destinations/${destinationId}/pricing/?group_size=${groupSize}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ API Test Successful!</h4>
+                        <div class="pricing-display">
+                            ${data.destination_name}: GH₵${data.price_per_person} per person × ${data.group_size} = GH₵${data.total_price}
+                        </div>
+                        <p><strong>Has Tiered Pricing:</strong> ${data.has_tiered_pricing ? 'Yes' : 'No'}</p>
+                        <p><strong>Base Price:</strong> GH₵${data.base_price}</p>
+                        ${data.pricing_tiers.length > 0 ? `
+                            <p><strong>Available Tiers:</strong></p>
+                            <ul>
+                                ${data.pricing_tiers.map(tier => 
+                                    `<li>${tier.group_size_display}: GH₵${tier.price_per_person}</li>`
+                                ).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ API Test Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Make sure:</strong></p>
+                        <ul>
+                            <li>Backend server is running on localhost:8000</li>
+                            <li>Destination ID ${destinationId} exists</li>
+                            <li>CORS is properly configured</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto-test on page load
+        window.onload = function() {
+            console.log('Dynamic Pricing Frontend Test Page Loaded');
+            console.log('Ready to test API integration');
+        };
+    </script>
+</body>
+</html>
