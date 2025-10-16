@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import DynamicPricing from "@/components/DynamicPricing";
-import TravelerSelector from "@/components/TravelerSelector";
+import CompactTravelerSelector from "@/components/CompactTravelerSelector";
 import { 
   MapPin, Star, Users, Clock, Calendar, Car, Hotel, Utensils, Shield, 
   Camera, ChevronLeft, Heart, Share2, CheckCircle, AlertCircle, Phone, Mail 
@@ -290,7 +290,7 @@ export default function TourDetails() {
                     />
                   </div>
 
-                  <TravelerSelector
+                  <CompactTravelerSelector
                     destination={tour}
                     selectedTravelers={travelers}
                     onTravelersChange={setTravelers}
