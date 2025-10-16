@@ -15,4 +15,3 @@ coverage
 **/*.pyc
 Tfront/node_modules
 Tfront/dist
-.vercel

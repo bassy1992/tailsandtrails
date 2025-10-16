@@ -67,7 +67,7 @@ def test_frontend_url_setting():
     print("\n3. Testing frontend URL configuration...")
     
     # This would be done by checking the Django settings
-    print("   Frontend URL should be: https://tailsandtrails.vercel.app")
+    print("   Frontend URL should be: http://localhost:5173")
     print("   ✅ Frontend URL updated in settings")
 
 if __name__ == "__main__":

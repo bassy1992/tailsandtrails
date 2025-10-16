@@ -72,7 +72,7 @@ def main():
         print(f"   ✅ Database updated")
         print(f"   ✅ Videos have URLs") 
         print(f"   ✅ API will return video_url field")
-        print(f"   ✅ Vercel frontend will work")
+        print(f"   ✅ Frontend will work")
         
         return True
         

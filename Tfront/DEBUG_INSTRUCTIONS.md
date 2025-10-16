@@ -8,7 +8,7 @@
 ## 🧪 **Debug Steps**
 
 ### 1. **Open Browser Developer Tools**
-1. Go to: https://tfront-chi.vercel.app/gallery
+1. Go to your deployed frontend URL + /gallery
 2. Press **F12** to open Developer Tools
 3. Go to **Console** tab
 4. Keep it open while testing

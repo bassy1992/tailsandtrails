@@ -1,4 +1,4 @@
-# 🚀 Vercel Deployment Checklist
+# 🚀 Frontend Deployment Checklist
 
 ## ✅ **Pre-Deployment Steps**
 
@@ -18,7 +18,7 @@ git push origin master
 - Check: https://tailsandtrails-production.up.railway.app/api/gallery/galleries/cape-coast-castle-cape-coast-gallery/
 - Should return 6 images in the images array
 
-### 2. **Frontend Deployment (Vercel)**
+### 2. **Frontend Deployment**
 
 ```bash
 # In Tfront directory
@@ -27,23 +27,18 @@ git commit -m "deploy: image slider for gallery modal"
 git push origin master
 ```
 
-Then deploy to Vercel:
-```bash
-vercel --prod
-```
-
-Or use Vercel dashboard to deploy from GitHub.
+Deploy using your preferred hosting platform (Railway, Netlify, etc.).
 
 ## 🔧 **Environment Variables**
 
-Vercel is configured to use:
+Frontend should be configured to use:
 - **API URL**: `https://tailsandtrails-production.up.railway.app/api`
 - **Base URL**: `https://tailsandtrails-production.up.railway.app`
 
 ## 🧪 **Testing After Deployment**
 
 ### 1. **Gallery Page Test**
-1. Go to deployed Vercel URL
+1. Go to deployed frontend URL
 2. Navigate to Gallery page
 3. Click on "Cape Coast Castle"
 4. **Expected Results**:
@@ -95,7 +90,7 @@ If issues occur, check browser console for:
 - Verify database has multiple images
 
 ### If API calls fail:
-- CORS issues between Vercel and Railway
+- CORS issues between frontend and Railway
 - Check environment variables
 - Verify Railway backend is accessible
 

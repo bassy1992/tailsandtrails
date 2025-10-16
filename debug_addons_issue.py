@@ -63,7 +63,7 @@ def debug_addons_issue():
     print("🔍 Testing Frontend API Configuration...")
     
     # Test if the frontend is using the correct API URL
-    frontend_url = "https://tailsandtrails.vercel.app"
+    frontend_url = "http://localhost:5173"
     try:
         print(f"\n📋 Checking frontend at: {frontend_url}")
         response = requests.get(frontend_url, timeout=10)

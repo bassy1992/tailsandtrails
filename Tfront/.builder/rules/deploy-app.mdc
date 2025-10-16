@@ -1,10 +1,10 @@
 ---
-description: Deploy the app to production using Netlify or Vercel to make the site live
+description: Deploy the app to production using Netlify or Railway to make the site live
 globs:
 alwaysApply: true
 ---
 
-Deploying the app to production is powered by either Netlify or Vercel through MCP (Model Context Protocol) integrations:
+Deploying the app to production is powered by either Netlify or Railway through MCP (Model Context Protocol) integrations:
 
 **For Netlify:**
 
@@ -13,10 +13,11 @@ Deploying the app to production is powered by either Netlify or Vercel through M
 - Note: Netlify builds the source code on their servers, so while it's good to check if `npm run build` works locally, it's not required.
 - Do not ask user to your any command in the terminal, use the Bash tool when needed.
 
-**For Vercel:**
+**For Railway:**
 
-- If the Vercel tools are not available, tell the user to [Connect Vercel MCP](#open-mcp-popover).
-- Vercel deployment should work automatically once connected - simply use the appropriate Vercel MCP tools.
-- Do not ask user to your any command in the terminal, use the Bash tool when needed.
+- Railway can host both frontend and backend applications
+- Use Railway CLI or GitHub integration for deployment
+- Configure environment variables in Railway dashboard
+- Do not ask user to run any command in the terminal, use the Bash tool when needed.
 
 You can also suggest sharing the [Open Preview](#open-preview), but explain that it won't be a production-ready link.

@@ -17,7 +17,7 @@ def test_comprehensive_ticket_validation():
     print("=" * 60)
     
     base_url = "https://tailsandtrails-production.up.railway.app"
-    frontend_url = "https://tailsandtrails.vercel.app"
+    frontend_url = "http://localhost:5173"
     
     # Test 1: Valid ticket IDs
     print("\n✅ Test 1: Valid Ticket IDs")

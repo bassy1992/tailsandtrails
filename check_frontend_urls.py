@@ -10,9 +10,8 @@ def check_frontend_urls():
     
     # Common frontend URLs - update these with your actual frontend URL
     frontend_urls = [
-        "https://tailsandtrails.vercel.app",
-        "https://tfront-nxcxxw7cr-bassys-projects-fca17413.vercel.app", 
-        "https://tfront-b30j1teg7-bassys-projects-fca17413.vercel.app",
+        "http://localhost:5173",  # Local development
+        "http://localhost:8080",  # Alternative dev server
         # Add your actual frontend URL here
     ]
     
