@@ -1,7 +1,8 @@
 {
-  "buildCommand": "npm run build:client",
+  "framework": "vite",
+  "buildCommand": "npm run vercel-build",
   "outputDirectory": "dist/spa",
-  "framework": null,
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/(.*)",
