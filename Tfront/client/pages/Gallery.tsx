@@ -8,7 +8,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, MapPin, Calendar, Filter, Video, Play, Clock, Eye, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { galleryApi, GalleryCategory, ImageGallery, GalleryVideo } from "../lib/api.ts";
+import { galleryApi, GalleryCategory, ImageGallery, GalleryVideo } from "@/lib/api";
 import { useToast } from "@/contexts/ToastContext";
 
 export default function Gallery() {

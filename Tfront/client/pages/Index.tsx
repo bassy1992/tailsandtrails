@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar, MapPin, Search, Star, Users, Clock, Car, Hotel, Utensils, Shield, Filter, X, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import VideoSection from "@/components/VideoSection";
-import Currency from "../lib/currency.ts";
-import { destinationsApi, Destination, galleryApi, GalleryVideo } from "../lib/api.ts";
+import Currency from "@/lib/currency";
+import { destinationsApi, Destination, galleryApi, GalleryVideo } from "@/lib/api";
 
 interface SearchResult {
   id: number;
