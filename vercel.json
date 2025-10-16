@@ -1,17 +1,18 @@
 {
-  "buildCommand": "cd Tfront && npm run build:client",
-  "outputDirectory": "Tfront/dist/spa",
-  "devCommand": "cd Tfront && npm run dev",
-  "installCommand": "cd Tfront && npm install",
-  "framework": null,
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "Tfront/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/spa"
+      }
     }
   ],
-  "env": {
-    "VITE_API_BASE_URL": "https://tailsandtrails-production.up.railway.app",
-    "VITE_API_URL": "https://tailsandtrails-production.up.railway.app/api"
-  }
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
