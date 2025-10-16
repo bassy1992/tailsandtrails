@@ -290,7 +290,7 @@ AUTH_USER_MODEL = 'authentication.User'
 # Payment settings
 PAYMENT_TIMEOUT = 30  # seconds
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:8080')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://tailsandtrails.vercel.app')
 SITE_NAME = os.getenv('SITE_NAME', 'Trails & Trails')
 
 # Stripe settings removed - using MTN MoMo only

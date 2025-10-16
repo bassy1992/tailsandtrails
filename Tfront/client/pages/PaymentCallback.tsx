@@ -57,20 +57,27 @@ export default function PaymentCallback() {
               // Determine payment method from payment data
               const paymentMethod = payment.payment_method === 'mobile_money' ? 'Mobile Money' : 'Card Payment';
               
-              navigate('/payment-success', {
-                state: {
-                  ...originalPaymentData, // Restore original booking/ticket data
-                  paymentDetails: {
-                    method: paymentMethod,
-                    transactionId: paymentRef,
-                    status: 'completed',
-                    timestamp: payment.processed_at || new Date().toISOString(),
-                    gateway: 'Paystack',
-                    amount: payment.amount,
-                    currency: payment.currency,
-                    provider: payment.payment_method === 'mobile_money' ? 'MTN' : undefined
-                  }
+              // Ensure we have the necessary data for the success page
+              const successData = {
+                ...originalPaymentData, // Restore original booking/ticket data
+                total: payment.amount || originalPaymentData?.total || 0,
+                paymentDetails: {
+                  method: paymentMethod,
+                  transactionId: paymentRef,
+                  status: 'completed',
+                  timestamp: payment.processed_at || new Date().toISOString(),
+                  gateway: 'Paystack',
+                  amount: payment.amount,
+                  currency: payment.currency,
+                  provider: payment.payment_method === 'mobile_money' ? 'MTN' : undefined
                 }
+              };
+              
+              console.log('Redirecting to payment success with data:', successData);
+              
+              navigate('/payment-success', {
+                state: successData,
+                replace: true // Use replace to prevent back button issues
               });
             }, 2000);
           } else if (payment.status === 'failed') {
@@ -78,7 +85,7 @@ export default function PaymentCallback() {
             setMessage('Payment failed. Please try again.');
             
             setTimeout(() => {
-              navigate('/destinations');
+              navigate('/tickets');
             }, 3000);
           } else {
             // Still processing, continue checking

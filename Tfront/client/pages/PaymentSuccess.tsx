@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,8 +45,26 @@ interface PaymentSuccessData {
 export default function PaymentSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
-  const paymentData = location.state as PaymentSuccessData;
+  // Try to get payment data from location state first, then from URL params
+  const paymentData = location.state as PaymentSuccessData || (() => {
+    const reference = searchParams.get('reference');
+    const amount = searchParams.get('amount');
+    const method = searchParams.get('method');
+    
+    if (reference && amount) {
+      return {
+        total: parseFloat(amount),
+        paymentDetails: {
+          method: method || 'Unknown',
+          transactionId: reference,
+          timestamp: new Date().toISOString()
+        }
+      } as PaymentSuccessData;
+    }
+    return null;
+  })();
   const [isDownloading, setIsDownloading] = useState(false);
   const [enhancedPaymentData, setEnhancedPaymentData] = useState<PaymentSuccessData | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -166,8 +184,16 @@ export default function PaymentSuccess() {
   };
 
   useEffect(() => {
+    console.log('PaymentSuccess mounted with data:', paymentData);
+    
     if (!paymentData) {
-      navigate('/dashboard');
+      console.log('No payment data found, redirecting to tickets page');
+      // Instead of dashboard, redirect to tickets page with a message
+      navigate('/tickets', { 
+        state: { 
+          message: 'Payment completed successfully! Check your email for confirmation.' 
+        } 
+      });
       return;
     }
   }, [paymentData, navigate]);
