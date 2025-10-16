@@ -1,319 +1,307 @@
-from rest_framework import generics, status, filters
+from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
-from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q, F, Sum
-from django.db import models
+from django.shortcuts import get_object_or_404
+from django.db import transaction, models
 from django.utils import timezone
-from .models import (
-    TicketCategory, Venue, Ticket, TicketPurchase, 
-    TicketCode, TicketReview, TicketPromoCode
-)
+from decimal import Decimal
+import uuid
+
+from .models import Ticket, TicketCategory, TicketPurchase
+from .addon_models import AddOnCategory, AddOn, BookingAddOn
 from .serializers import (
-    TicketCategorySerializer, VenueSerializer, TicketListSerializer,
-    TicketDetailSerializer, TicketPurchaseSerializer, TicketPurchaseCreateSerializer,
-    TicketCodeSerializer, TicketReviewSerializer, TicketReviewCreateSerializer,
-    TicketPromoCodeSerializer, PromoCodeValidationSerializer
+    TicketSerializer, TicketCategorySerializer, AddOnCategorySerializer,
+    AddOnSerializer, TicketPurchaseSerializer, BookingAddOnSerializer
 )
-
-class TicketCategoryListView(generics.ListAPIView):
-    queryset = TicketCategory.objects.filter(is_active=True)
-    serializer_class = TicketCategorySerializer
-    permission_classes = [AllowAny]  # Allow public access for browsing
-    ordering = ['order', 'name']
-
-class VenueListView(generics.ListAPIView):
-    queryset = Venue.objects.filter(is_active=True)
-    serializer_class = VenueSerializer
-    permission_classes = [AllowAny]  # Allow public access for browsing
-    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    search_fields = ['name', 'city', 'address']
-    filterset_fields = ['city', 'region']
-    ordering = ['name']
-
-class VenueDetailView(generics.RetrieveAPIView):
-    queryset = Venue.objects.filter(is_active=True)
-    serializer_class = VenueSerializer
-    permission_classes = [AllowAny]  # Allow public access for browsing
-    lookup_field = 'slug'
 
 class TicketListView(generics.ListAPIView):
-    serializer_class = TicketListSerializer
-    permission_classes = [AllowAny]  # Allow public access for browsing
-    filter_backends = [filters.SearchFilter, DjangoFilterBackend, filters.OrderingFilter]
-    search_fields = ['title', 'description', 'venue__name', 'venue__city']
-    filterset_fields = ['category', 'venue', 'ticket_type', 'status', 'is_featured']
-    ordering_fields = ['price', 'event_date', 'created_at', 'rating', 'sales_count']
-    ordering = ['-created_at']
-    
-    def get_queryset(self):
-        queryset = Ticket.objects.filter(status='published').select_related('category', 'venue')
-        
-        # Filter by ID if provided
-        ticket_id = self.request.query_params.get('id')
-        if ticket_id:
-            queryset = queryset.filter(id=ticket_id)
-            return queryset
-        
-        # Filter by price range
-        min_price = self.request.query_params.get('min_price')
-        max_price = self.request.query_params.get('max_price')
-        if min_price:
-            queryset = queryset.filter(price__gte=min_price)
-        if max_price:
-            queryset = queryset.filter(price__lte=max_price)
-        
-        # Filter by date range
-        start_date = self.request.query_params.get('start_date')
-        end_date = self.request.query_params.get('end_date')
-        if start_date:
-            queryset = queryset.filter(event_date__gte=start_date)
-        if end_date:
-            queryset = queryset.filter(event_date__lte=end_date)
-        
-        # Filter by availability
-        available_only = self.request.query_params.get('available_only')
-        if available_only and available_only.lower() == 'true':
-            now = timezone.now()
-            queryset = queryset.filter(
-                available_quantity__gt=0,
-                sale_start_date__lte=now,
-                sale_end_date__gte=now
-            )
-        
-        return queryset
-
-class TicketDetailView(generics.RetrieveAPIView):
-    queryset = Ticket.objects.filter(status='published').select_related('category', 'venue')
-    serializer_class = TicketDetailSerializer
-    permission_classes = [AllowAny]  # Allow public access for browsing
-    lookup_field = 'slug'
-    
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        # Increment view count
-        Ticket.objects.filter(pk=instance.pk).update(views_count=F('views_count') + 1)
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-class FeaturedTicketsView(generics.ListAPIView):
-    queryset = Ticket.objects.filter(
-        status='published', 
-        is_featured=True
-    ).select_related('category', 'venue')[:6]
-    serializer_class = TicketListSerializer
-    permission_classes = [AllowAny]  # Allow public access for browsing
-
-class PopularTicketsView(generics.ListAPIView):
-    queryset = Ticket.objects.filter(
-        status='published'
-    ).select_related('category', 'venue').order_by('-sales_count', '-rating')[:10]
-    serializer_class = TicketListSerializer
-    permission_classes = [AllowAny]  # Allow public access for browsing
-
-class UpcomingTicketsView(generics.ListAPIView):
-    serializer_class = TicketListSerializer
-    permission_classes = [AllowAny]  # Allow public access for browsing
+    serializer_class = TicketSerializer
+    permission_classes = [AllowAny]
     
     def get_queryset(self):
         now = timezone.now()
         return Ticket.objects.filter(
             status='published',
-            event_date__gte=now
-        ).select_related('category', 'venue').order_by('event_date')[:10]
+            available_quantity__gt=0,
+            sale_start_date__lte=now,
+            sale_end_date__gte=now
+        )
 
-class TicketPurchaseCreateView(generics.CreateAPIView):
-    serializer_class = TicketPurchaseCreateSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        try:
-            purchase = serializer.save()
-            response_serializer = TicketPurchaseSerializer(purchase)
-            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response(
-                {'error': 'Failed to create purchase. Please try again.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+class TicketDetailView(generics.RetrieveAPIView):
+    queryset = Ticket.objects.filter(status='published')
+    serializer_class = TicketSerializer
+    lookup_field = 'slug'
+    permission_classes = [AllowAny]
 
-class TicketPurchaseListView(generics.ListAPIView):
-    serializer_class = TicketPurchaseSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['status', 'payment_status']
-    ordering = ['-created_at']
-    
-    def get_queryset(self):
-        return TicketPurchase.objects.filter(
-            user=self.request.user
-        ).select_related('ticket__category', 'ticket__venue')
+class TicketCategoryListView(generics.ListAPIView):
+    queryset = TicketCategory.objects.filter(is_active=True)
+    serializer_class = TicketCategorySerializer
+    permission_classes = [AllowAny]
 
-class TicketPurchaseDetailView(generics.RetrieveAPIView):
-    serializer_class = TicketPurchaseSerializer
-    permission_classes = [IsAuthenticated]
-    lookup_field = 'purchase_id'
-    
-    def get_queryset(self):
-        return TicketPurchase.objects.filter(
-            user=self.request.user
-        ).select_related('ticket__category', 'ticket__venue').prefetch_related('ticket_codes')
-
-class TicketCodeValidateView(generics.RetrieveAPIView):
-    serializer_class = TicketCodeSerializer
-    lookup_field = 'code'
-    
-    def get_queryset(self):
-        return TicketCode.objects.select_related('purchase__ticket')
-    
-    def retrieve(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance)
-            
-            # Additional validation info
-            data = serializer.data
-            data['ticket_info'] = {
-                'title': instance.purchase.ticket.title,
-                'event_date': instance.purchase.ticket.event_date,
-                'venue': instance.purchase.ticket.venue.name if instance.purchase.ticket.venue else None
-            }
-            
-            return Response(data)
-        except TicketCode.DoesNotExist:
-            return Response(
-                {'error': 'Invalid ticket code'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def use_ticket_code(request, code):
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_ticket_addons(request, ticket_id):
+    """Get available add-ons for a specific ticket"""
     try:
-        ticket_code = TicketCode.objects.get(code=code)
+        ticket = get_object_or_404(Ticket, id=ticket_id)
         
-        if not ticket_code.is_valid:
-            return Response(
-                {'error': 'Ticket code is not valid or has already been used'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        # Get add-ons applicable to this ticket or its category
+        addons = AddOn.objects.filter(
+            is_active=True
+        ).filter(
+            models.Q(applicable_tickets=ticket) | 
+            models.Q(applicable_categories=ticket.category) |
+            models.Q(applicable_tickets__isnull=True, applicable_categories__isnull=True)
+        ).prefetch_related('options', 'category').distinct()
         
-        # Mark as used
-        ticket_code.status = 'used'
-        ticket_code.used_at = timezone.now()
-        ticket_code.used_by = request.user.get_full_name() or request.user.username
-        ticket_code.save()
+        # Group by category
+        categories = AddOnCategory.objects.filter(
+            is_active=True,
+            addons__in=addons
+        ).prefetch_related('addons').distinct()
+        
+        # Calculate prices based on ticket base price
+        base_amount = float(ticket.effective_price)
+        travelers = int(request.GET.get('travelers', 1))
+        
+        context = {
+            'request': request,
+            'base_amount': base_amount,
+            'travelers': travelers
+        }
+        
+        serializer = AddOnCategorySerializer(categories, many=True, context=context)
         
         return Response({
-            'message': 'Ticket code successfully validated and marked as used',
+            'success': True,
+            'categories': serializer.data,
             'ticket_info': {
-                'title': ticket_code.purchase.ticket.title,
-                'event_date': ticket_code.purchase.ticket.event_date,
-                'customer': ticket_code.purchase.customer_name
+                'id': ticket.id,
+                'title': ticket.title,
+                'base_price': float(ticket.effective_price),
+                'currency': ticket.currency
             }
         })
         
-    except TicketCode.DoesNotExist:
-        return Response(
-            {'error': 'Invalid ticket code'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-class TicketReviewListView(generics.ListAPIView):
-    serializer_class = TicketReviewSerializer
-    filter_backends = [filters.OrderingFilter]
-    ordering = ['-created_at']
-    
-    def get_queryset(self):
-        ticket_id = self.kwargs.get('ticket_id')
-        return TicketReview.objects.filter(
-            ticket_id=ticket_id,
-            is_active=True
-        ).select_related('user')
-
-class TicketReviewCreateView(generics.CreateAPIView):
-    serializer_class = TicketReviewCreateSerializer
-    permission_classes = [IsAuthenticated]
-
-class UserTicketReviewsView(generics.ListAPIView):
-    serializer_class = TicketReviewSerializer
-    permission_classes = [IsAuthenticated]
-    ordering = ['-created_at']
-    
-    def get_queryset(self):
-        return TicketReview.objects.filter(
-            user=self.request.user
-        ).select_related('ticket')
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def validate_promo_code(request):
-    serializer = PromoCodeValidationSerializer(data=request.data)
-    if serializer.is_valid():
-        promo_code = serializer.validated_data['promo_code']
-        total_amount = serializer.validated_data['total_amount']
+def calculate_booking_total(request):
+    """Calculate total booking cost including selected add-ons"""
+    try:
+        data = request.data
+        ticket_id = data.get('ticket_id')
+        quantity = int(data.get('quantity', 1))
+        travelers = int(data.get('travelers', 1))
+        selected_addons = data.get('selected_addons', [])
         
-        discount_amount = promo_code.calculate_discount(total_amount)
-        final_amount = total_amount - discount_amount
+        ticket = get_object_or_404(Ticket, id=ticket_id)
+        base_price = float(ticket.effective_price)
+        base_total = base_price * quantity
+        
+        addon_total = Decimal('0.00')
+        addon_details = []
+        
+        for addon_selection in selected_addons:
+            addon_id = addon_selection.get('addon_id')
+            option_id = addon_selection.get('option_id')
+            addon_quantity = int(addon_selection.get('quantity', 1))
+            
+            addon = get_object_or_404(AddOn, id=addon_id, is_active=True)
+            
+            if option_id:
+                # Add-on with specific option selected
+                option = get_object_or_404(AddOnOption, id=option_id, addon=addon)
+                unit_price = option.price
+                addon_name = f"{addon.name} - {option.name}"
+            else:
+                # Simple add-on
+                unit_price = addon.calculate_price(
+                    base_amount=base_total, 
+                    quantity=addon_quantity, 
+                    travelers=travelers
+                )
+                addon_name = addon.name
+            
+            total_addon_price = unit_price * addon_quantity
+            addon_total += total_addon_price
+            
+            addon_details.append({
+                'addon_id': addon_id,
+                'option_id': option_id,
+                'name': addon_name,
+                'unit_price': float(unit_price),
+                'quantity': addon_quantity,
+                'total_price': float(total_addon_price),
+                'pricing_type': addon.pricing_type
+            })
+        
+        grand_total = base_total + float(addon_total)
         
         return Response({
-            'valid': True,
-            'discount_amount': discount_amount,
-            'final_amount': final_amount,
-            'promo_code': TicketPromoCodeSerializer(promo_code).data
+            'success': True,
+            'calculation': {
+                'base_total': base_total,
+                'addon_total': float(addon_total),
+                'grand_total': grand_total,
+                'currency': ticket.currency,
+                'breakdown': {
+                    'ticket': {
+                        'name': ticket.title,
+                        'unit_price': base_price,
+                        'quantity': quantity,
+                        'total': base_total
+                    },
+                    'addons': addon_details
+                }
+            }
         })
-    
-    return Response({
-        'valid': False,
-        'errors': serializer.errors
-    }, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_booking_with_addons(request):
+    """Create a booking with selected add-ons"""
+    try:
+        with transaction.atomic():
+            data = request.data
+            
+            # Create main ticket purchase
+            ticket_id = data.get('ticket_id')
+            quantity = int(data.get('quantity', 1))
+            customer_info = data.get('customer_info', {})
+            selected_addons = data.get('selected_addons', [])
+            payment_info = data.get('payment_info', {})
+            
+            ticket = get_object_or_404(Ticket, id=ticket_id)
+            
+            # Generate booking reference
+            booking_reference = f"BK{uuid.uuid4().hex[:8].upper()}"
+            
+            # Calculate totals
+            base_total = float(ticket.effective_price) * quantity
+            addon_total = Decimal('0.00')
+            
+            # Create ticket purchase
+            purchase = TicketPurchase.objects.create(
+                ticket=ticket,
+                quantity=quantity,
+                unit_price=ticket.effective_price,
+                total_amount=base_total,  # Will be updated after add-ons
+                customer_name=customer_info.get('name', ''),
+                customer_email=customer_info.get('email', ''),
+                customer_phone=customer_info.get('phone', ''),
+                payment_method=payment_info.get('method', ''),
+                special_requests=f"Booking Reference: {booking_reference}"
+            )
+            
+            # Process selected add-ons
+            for addon_selection in selected_addons:
+                addon_id = addon_selection.get('addon_id')
+                option_id = addon_selection.get('option_id')
+                addon_quantity = int(addon_selection.get('quantity', 1))
+                
+                addon = get_object_or_404(AddOn, id=addon_id, is_active=True)
+                option = None
+                
+                if option_id:
+                    option = get_object_or_404(AddOnOption, id=option_id, addon=addon)
+                    unit_price = option.price
+                else:
+                    unit_price = addon.calculate_price(
+                        base_amount=base_total,
+                        quantity=addon_quantity,
+                        travelers=data.get('travelers', 1)
+                    )
+                
+                total_addon_price = unit_price * addon_quantity
+                addon_total += total_addon_price
+                
+                # Create booking add-on record
+                BookingAddOn.objects.create(
+                    booking_reference=booking_reference,
+                    addon=addon,
+                    option=option,
+                    quantity=addon_quantity,
+                    unit_price=unit_price,
+                    total_price=total_addon_price,
+                    customer_name=customer_info.get('name', ''),
+                    customer_email=customer_info.get('email', '')
+                )
+            
+            # Update purchase total with add-ons
+            purchase.total_amount = base_total + float(addon_total)
+            purchase.save()
+            
+            # Update ticket availability
+            ticket.available_quantity -= quantity
+            ticket.save()
+            
+            return Response({
+                'success': True,
+                'booking': {
+                    'reference': booking_reference,
+                    'purchase_id': str(purchase.purchase_id),
+                    'total_amount': float(purchase.total_amount),
+                    'base_amount': base_total,
+                    'addon_amount': float(addon_total),
+                    'currency': ticket.currency
+                }
+            })
+            
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-@permission_classes([AllowAny])  # Allow public access for general stats
-def ticket_stats(request):
-    """Get general ticket statistics"""
-    total_tickets = Ticket.objects.filter(status='published').count()
-    total_venues = Venue.objects.filter(is_active=True).count()
-    total_categories = TicketCategory.objects.filter(is_active=True).count()
-    
-    # Upcoming events
-    now = timezone.now()
-    upcoming_events = Ticket.objects.filter(
-        status='published',
-        event_date__gte=now
-    ).count()
-    
-    return Response({
-        'total_tickets': total_tickets,
-        'total_venues': total_venues,
-        'total_categories': total_categories,
-        'upcoming_events': upcoming_events
-    })
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def user_ticket_stats(request):
-    """Get user-specific ticket statistics"""
-    user = request.user
-    
-    total_purchases = TicketPurchase.objects.filter(user=user).count()
-    total_spent = TicketPurchase.objects.filter(
-        user=user, 
-        payment_status='completed'
-    ).aggregate(total=models.Sum('total_amount'))['total'] or 0
-    
-    upcoming_tickets = TicketPurchase.objects.filter(
-        user=user,
-        status='confirmed',
-        ticket__event_date__gte=timezone.now()
-    ).count()
-    
-    return Response({
-        'total_purchases': total_purchases,
-        'total_spent': total_spent,
-        'upcoming_tickets': upcoming_tickets
-    })
+@permission_classes([AllowAny])
+def get_booking_details(request, booking_reference):
+    """Get booking details including add-ons"""
+    try:
+        # Get main purchase
+        purchase = TicketPurchase.objects.filter(
+            special_requests__icontains=booking_reference
+        ).first()
+        
+        if not purchase:
+            return Response({
+                'success': False,
+                'error': 'Booking not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Get add-ons
+        booking_addons = BookingAddOn.objects.filter(
+            booking_reference=booking_reference
+        ).select_related('addon', 'option')
+        
+        purchase_data = TicketPurchaseSerializer(purchase).data
+        addons_data = BookingAddOnSerializer(booking_addons, many=True).data
+        
+        return Response({
+            'success': True,
+            'booking': {
+                'reference': booking_reference,
+                'purchase': purchase_data,
+                'addons': addons_data,
+                'total_with_addons': float(purchase.total_amount)
+            }
+        })
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)

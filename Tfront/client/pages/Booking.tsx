@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
+import AddOnSelector from "@/components/AddOnSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { 
   MapPin, Calendar, Users, ArrowLeft, CreditCard, Smartphone, 
@@ -28,18 +28,13 @@ interface BookingState {
   };
 }
 
-interface AddOnOption {
-  id: string;
+interface AddOnSelection {
+  addon_id: number;
+  option_id?: number;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
   name: string;
-  description: string;
-  price: number;
-  category: string;
-  selected: boolean;
-  options?: {
-    id: string;
-    name: string;
-    price: number;
-  }[];
 }
 
 export default function Booking() {
@@ -63,89 +58,8 @@ export default function Booking() {
     };
   });
 
-  const [addOns, setAddOns] = useState<AddOnOption[]>([
-    // Accommodation
-    {
-      id: "accommodation",
-      name: "Accommodation Upgrade",
-      description: "Choose your preferred accommodation level",
-      price: 0,
-      category: "accommodation",
-      selected: false,
-      options: [
-        { id: "standard", name: "Standard Hotel (included)", price: 0 },
-        { id: "premium", name: "Premium Hotel", price: 500 },
-        { id: "luxury", name: "Luxury Resort", price: 1200 }
-      ]
-    },
-    // Transport
-    {
-      id: "transport",
-      name: "Transport Options",
-      description: "Upgrade your transportation",
-      price: 0,
-      category: "transport",
-      selected: false,
-      options: [
-        { id: "shared", name: "Shared Bus (included)", price: 0 },
-        { id: "private", name: "Private Van", price: 800 },
-        { id: "airport", name: "Airport Pickup & Drop", price: 400 }
-      ]
-    },
-    // Meals
-    {
-      id: "meals",
-      name: "Meal Options",
-      description: "Customize your dining experience",
-      price: 0,
-      category: "meals", 
-      selected: false,
-      options: [
-        { id: "standard", name: "Standard Meals (included)", price: 0 },
-        { id: "vegetarian", name: "Vegetarian / Vegan Option", price: 0 },
-        { id: "luxury", name: "Luxury Dining Package", price: 300 }
-      ]
-    },
-    // Medical & Insurance
-    {
-      id: "medical",
-      name: "Medical & Insurance",
-      description: "Additional health and safety coverage",
-      price: 0,
-      category: "medical",
-      selected: false,
-      options: [
-        { id: "basic", name: "Basic First Aid (included)", price: 0 },
-        { id: "insurance", name: "Travel Insurance", price: 200 },
-        { id: "support", name: "On-call Medical Support", price: 500 }
-      ]
-    },
-    // Experiences
-    {
-      id: "cultural",
-      name: "Cultural Experience",
-      description: "Drumming, cooking, local market tour",
-      price: 250,
-      category: "experience",
-      selected: false
-    },
-    {
-      id: "adventure",
-      name: "Adventure Add-on", 
-      description: "Kakum Canopy Walk, Beach Trip",
-      price: 400,
-      category: "experience",
-      selected: false
-    }
-  ]);
-
-  const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({
-    accommodation: "standard",
-    transport: "shared", 
-    meals: "standard",
-    medical: "basic"
-  });
-
+  const [selectedAddOns, setSelectedAddOns] = useState<AddOnSelection[]>([]);
+  const [addonTotal, setAddonTotal] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showBreakdown, setShowBreakdown] = useState(true);
@@ -179,43 +93,15 @@ export default function Booking() {
   // Calculate total price
   const calculateTotal = () => {
     const baseTotal = bookingData.basePrice * bookingData.travelers.adults;
-    
-    let addOnTotal = 0;
-    
-    // Calculate option upgrades
-    Object.entries(selectedOptions).forEach(([category, optionId]) => {
-      const addOn = addOns.find(a => a.id === category);
-      if (addOn?.options) {
-        const option = addOn.options.find(o => o.id === optionId);
-        if (option && option.price > 0) {
-          addOnTotal += option.price * bookingData.travelers.adults;
-        }
-      }
-    });
-
-    // Calculate experience add-ons
-    addOns.forEach(addOn => {
-      if (addOn.category === "experience" && addOn.selected) {
-        addOnTotal += addOn.price;
-      }
-    });
-
-    return { baseTotal, addOnTotal, total: baseTotal + addOnTotal };
+    return { baseTotal, addOnTotal: addonTotal, total: baseTotal + addonTotal };
   };
 
   const totals = calculateTotal();
 
-  const handleOptionChange = (category: string, optionId: string) => {
-    setSelectedOptions(prev => ({
-      ...prev,
-      [category]: optionId
-    }));
-  };
-
-  const handleAddOnToggle = (id: string) => {
-    setAddOns(prev => prev.map(addOn => 
-      addOn.id === id ? { ...addOn, selected: !addOn.selected } : addOn
-    ));
+  // Handle add-on selection changes
+  const handleAddOnSelectionChange = (addons: AddOnSelection[], total: number) => {
+    setSelectedAddOns(addons);
+    setAddonTotal(total);
   };
 
   const handleTravelersChange = (type: 'adults' | 'children', increment: boolean) => {
@@ -253,8 +139,9 @@ export default function Booking() {
       },
       bookingDetails: {
         bookingData,
-        selectedOptions,
-        addOns: addOns.filter(a => a.selected)
+        selectedAddOns,
+        addonTotal,
+        baseTotal: totals.baseTotal
       }
     };
 
@@ -262,13 +149,10 @@ export default function Booking() {
     if (paymentMethod === "mobile_money") {
       navigate("/momo-checkout", { state: paymentData });
     } else if (paymentMethod === "card") {
-      // Navigate to Paystack checkout for card payments
       navigate("/paystack-checkout", { state: paymentData });
     } else if (paymentMethod === "bank_transfer") {
-      // Show bank transfer information
       alert("Bank transfer details will be provided via email. Please contact support for large group bookings.");
     } else {
-      // Other payment methods
       alert(`Payment method ${paymentMethod} will be available soon. Please try Mobile Money or Card payment.`);
     }
   };
@@ -324,7 +208,7 @@ export default function Booking() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             
-            {/* 🔹 Login Prompt for Unauthenticated Users */}
+            {/* Login Prompt for Unauthenticated Users */}
             {!isAuthenticated && (
               <Card className="border-amber-200 bg-amber-50">
                 <CardContent className="pt-6">
@@ -356,7 +240,7 @@ export default function Booking() {
               </Card>
             )}
 
-            {/* 🔹 1. User Information */}
+            {/* User Information */}
             {isAuthenticated && user && (
               <Card>
                 <CardHeader>
@@ -368,7 +252,7 @@ export default function Booking() {
                 <CardContent>
                   <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
                     <div className="w-12 h-12 bg-ghana-green text-white rounded-full flex items-center justify-center font-semibold">
-                      {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+                      {user.first_name?.charAt(0)}{user.last_name?.charAt(0)}
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{user.name}</h3>
@@ -376,14 +260,14 @@ export default function Booking() {
                       {user.phone && <p className="text-gray-600">{user.phone}</p>}
                     </div>
                     <Badge variant="outline" className="ml-auto border-ghana-green text-ghana-green">
-                      Member since {new Date(user.memberSince).getFullYear()}
+                      Member since {new Date(user.memberSince || Date.now()).getFullYear()}
                     </Badge>
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* 🔹 2. Booking Summary */}
+            {/* Booking Summary */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -444,284 +328,79 @@ export default function Booking() {
                     </div>
                   </div>
 
-
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 🔹 3. Select/Add-On Options */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Star className="h-5 w-5 text-ghana-green" />
-                  <span>Customize Your Experience</span>
-                </CardTitle>
-                <CardDescription>
-                  Select upgrades and add-ons to enhance your tour
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                
-                {/* A. Accommodation */}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Hotel className="h-5 w-5 text-ghana-green" />
-                    <h4 className="font-semibold">Accommodation Options</h4>
-                  </div>
-                  <RadioGroup 
-                    value={selectedOptions.accommodation} 
-                    onValueChange={(value) => handleOptionChange('accommodation', value)}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="standard" id="standard" />
-                      <Label htmlFor="standard" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Standard Hotel</p>
-                            <p className="text-sm text-gray-600">Included in base package</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">Included</span>
-                        </div>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="premium" id="premium" />
-                      <Label htmlFor="premium" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Premium Hotel</p>
-                            <p className="text-sm text-gray-600">4-star accommodation with pool & spa</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵500 per person</span>
-                        </div>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="luxury" id="luxury" />
-                      <Label htmlFor="luxury" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Luxury Resort</p>
-                            <p className="text-sm text-gray-600">5-star beachfront resort with premium amenities</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵1,200 per person</span>
-                        </div>
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <Separator />
-
-                {/* B. Transport */}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Car className="h-5 w-5 text-ghana-green" />
-                    <h4 className="font-semibold">Transport Options</h4>
-                  </div>
-                  <RadioGroup 
-                    value={selectedOptions.transport} 
-                    onValueChange={(value) => handleOptionChange('transport', value)}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="shared" id="shared" />
-                      <Label htmlFor="shared" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Shared Bus</p>
-                            <p className="text-sm text-gray-600">Comfortable group transportation</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">Included</span>
-                        </div>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="private" id="private" />
-                      <Label htmlFor="private" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Private Van</p>
-                            <p className="text-sm text-gray-600">Exclusive vehicle for your group</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵800</span>
-                        </div>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="airport" id="airport" />
-                      <Label htmlFor="airport" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Airport Pickup & Drop</p>
-                            <p className="text-sm text-gray-600">Convenient airport transfers</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵400</span>
-                        </div>
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <Separator />
-
-                {/* C. Meals */}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Utensils className="h-5 w-5 text-ghana-green" />
-                    <h4 className="font-semibold">Meal Options</h4>
-                  </div>
-                  <RadioGroup 
-                    value={selectedOptions.meals} 
-                    onValueChange={(value) => handleOptionChange('meals', value)}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="standard" id="meals-standard" />
-                      <Label htmlFor="meals-standard" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Standard Meals</p>
-                            <p className="text-sm text-gray-600">Local cuisine and international options</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">Included</span>
-                        </div>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="vegetarian" id="vegetarian" />
-                      <Label htmlFor="vegetarian" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Vegetarian / Vegan Option</p>
-                            <p className="text-sm text-gray-600">Plant-based meals throughout the tour</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">No extra charge</span>
-                        </div>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="luxury-meals" id="luxury-meals" />
-                      <Label htmlFor="luxury-meals" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Luxury Dining Package</p>
-                            <p className="text-sm text-gray-600">Fine dining and premium restaurants</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵300</span>
-                        </div>
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <Separator />
-
-                {/* D. Medical & Insurance */}
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="h-5 w-5 text-ghana-green" />
-                    <h4 className="font-semibold">Medical & Insurance</h4>
-                  </div>
-                  <RadioGroup 
-                    value={selectedOptions.medical} 
-                    onValueChange={(value) => handleOptionChange('medical', value)}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="basic" id="basic-medical" />
-                      <Label htmlFor="basic-medical" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Basic First Aid</p>
-                            <p className="text-sm text-gray-600">Standard first aid coverage</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">Included</span>
-                        </div>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="insurance" id="travel-insurance" />
-                      <Label htmlFor="travel-insurance" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Travel Insurance</p>
-                            <p className="text-sm text-gray-600">Comprehensive coverage for emergencies</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵200</span>
-                        </div>
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                      <RadioGroupItem value="support" id="medical-support" />
-                      <Label htmlFor="medical-support" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">On-call Medical Support</p>
-                            <p className="text-sm text-gray-600">24/7 medical assistance available</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵500</span>
-                        </div>
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <Separator />
-
-                {/* E. Extras / Experiences */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Additional Experiences</h4>
-                  
+                  {/* Travelers Section */}
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                      <Checkbox
-                        id="cultural"
-                        checked={addOns.find(a => a.id === "cultural")?.selected}
-                        onCheckedChange={() => handleAddOnToggle("cultural")}
-                      />
-                      <Label htmlFor="cultural" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Cultural Experience</p>
-                            <p className="text-sm text-gray-600">Traditional drumming, cooking class, local market tour</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵250</span>
-                        </div>
-                      </Label>
-                    </div>
+                    <Label className="text-sm font-medium text-gray-700 flex items-center">
+                      <Users className="h-4 w-4 mr-2 text-ghana-green" />
+                      Travelers
+                    </Label>
                     
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                      <Checkbox
-                        id="adventure"
-                        checked={addOns.find(a => a.id === "adventure")?.selected}
-                        onCheckedChange={() => handleAddOnToggle("adventure")}
-                      />
-                      <Label htmlFor="adventure" className="flex-1 cursor-pointer">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-medium">Adventure Add-on</p>
-                            <p className="text-sm text-gray-600">Kakum Canopy Walk, Beach Trip, Nature Photography</p>
-                          </div>
-                          <span className="text-ghana-green font-medium">+GH₵400</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Adults */}
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium">Adults</p>
+                          <p className="text-sm text-gray-600">Age 18+</p>
                         </div>
-                      </Label>
+                        <div className="flex items-center space-x-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTravelersChange('adults', false)}
+                            disabled={bookingData.travelers.adults <= 1}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="font-semibold w-8 text-center">{bookingData.travelers.adults}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTravelersChange('adults', true)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Children */}
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium">Children</p>
+                          <p className="text-sm text-gray-600">Age 2-17</p>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTravelersChange('children', false)}
+                            disabled={bookingData.travelers.children <= 0}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="font-semibold w-8 text-center">{bookingData.travelers.children}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTravelersChange('children', true)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* 🔹 4. Payment Methods */}
+            {/* Dynamic Add-On Options */}
+            <AddOnSelector
+              ticketId={parseInt(bookingData.tourId)}
+              travelers={bookingData.travelers.adults}
+              onSelectionChange={handleAddOnSelectionChange}
+            />
+
+            {/* Payment Methods */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -733,7 +412,6 @@ export default function Booking() {
               <CardContent>
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
                   {paymentMethods.map((method) => {
-                    // Only show methods with providers or bank transfer
                     if (method.providers?.length === 0 && method.id !== 'bank_transfer') {
                       return null;
                     }
@@ -762,10 +440,10 @@ export default function Booking() {
                     };
 
                     return (
-                      <div key={method.id} className="flex items-center space-x-3 p-4 border rounded-lg">
+                      <div key={method.id} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value={method.id} id={method.id} />
                         <Label htmlFor={method.id} className="flex-1 cursor-pointer">
-                          <div className="flex items-center justify-between">
+                          <div className="flex justify-between items-center">
                             <div className="flex items-center space-x-3">
                               {getIcon(method.id)}
                               <div>
@@ -786,67 +464,62 @@ export default function Booking() {
             </Card>
           </div>
 
-          {/* 🔹 3. Payment Breakdown (Right Sidebar) */}
+          {/* Summary Sidebar */}
           <div className="lg:col-span-1">
             <Card className="sticky top-4">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Payment Summary</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Booking Summary</span>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowBreakdown(!showBreakdown)}
-                    className="p-1"
                   >
                     {showBreakdown ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </Button>
-                </div>
+                </CardTitle>
               </CardHeader>
-              
               <CardContent className="space-y-4">
+                {/* Tour Details */}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-gray-900">{bookingData.tourName}</h3>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>{bookingData.duration}</p>
+                    <p>{bookingData.travelers.adults} Adults, {bookingData.travelers.children} Children</p>
+                    <p>{new Date(bookingData.selectedDate).toLocaleDateString('en-GB')}</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Price Breakdown */}
                 {showBreakdown && (
-                  <>
-                    {/* Base Package */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Base Package ({bookingData.travelers.adults} {bookingData.travelers.adults === 1 ? 'traveler' : 'travelers'})</span>
-                        <span>GH₵{totals.baseTotal.toLocaleString()}</span>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {bookingData.travelers.adults} {bookingData.travelers.adults === 1 ? 'Adult' : 'Adults'} × GH₵{bookingData.basePrice.toLocaleString()}
-                      </div>
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900">Price Breakdown</h4>
+                    
+                    {/* Base Price */}
+                    <div className="flex justify-between text-sm">
+                      <span>Base Price ({bookingData.travelers.adults} adults)</span>
+                      <span>GH₵{totals.baseTotal.toLocaleString()}</span>
                     </div>
 
-                    <Separator />
-
-                    {/* Upgrades */}
-                    {Object.entries(selectedOptions).map(([category, optionId]) => {
-                      const addOn = addOns.find(a => a.id === category);
-                      if (!addOn?.options) return null;
-                      
-                      const option = addOn.options.find(o => o.id === optionId);
-                      if (!option || option.price === 0) return null;
-                      
-                      const upgradeTotal = option.price * bookingData.travelers.adults;
-                      
-                      return (
-                        <div key={category} className="flex justify-between text-sm">
-                          <span>{option.name}</span>
-                          <span>GH₵{upgradeTotal.toLocaleString()}</span>
+                    {/* Add-ons */}
+                    {selectedAddOns.length > 0 && (
+                      <>
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-gray-700">Add-ons:</p>
+                          {selectedAddOns.map((addon, index) => (
+                            <div key={index} className="flex justify-between text-sm text-gray-600">
+                              <span className="truncate mr-2">{addon.name}</span>
+                              <span>+GH₵{addon.total_price.toLocaleString()}</span>
+                            </div>
+                          ))}
                         </div>
-                      );
-                    })}
-
-                    {/* Experience Add-ons */}
-                    {addOns.filter(a => a.category === "experience" && a.selected).map(addOn => (
-                      <div key={addOn.id} className="flex justify-between text-sm">
-                        <span>{addOn.name}</span>
-                        <span>GH₵{addOn.price.toLocaleString()}</span>
-                      </div>
-                    ))}
+                      </>
+                    )}
 
                     <Separator />
-                  </>
+                  </div>
                 )}
 
                 {/* Total */}
@@ -858,18 +531,21 @@ export default function Booking() {
                 {/* Proceed Button */}
                 <Button 
                   onClick={handleProceedToPayment}
-                  className="w-full bg-ghana-green hover:bg-ghana-green/90 text-white"
                   disabled={!paymentMethod}
+                  className="w-full bg-ghana-green hover:bg-ghana-green/90 text-white"
+                  size="lg"
                 >
                   Proceed to Payment
                 </Button>
 
-                {/* Info */}
-                <div className="flex items-start space-x-2 text-xs text-gray-600 bg-blue-50 p-3 rounded-lg">
-                  <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-blue-800">Secure Payment</p>
-                    <p>Your payment information is encrypted and secure. Free cancellation up to 24 hours before departure.</p>
+                {/* Security Notice */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-start space-x-2">
+                    <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-xs text-blue-800">
+                      <p className="font-medium">Secure Booking</p>
+                      <p>Your payment information is encrypted and secure. You can cancel or modify your booking up to 24 hours before the tour date.</p>
+                    </div>
                   </div>
                 </div>
               </CardContent>

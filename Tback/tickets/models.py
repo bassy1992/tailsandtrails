@@ -4,6 +4,9 @@ from django.utils.text import slugify
 from decimal import Decimal
 import uuid
 
+# Import add-on models
+from .addon_models import AddOnCategory, AddOn, AddOnOption, BookingAddOn
+
 class TicketCategory(models.Model):
     CATEGORY_TYPES = [
         ('event', 'Event'),

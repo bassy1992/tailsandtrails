@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Add-On API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .addon-category { margin: 15px 0; }
+        .addon { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .option { margin: 5px 0; padding: 5px; background: #e9e9e9; border-radius: 3px; }
+        button { padding: 10px 15px; margin: 5px; background: #007cba; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .error { color: red; }
+        .success { color: green; }
+        pre { background: #f0f0f0; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add-On API Test</h1>
+        
+        <div class="section">
+            <h2>Test Add-On Loading</h2>
+            <button onclick="testAddOnAPI()">Load Add-Ons for Ticket ID 1</button>
+            <div id="addon-results"></div>
+        </div>
+
+        <div class="section">
+            <h2>Test Price Calculation</h2>
+            <button onclick="testPriceCalculation()">Calculate Total with Sample Add-Ons</button>
+            <div id="calculation-results"></div>
+        </div>
+
+        <div class="section">
+            <h2>API Response</h2>
+            <pre id="api-response"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+
+        async function testAddOnAPI() {
+            const resultsDiv = document.getElementById('addon-results');
+            const responseDiv = document.getElementById('api-response');
+            
+            try {
+                resultsDiv.innerHTML = '<p>Loading add-ons...</p>';
+                
+                const response = await fetch(`${API_BASE}/tickets/1/addons/?travelers=2`);
+                const data = await response.json();
+                
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    let html = '<div class="success">✅ Add-ons loaded successfully!</div>';
+                    
+                    data.categories.forEach(category => {
+                        html += `<div class="addon-category">
+                            <h3>🏷️ ${category.name} (${category.category_type})</h3>
+                            <p>${category.description}</p>`;
+                        
+                        category.addons.forEach(addon => {
+                            html += `<div class="addon">
+                                <h4>${addon.name} - GH₵${addon.calculated_price}</h4>
+                                <p>${addon.description}</p>
+                                <p><strong>Type:</strong> ${addon.addon_type} | <strong>Pricing:</strong> ${addon.pricing_type}</p>`;
+                            
+                            if (addon.options && addon.options.length > 0) {
+                                html += '<div><strong>Options:</strong>';
+                                addon.options.forEach(option => {
+                                    html += `<div class="option">
+                                        ${option.name} - GH₵${option.price}
+                                        ${option.is_default ? ' (Default)' : ''}
+                                    </div>`;
+                                });
+                                html += '</div>';
+                            }
+                            
+                            if (addon.features && addon.features.length > 0) {
+                                html += '<div><strong>Features:</strong><ul>';
+                                addon.features.forEach(feature => {
+                                    html += `<li>${feature}</li>`;
+                                });
+                                html += '</ul></div>';
+                            }
+                            
+                            html += '</div>';
+                        });
+                        
+                        html += '</div>';
+                    });
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `<div class="error">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+                responseDiv.textContent = error.toString();
+            }
+        }
+
+        async function testPriceCalculation() {
+            const resultsDiv = document.getElementById('calculation-results');
+            const responseDiv = document.getElementById('api-response');
+            
+            try {
+                resultsDiv.innerHTML = '<p>Calculating prices...</p>';
+                
+                // Sample add-on selections
+                const sampleAddOns = [
+                    { addon_id: 1, option_id: 2, quantity: 1 }, // Premium Hotel
+                    { addon_id: 5, quantity: 1 }, // Cultural Experience
+                ];
+                
+                const requestData = {
+                    ticket_id: 1,
+                    quantity: 2,
+                    travelers: 2,
+                    selected_addons: sampleAddOns
+                };
+                
+                const response = await fetch(`${API_BASE}/tickets/calculate-total/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    const calc = data.calculation;
+                    let html = `<div class="success">✅ Price calculated successfully!</div>
+                        <h3>Calculation Results:</h3>
+                        <p><strong>Base Total:</strong> GH₵${calc.base_total}</p>
+                        <p><strong>Add-on Total:</strong> GH₵${calc.addon_total}</p>
+                        <p><strong>Grand Total:</strong> GH₵${calc.grand_total}</p>
+                        <p><strong>Currency:</strong> ${calc.currency}</p>
+                        
+                        <h4>Breakdown:</h4>
+                        <div class="addon">
+                            <strong>Ticket:</strong> ${calc.breakdown.ticket.name}<br>
+                            Unit Price: GH₵${calc.breakdown.ticket.unit_price} × ${calc.breakdown.ticket.quantity} = GH₵${calc.breakdown.ticket.total}
+                        </div>`;
+                    
+                    if (calc.breakdown.addons.length > 0) {
+                        html += '<h4>Selected Add-ons:</h4>';
+                        calc.breakdown.addons.forEach(addon => {
+                            html += `<div class="addon">
+                                <strong>${addon.name}</strong><br>
+                                Unit Price: GH₵${addon.unit_price} × ${addon.quantity} = GH₵${addon.total_price}<br>
+                                <em>Pricing Type: ${addon.pricing_type}</em>
+                            </div>`;
+                        });
+                    }
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `<div class="error">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+                responseDiv.textContent = error.toString();
+            }
+        }
+
+        // Auto-load add-ons on page load
+        window.onload = function() {
+            testAddOnAPI();
+        };
+    </script>
+</body>
+</html>
