@@ -1,18 +1,14 @@
 {
-  "version": 2,
-  "builds": [
+  "buildCommand": "cd Tfront && npm install && npm run build:client",
+  "outputDirectory": "Tfront/dist/spa",
+  "framework": null,
+  "rewrites": [
     {
-      "src": "Tfront/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/spa"
-      }
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
+  "env": {
+    "NODE_VERSION": "18"
+  }
 }
