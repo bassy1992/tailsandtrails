@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { validateTicketId, shouldMakeApiCall, getTicketErrorMessage } from '../utils/ticketValidation';
+import { validateId, shouldMakeApiCall, getErrorMessage, getPathType } from '../utils/idValidation';
 
 export interface AddOnOption {
   id: number;
@@ -72,19 +72,19 @@ export interface BookingCalculation {
   };
 }
 
-export const useAddOns = (ticketId?: number, travelers: number = 1) => {
+export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destination' | 'ticket' = 'destination') => {
   const [categories, setCategories] = useState<AddOnCategory[]>([]);
   const [selectedAddOns, setSelectedAddOns] = useState<SelectedAddOn[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load add-ons for a specific ticket
-  const loadAddOns = async (ticketId: number, travelers: number = 1) => {
-    // Comprehensive ticket ID validation
-    if (!shouldMakeApiCall(ticketId)) {
-      const errorMessage = getTicketErrorMessage(ticketId);
-      console.warn(`🚫 Preventing API call for invalid ticket ID ${ticketId}`);
+  // Load add-ons for a specific item (destination or ticket)
+  const loadAddOns = async (id: number, travelers: number = 1) => {
+    // Comprehensive ID validation
+    if (!shouldMakeApiCall(id, itemType)) {
+      const errorMessage = getErrorMessage(id, itemType);
+      console.warn(`🚫 Preventing API call for invalid ${itemType} ID ${id}`);
       setError(errorMessage);
       setCategories([]);
       setSelectedAddOns([]);
@@ -96,8 +96,12 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
     setError(null);
     
     try {
+      const endpoint = itemType === 'destination' 
+        ? `destinations/${id}/addons/?travelers=${travelers}`
+        : `tickets/${id}/addons/?travelers=${travelers}`;
+      
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/${ticketId}/addons/?travelers=${travelers}`
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/${endpoint}`
       );
       
       if (!response.ok) {
@@ -162,17 +166,23 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
   };
 
   // Calculate total booking cost
-  const calculateTotal = async (ticketId: number, quantity: number, travelers: number) => {
+  const calculateTotal = async (id: number, quantity: number, travelers: number) => {
     try {
+      const endpoint = itemType === 'destination' 
+        ? 'destinations/calculate-total/'
+        : 'tickets/calculate-total/';
+      
+      const bodyKey = itemType === 'destination' ? 'destination_id' : 'ticket_id';
+      
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/calculate-total/`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/${endpoint}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            ticket_id: ticketId,
+            [bodyKey]: id,
             quantity,
             travelers,
             selected_addons: selectedAddOns.map(addon => ({
@@ -262,28 +272,28 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
     return selectedOptions[addonSlug];
   };
 
-  // Load add-ons when ticketId changes
+  // Load add-ons when ID changes
   useEffect(() => {
-    if (ticketId && ticketId > 0) {
-      // Comprehensive ticket ID validation
-      const validation = validateTicketId(ticketId);
+    if (id && id > 0) {
+      // Comprehensive ID validation
+      const validation = validateId(id, itemType);
       if (validation.isValid) {
-        loadAddOns(ticketId, travelers);
+        loadAddOns(id, travelers);
       } else {
-        console.warn(`🚫 Invalid ticket ID ${ticketId}, not loading add-ons`);
-        setError(validation.errorMessage || 'Invalid ticket ID');
+        console.warn(`🚫 Invalid ${itemType} ID ${id}, not loading add-ons`);
+        setError(validation.errorMessage || `Invalid ${itemType} ID`);
         setCategories([]);
         setSelectedAddOns([]);
         setLoading(false);
       }
     } else {
-      // Clear state if no valid ticket ID
+      // Clear state if no valid ID
       setCategories([]);
       setSelectedAddOns([]);
       setError(null);
       setLoading(false);
     }
-  }, [ticketId, travelers]);
+  }, [id, travelers, itemType]);
 
   return {
     categories,
