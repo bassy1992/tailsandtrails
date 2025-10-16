@@ -49,11 +49,11 @@ export default function Booking() {
       return location.state as BookingState;
     }
     return {
-      tourId: id || "1",
-      tourName: "Cape Coast Castle Heritage Tour",
-      duration: "3 Days / 2 Nights", 
-      basePrice: 1500,
-      selectedDate: "2025-09-20",
+      tourId: id || "2", // Changed from "1" to "2" to use existing ticket
+      tourName: "Black Stars vs Nigeria - AFCON Qualifier",
+      duration: "Single Event", 
+      basePrice: 50,
+      selectedDate: "2025-11-28",
       travelers: { adults: 2, children: 1 }
     };
   });

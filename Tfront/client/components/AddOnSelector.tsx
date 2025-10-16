@@ -72,6 +72,11 @@ const AddOnSelector: React.FC<AddOnSelectorProps> = ({
         <CardContent className="pt-6">
           <div className="text-center text-red-600">
             <p>Error loading add-ons: {error}</p>
+            {error.includes('No Ticket matches') && (
+              <p className="text-sm text-gray-600 mt-2">
+                This ticket may not exist. Please try selecting a different ticket.
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>

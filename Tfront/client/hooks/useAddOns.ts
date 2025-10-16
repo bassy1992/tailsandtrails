@@ -253,7 +253,13 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
   // Load add-ons when ticketId changes
   useEffect(() => {
     if (ticketId && ticketId > 0) {
-      loadAddOns(ticketId, travelers);
+      // Validate ticket ID exists before loading add-ons
+      const validTicketIds = [1, 2]; // Update this list based on your available tickets
+      if (validTicketIds.includes(ticketId)) {
+        loadAddOns(ticketId, travelers);
+      } else {
+        setError(`Ticket ID ${ticketId} not found. Available tickets: ${validTicketIds.join(', ')}`);
+      }
     }
   }, [ticketId, travelers]);
 
