@@ -12,28 +12,28 @@ export default function TicketIdRedirect({ children }: TicketIdRedirectProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // List of valid ticket IDs that exist in the database
-    const validTicketIds = ['1', '2'];
+  // List of valid ticket IDs that exist in the database
+  const validTicketIds = ['1', '2'];
+  
+  // Check immediately if ID is invalid
+  if (id && !validTicketIds.includes(id)) {
+    console.log(`Invalid ticket ID ${id} detected, redirecting to ticket 2`);
     
-    if (id && !validTicketIds.includes(id)) {
-      console.log(`Invalid ticket ID ${id} detected, redirecting to ticket 2`);
-      
-      // Determine the current path to redirect appropriately
-      const currentPath = window.location.pathname;
-      
-      if (currentPath.includes('/booking/')) {
-        navigate('/booking/2', { replace: true });
-      } else if (currentPath.includes('/ticket-booking/')) {
-        navigate('/ticket-booking/2', { replace: true });
-      } else {
-        // Default redirect to tickets page
-        navigate('/tickets', { replace: true });
-      }
-      
-      return;
+    // Determine the current path to redirect appropriately
+    const currentPath = window.location.pathname;
+    
+    if (currentPath.includes('/booking/')) {
+      navigate('/booking/2', { replace: true });
+    } else if (currentPath.includes('/ticket-booking/')) {
+      navigate('/ticket-booking/2', { replace: true });
+    } else {
+      // Default redirect to tickets page
+      navigate('/tickets', { replace: true });
     }
-  }, [id, navigate]);
+    
+    // Return null to prevent rendering while redirecting
+    return null;
+  }
 
   return <>{children}</>;
 }

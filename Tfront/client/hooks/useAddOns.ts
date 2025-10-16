@@ -80,6 +80,17 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
 
   // Load add-ons for a specific ticket
   const loadAddOns = async (ticketId: number, travelers: number = 1) => {
+    // Validate ticket ID before making API call
+    const validTicketIds = [1, 2];
+    if (!validTicketIds.includes(ticketId)) {
+      console.warn(`Preventing API call for invalid ticket ID ${ticketId}`);
+      setError(`Ticket ID ${ticketId} not found. Available tickets: ${validTicketIds.join(', ')}`);
+      setCategories([]);
+      setSelectedAddOns([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     
