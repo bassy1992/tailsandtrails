@@ -96,9 +96,143 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
     setError(null);
     
     try {
-      const endpoint = itemType === 'destination' 
-        ? `destinations/${id}/addons/?travelers=${travelers}`
-        : `tickets/${id}/addons/?travelers=${travelers}`;
+      let endpoint: string;
+      let transformData: (data: any) => any;
+
+      if (itemType === 'destination') {
+        // For destinations, get add-ons from the destination detail endpoint
+        endpoint = `destinations/${id}/`;
+        transformData = (data: any) => {
+          // Transform destination add-ons to match the expected format
+          const categories: AddOnCategory[] = [];
+          
+          // Group addon_options by category
+          const categoryMap = new Map();
+          
+          if (data.addon_options && data.addon_options.length > 0) {
+            data.addon_options.forEach((option: any) => {
+              // Determine category based on option name since backend categories are empty
+              let categoryName = 'general';
+              let categoryDisplayName = 'General Options';
+              let categoryIcon = 'star';
+              
+              const optionName = option.name.toLowerCase();
+              if (optionName.includes('hotel') || optionName.includes('resort') || optionName.includes('accommodation') || optionName.includes('lodge') || optionName.includes('room')) {
+                categoryName = 'accommodation';
+                categoryDisplayName = 'Accommodation Options';
+                categoryIcon = 'hotel';
+              } else if (optionName.includes('bus') || optionName.includes('car') || optionName.includes('transport') || optionName.includes('vehicle') || optionName.includes('taxi') || optionName.includes('shuttle')) {
+                categoryName = 'transport';
+                categoryDisplayName = 'Transport Options';
+                categoryIcon = 'car';
+              } else if (optionName.includes('meal') || optionName.includes('food') || optionName.includes('dining') || optionName.includes('lunch') || optionName.includes('dinner') || optionName.includes('breakfast')) {
+                categoryName = 'meals';
+                categoryDisplayName = 'Meal Options';
+                categoryIcon = 'utensils';
+              } else if (optionName.includes('insurance') || optionName.includes('medical') || optionName.includes('health') || optionName.includes('safety') || optionName.includes('coverage')) {
+                categoryName = 'medical';
+                categoryDisplayName = 'Medical & Insurance';
+                categoryIcon = 'shield';
+              }
+              
+              if (!categoryMap.has(categoryName)) {
+                const categoryDescriptions = {
+                  accommodation: 'Choose your preferred accommodation level',
+                  transport: 'Select your transportation preferences', 
+                  meals: 'Customize your dining experience',
+                  medical: 'Health and safety coverage options',
+                  general: 'Additional options for your experience'
+                };
+                
+                const categoryIds = {
+                  accommodation: 1,
+                  transport: 2,
+                  meals: 3,
+                  medical: 4,
+                  general: 5
+                };
+                
+                categoryMap.set(categoryName, {
+                  id: categoryIds[categoryName as keyof typeof categoryIds] || 5,
+                  name: categoryDisplayName,
+                  slug: categoryName,
+                  category_type: categoryName,
+                  description: categoryDescriptions[categoryName as keyof typeof categoryDescriptions] || 'Additional options',
+                  icon: categoryIcon,
+                  addons: []
+                });
+              }
+              
+              // Transform option to addon format
+              const addon = {
+                id: option.id,
+                name: option.name,
+                slug: `${categoryName}-${option.id}`,
+                addon_type: 'multiple' as const,
+                description: option.description,
+                short_description: option.description,
+                base_price: Number(option.price),
+                pricing_type: option.pricing_type,
+                currency: 'GHS',
+                is_required: false,
+                is_default: option.is_default,
+                max_quantity: 1,
+                features: [],
+                options: [{
+                  id: option.id,
+                  name: option.name,
+                  description: option.description,
+                  price: Number(option.price),
+                  is_default: option.is_default,
+                  order: option.order
+                }],
+                calculated_price: Number(option.price)
+              };
+              
+              categoryMap.get(categoryName).addons.push(addon);
+            });
+          }
+          
+          // Add experience add-ons as a separate category
+          if (data.experience_addons && data.experience_addons.length > 0) {
+            const experienceCategory = {
+              id: 999,
+              name: 'Additional Experiences',
+              slug: 'experience',
+              category_type: 'experience',
+              description: 'Enhance your tour with extra activities',
+              icon: 'camera',
+              addons: data.experience_addons.map((exp: any) => ({
+                id: exp.id + 1000, // Offset to avoid ID conflicts
+                name: exp.name,
+                slug: `experience-${exp.id}`,
+                addon_type: 'checkbox' as const,
+                description: exp.description,
+                short_description: exp.description,
+                base_price: Number(exp.price),
+                pricing_type: 'per_person',
+                currency: 'GHS',
+                is_required: false,
+                is_default: false,
+                max_quantity: 1,
+                features: exp.duration ? [`Duration: ${exp.duration}`] : [],
+                options: [],
+                calculated_price: Number(exp.price)
+              }))
+            };
+            categoryMap.set('experience', experienceCategory);
+          }
+          
+          return {
+            success: true,
+            categories: Array.from(categoryMap.values())
+          };
+        };
+      } else {
+        // For tickets, use the existing add-ons endpoint
+        endpoint = `tickets/${id}/addons/?travelers=${travelers}`;
+        transformData = (data: any) => data;
+      }
       
       const response = await fetch(
         `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/${endpoint}`
@@ -110,16 +244,18 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
         throw new Error(errorMessage);
       }
       
-      const data = await response.json();
+      const rawData = await response.json();
+      const data = transformData(rawData);
       
-      if (data.success) {
-        setCategories(data.categories);
+      if (data.success || (itemType === 'destination' && data.categories)) {
+        const categories = data.categories || [];
+        setCategories(categories);
         
         // Set default selections for required add-ons
         const defaultOptions: { [key: string]: string } = {};
         const defaultAddOns: SelectedAddOn[] = [];
         
-        data.categories.forEach((category: AddOnCategory) => {
+        categories.forEach((category: AddOnCategory) => {
           category.addons.forEach((addon: AddOn) => {
             if (addon.is_required && addon.addon_type === 'multiple') {
               // Find default option
@@ -133,8 +269,8 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
                     addon_id: addon.id,
                     option_id: defaultOption.id,
                     quantity: 1,
-                    unit_price: defaultOption.price,
-                    total_price: defaultOption.price,
+                    unit_price: Number(defaultOption.price),
+                    total_price: Number(defaultOption.price),
                     name: `${addon.name} - ${defaultOption.name}`
                   });
                 }
@@ -144,8 +280,8 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
               defaultAddOns.push({
                 addon_id: addon.id,
                 quantity: 1,
-                unit_price: addon.calculated_price,
-                total_price: addon.calculated_price,
+                unit_price: Number(addon.calculated_price),
+                total_price: Number(addon.calculated_price),
                 name: addon.name
               });
             }
@@ -231,8 +367,8 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
             addon_id: addon.id,
             option_id: option.id,
             quantity: 1,
-            unit_price: option.price,
-            total_price: option.price,
+            unit_price: Number(option.price),
+            total_price: Number(option.price),
             name: `${addon.name} - ${option.name}`
           });
         }
@@ -251,8 +387,8 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
         {
           addon_id: addon.id,
           quantity: 1,
-          unit_price: addon.calculated_price,
-          total_price: addon.calculated_price,
+          unit_price: Number(addon.calculated_price),
+          total_price: Number(addon.calculated_price),
           name: addon.name
         }
       ]);

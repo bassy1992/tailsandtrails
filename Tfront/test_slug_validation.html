@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slug Validation Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Slug Validation Test</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Test Instructions</h3>
+        <p>This page tests the slug validation logic for destination URLs.</p>
+        <ol>
+            <li>Open browser DevTools (F12) and go to Console tab</li>
+            <li>Click the test buttons below</li>
+            <li>Check console logs for validation results</li>
+            <li>Try navigating to: <code>http://localhost:8080/booking/tent-xscape</code></li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>🔧 Manual Tests</h3>
+        <button onclick="testSlugValidation()">Test tent-xscape Slug</button>
+        <button onclick="testNumericValidation()">Test Numeric ID (7)</button>
+        <button onclick="testInvalidSlug()">Test Invalid Slug</button>
+        <button onclick="navigateToSlug()">Navigate to /booking/tent-xscape</button>
+    </div>
+
+    <div id="results" class="test-section">
+        <h3>📊 Results</h3>
+        <div id="result-content">Click a test button to see results...</div>
+    </div>
+
+    <script>
+        // Mock validation data (simplified version of the actual logic)
+        const VALID_DESTINATIONS = [
+            { id: 1, title: 'Kakum National Park Canopy Walk', slug: 'kakum-national-park-canopy-walk', status: 'active' },
+            { id: 2, title: 'Cape Coast Castle Tour', slug: 'cape-coast-castle-tour', status: 'active' },
+            { id: 3, title: 'Mole National Park Safari', slug: 'mole-national-park-safari', status: 'active' },
+            { id: 4, title: 'Labadi Beach Experience', slug: 'labadi-beach-experience', status: 'active' },
+            { id: 5, title: 'Kumasi Cultural Heritage Tour', slug: 'kumasi-cultural-heritage-tour', status: 'active' },
+            { id: 6, title: 'Volta Region Waterfalls Adventure', slug: 'volta-region-waterfalls-adventure', status: 'active' },
+            { id: 7, title: 'Tent Xscape', slug: 'tent-xscape', status: 'active' }
+        ];
+
+        function validateId(id, pathType) {
+            console.log(`🔍 Testing validation for: "${id}" (${typeof id}) as ${pathType}`);
+            
+            const isDestination = pathType === 'destination';
+            const validIds = [1, 2, 3, 4, 5, 6, 7];
+            const defaultId = 1;
+            const itemType = isDestination ? 'destination' : 'ticket';
+            const defaultPath = isDestination ? `/booking/${defaultId}` : `/ticket-booking/${defaultId}`;
+
+            if (id === undefined || id === null) {
+                return { isValid: false, errorMessage: `No ${itemType} ID provided` };
+            }
+
+            if (typeof id === 'string') {
+                const numericId = parseInt(id, 10);
+                console.log(`🔢 Parsed numeric: ${numericId}, isNaN: ${isNaN(numericId)}`);
+                
+                if (!isNaN(numericId) && numericId > 0) {
+                    console.log(`✅ Valid numeric ID, checking against:`, validIds);
+                    if (validIds.includes(numericId)) {
+                        return { isValid: true, id: numericId };
+                    }
+                } else {
+                    console.log(`🏷️ Treating as slug for ${itemType}`);
+                    if (isDestination) {
+                        console.log(`🔍 Searching for slug "${id}" in:`, VALID_DESTINATIONS.map(d => d.slug));
+                        const destinationBySlug = VALID_DESTINATIONS.find(dest => 
+                            dest.slug === id && dest.status === 'active'
+                        );
+                        console.log(`🎯 Found:`, destinationBySlug);
+                        if (destinationBySlug) {
+                            return { isValid: true, id: destinationBySlug.id };
+                        }
+                    }
+                }
+            } else {
+                if (validIds.includes(id)) {
+                    return { isValid: true, id: id };
+                }
+            }
+
+            return {
+                isValid: false,
+                errorMessage: `${itemType} ID ${id} not found`,
+                redirectPath: defaultPath,
+                suggestedIds: validIds
+            };
+        }
+
+        function displayResult(testName, result) {
+            const resultDiv = document.getElementById('result-content');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            resultDiv.innerHTML = `
+                <h4>${testName} - ${timestamp}</h4>
+                <pre>${JSON.stringify(result, null, 2)}</pre>
+                ${resultDiv.innerHTML}
+            `;
+            
+            console.log(`📊 ${testName} Result:`, result);
+        }
+
+        function testSlugValidation() {
+            const result = validateId('tent-xscape', 'destination');
+            displayResult('Slug Validation (tent-xscape)', result);
+        }
+
+        function testNumericValidation() {
+            const result = validateId('7', 'destination');
+            displayResult('Numeric Validation (7)', result);
+        }
+
+        function testInvalidSlug() {
+            const result = validateId('invalid-slug', 'destination');
+            displayResult('Invalid Slug Test', result);
+        }
+
+        function navigateToSlug() {
+            console.log('🚀 Navigating to /booking/tent-xscape');
+            window.location.href = '/booking/tent-xscape';
+        }
+
+        console.log('🧪 Slug Validation Test Page Loaded');
+        console.log('📋 Available destinations:', VALID_DESTINATIONS);
+    </script>
+</body>
+</html>

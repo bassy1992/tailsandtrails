@@ -43,6 +43,8 @@ interface PaymentSuccessData {
 }
 
 export default function PaymentSuccess() {
+  console.log('🚀 PaymentSuccess component is being rendered!');
+  
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -71,6 +73,9 @@ export default function PaymentSuccess() {
 
   // Debug: Log the payment data to see what we're receiving
   useEffect(() => {
+    console.log('🎉 PaymentSuccess component mounted!');
+    console.log('PaymentSuccess - Location:', location);
+    console.log('PaymentSuccess - Search params:', Object.fromEntries(searchParams.entries()));
     console.log('PaymentSuccess - Received payment data:', paymentData);
     if (paymentData?.bookingDetails) {
       console.log('PaymentSuccess - Booking details:', paymentData.bookingDetails);

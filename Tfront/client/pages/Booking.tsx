@@ -417,6 +417,7 @@ export default function Booking() {
               ticketId={parseInt(bookingData.tourId)}
               travelers={bookingData.travelers.adults}
               onSelectionChange={handleAddOnSelectionChange}
+              itemType="destination"
             />
 
             {/* Payment Methods */}

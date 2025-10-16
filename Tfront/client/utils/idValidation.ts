@@ -1,3 +1,5 @@
+
+
 /**
  * Comprehensive ID Validation and Redirect Handling for Tickets and Destinations
  * GitHub Issue: 60110
@@ -17,6 +19,11 @@ export interface ValidItem {
   slug?: string;
   status: 'active' | 'inactive';
 }
+
+// Dynamic destinations cache
+let cachedDestinations: ValidItem[] | null = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Current valid tickets in the system
@@ -47,10 +54,62 @@ export const getValidTicketIds = (): number[] => {
 };
 
 /**
- * Get all valid destination IDs
+ * Fetch destinations from API and cache them
  */
-export const getValidDestinationIds = (): number[] => {
-  return VALID_DESTINATIONS.filter(dest => dest.status === 'active').map(dest => dest.id);
+const fetchDestinationsFromAPI = async (): Promise<ValidItem[]> => {
+  try {
+    // Lazy load the API to avoid circular dependencies
+    const apiModule = await import('../lib/api');
+    const destinations = await apiModule.destinationsApi.getDestinations();
+    
+    return destinations.map(dest => ({
+      id: dest.id,
+      title: dest.title,
+      slug: dest.slug,
+      status: 'active' as const
+    }));
+  } catch (error) {
+    console.warn('Failed to fetch destinations from API, using fallback:', error);
+    return VALID_DESTINATIONS;
+  }
+};
+
+/**
+ * Get all valid destination IDs (with API fallback)
+ */
+export const getValidDestinationIds = async (): Promise<number[]> => {
+  const destinations = await getValidDestinations();
+  return destinations.filter(dest => dest.status === 'active').map(dest => dest.id);
+};
+
+/**
+ * Get valid destinations with caching
+ */
+export const getValidDestinations = async (): Promise<ValidItem[]> => {
+  const now = Date.now();
+  
+  // Return cached data if it's still fresh
+  if (cachedDestinations && (now - lastFetchTime) < CACHE_DURATION) {
+    return cachedDestinations;
+  }
+  
+  // Fetch fresh data
+  try {
+    cachedDestinations = await fetchDestinationsFromAPI();
+    lastFetchTime = now;
+    return cachedDestinations;
+  } catch (error) {
+    console.warn('Failed to fetch destinations, using hardcoded fallback');
+    return VALID_DESTINATIONS;
+  }
+};
+
+/**
+ * Synchronous version for backward compatibility (uses cached data or fallback)
+ */
+export const getValidDestinationIdsSync = (): number[] => {
+  const destinations = cachedDestinations || VALID_DESTINATIONS;
+  return destinations.filter(dest => dest.status === 'active').map(dest => dest.id);
 };
 
 /**
@@ -64,8 +123,16 @@ export const getDefaultTicketId = (): number => {
 /**
  * Get default destination ID (first active destination)
  */
-export const getDefaultDestinationId = (): number => {
-  const validIds = getValidDestinationIds();
+export const getDefaultDestinationId = async (): Promise<number> => {
+  const validIds = await getValidDestinationIds();
+  return validIds.length > 0 ? validIds[0] : 1;
+};
+
+/**
+ * Synchronous version for backward compatibility
+ */
+export const getDefaultDestinationIdSync = (): number => {
+  const validIds = getValidDestinationIdsSync();
   return validIds.length > 0 ? validIds[0] : 1;
 };
 
@@ -80,14 +147,14 @@ export const getPathType = (currentPath: string): 'destination' | 'ticket' => {
 };
 
 /**
- * Validate ID based on path type and provide comprehensive feedback
+ * Validate ID based on path type and provide comprehensive feedback (async version)
  */
-export const validateId = (id: string | number | undefined, pathType: 'destination' | 'ticket'): ValidationResult => {
-  console.log(`🚀 validateId called with ID: "${id}" (${typeof id}), pathType: ${pathType}`);
+export const validateIdAsync = async (id: string | number | undefined, pathType: 'destination' | 'ticket'): Promise<ValidationResult> => {
+  console.log(`🚀 validateIdAsync called with ID: "${id}" (${typeof id}), pathType: ${pathType}`);
   
   const isDestination = pathType === 'destination';
-  const validIds = isDestination ? getValidDestinationIds() : getValidTicketIds();
-  const defaultId = isDestination ? getDefaultDestinationId() : getDefaultTicketId();
+  const validIds = isDestination ? await getValidDestinationIds() : getValidTicketIds();
+  const defaultId = isDestination ? await getDefaultDestinationId() : getDefaultTicketId();
   const itemType = isDestination ? 'destination' : 'ticket';
   const defaultPath = isDestination ? `/booking/${defaultId}` : `/ticket-booking/${defaultId}`;
 
@@ -118,7 +185,80 @@ export const validateId = (id: string | number | undefined, pathType: 'destinati
     } else {
       // It's likely a slug, validate against slug list
       if (isDestination) {
-        const destinationBySlug = VALID_DESTINATIONS.find(dest => 
+        const destinations = await getValidDestinations();
+        const destinationBySlug = destinations.find(dest => 
+          dest.slug === id && dest.status === 'active'
+        );
+        if (destinationBySlug) {
+          console.log(`✅ Valid slug "${id}" -> ID ${destinationBySlug.id}`);
+          return {
+            isValid: true,
+            id: destinationBySlug.id
+          };
+        }
+      }
+      // For tickets, we don't have slug support yet, so treat as invalid
+    }
+  } else {
+    // Handle numeric ID
+    if (validIds.includes(id)) {
+      return {
+        isValid: true,
+        id: id
+      };
+    }
+  }
+
+  // Invalid ID - provide helpful redirect
+  return {
+    isValid: false,
+    errorMessage: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} ID ${id} not found`,
+    redirectPath: defaultPath,
+    suggestedIds: validIds
+  };
+};
+
+/**
+ * Synchronous validate ID (for backward compatibility, uses cached data)
+ */
+export const validateId = (id: string | number | undefined, pathType: 'destination' | 'ticket'): ValidationResult => {
+  console.log(`🚀 validateId called with ID: "${id}" (${typeof id}), pathType: ${pathType}`);
+  
+  const isDestination = pathType === 'destination';
+  const validIds = isDestination ? getValidDestinationIdsSync() : getValidTicketIds();
+  const defaultId = isDestination ? getDefaultDestinationIdSync() : getDefaultTicketId();
+  const itemType = isDestination ? 'destination' : 'ticket';
+  const defaultPath = isDestination ? `/booking/${defaultId}` : `/ticket-booking/${defaultId}`;
+
+  // Handle undefined or null
+  if (id === undefined || id === null) {
+    return {
+      isValid: false,
+      errorMessage: `No ${itemType} ID provided`,
+      redirectPath: defaultPath,
+      suggestedIds: validIds
+    };
+  }
+
+  // Handle string IDs (could be slugs or numeric strings)
+  if (typeof id === 'string') {
+    // Try to parse as number first
+    const numericId = parseInt(id, 10);
+    
+    // If it's a valid number, validate as numeric ID
+    if (!isNaN(numericId) && numericId > 0) {
+      if (validIds.includes(numericId)) {
+        console.log(`✅ Valid numeric ID: ${numericId}`);
+        return {
+          isValid: true,
+          id: numericId
+        };
+      }
+    } else {
+      // It's likely a slug, validate against slug list
+      if (isDestination) {
+        const destinations = cachedDestinations || VALID_DESTINATIONS;
+        const destinationBySlug = destinations.find(dest => 
           dest.slug === id && dest.status === 'active'
         );
         if (destinationBySlug) {
@@ -178,7 +318,43 @@ export const getRedirectPath = (currentPath: string, validId: number): string =>
 };
 
 /**
- * Comprehensive ID validation with logging for both tickets and destinations
+ * Comprehensive ID validation with logging for both tickets and destinations (async version)
+ */
+export const validateAndRedirectAsync = async (
+  id: string | number | undefined,
+  currentPath: string,
+  navigate: (path: string, options?: any) => void
+): Promise<boolean> => {
+  const pathType = getPathType(currentPath);
+  const validation = await validateIdAsync(id, pathType);
+
+  if (!validation.isValid) {
+    console.warn(`🔄 ${pathType.charAt(0).toUpperCase() + pathType.slice(1)} ID Validation Failed:`, JSON.stringify({
+      providedId: id,
+      error: validation.errorMessage,
+      suggestedIds: validation.suggestedIds,
+      currentPath,
+      pathType
+    }, null, 2));
+
+    // Determine redirect path
+    const defaultId = pathType === 'destination' ? await getDefaultDestinationId() : getDefaultTicketId();
+    const redirectPath = validation.redirectPath || getRedirectPath(currentPath, defaultId);
+    
+    console.log(`🔄 Redirecting to: ${redirectPath}`);
+    
+    // Perform redirect
+    navigate(redirectPath, { replace: true });
+    
+    return false; // Validation failed, redirect performed
+  }
+
+  console.log(`✅ ${pathType.charAt(0).toUpperCase() + pathType.slice(1)} ID ${validation.id} validated successfully`);
+  return true; // Validation passed
+};
+
+/**
+ * Synchronous version for backward compatibility (uses cached data)
  */
 export const validateAndRedirect = (
   id: string | number | undefined,
@@ -189,16 +365,16 @@ export const validateAndRedirect = (
   const validation = validateId(id, pathType);
 
   if (!validation.isValid) {
-    console.warn(`🔄 ${pathType.charAt(0).toUpperCase() + pathType.slice(1)} ID Validation Failed:`, {
+    console.warn(`🔄 ${pathType.charAt(0).toUpperCase() + pathType.slice(1)} ID Validation Failed:`, JSON.stringify({
       providedId: id,
       error: validation.errorMessage,
       suggestedIds: validation.suggestedIds,
       currentPath,
       pathType
-    });
+    }, null, 2));
 
     // Determine redirect path
-    const defaultId = pathType === 'destination' ? getDefaultDestinationId() : getDefaultTicketId();
+    const defaultId = pathType === 'destination' ? getDefaultDestinationIdSync() : getDefaultTicketId();
     const redirectPath = validation.redirectPath || getRedirectPath(currentPath, defaultId);
     
     console.log(`🔄 Redirecting to: ${redirectPath}`);

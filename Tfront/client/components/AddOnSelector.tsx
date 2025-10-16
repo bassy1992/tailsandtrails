@@ -13,6 +13,7 @@ interface AddOnSelectorProps {
   travelers?: number;
   onSelectionChange?: (selectedAddOns: any[], totalAddonPrice: number) => void;
   className?: string;
+  itemType?: 'destination' | 'ticket';
 }
 
 const getIconComponent = (iconName: string) => {
@@ -31,7 +32,8 @@ const AddOnSelector: React.FC<AddOnSelectorProps> = ({
   ticketId,
   travelers = 1,
   onSelectionChange,
-  className = ''
+  className = '',
+  itemType = 'ticket'
 }) => {
   const {
     categories,
@@ -43,7 +45,7 @@ const AddOnSelector: React.FC<AddOnSelectorProps> = ({
     handleAddOnToggle,
     isAddOnSelected,
     getSelectedOption
-  } = useAddOns(ticketId, travelers);
+  } = useAddOns(ticketId, travelers, itemType);
 
   // Notify parent component of selection changes
   React.useEffect(() => {
@@ -84,6 +86,7 @@ const AddOnSelector: React.FC<AddOnSelectorProps> = ({
   }
 
   if (categories.length === 0) {
+    const itemName = itemType === 'destination' ? 'destination' : 'ticket';
     return (
       <Card className={className}>
         <CardHeader>
@@ -92,7 +95,7 @@ const AddOnSelector: React.FC<AddOnSelectorProps> = ({
             <span>Customize Your Experience</span>
           </CardTitle>
           <CardDescription>
-            No add-ons available for this ticket
+            No add-ons available for this {itemName}
           </CardDescription>
         </CardHeader>
       </Card>
