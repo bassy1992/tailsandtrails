@@ -402,7 +402,7 @@ export default function TourDetails() {
         </div>
 
         {/* Main Content */}
-        <div className="mt-6">
+        <div className="mt-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               {/* Tabs */}
@@ -414,7 +414,7 @@ export default function TourDetails() {
                   <TabsTrigger value="reviews">Reviews</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="space-y-6 mt-6">
+                <TabsContent value="overview" className="space-y-6 mt-4">
                   {/* Highlights */}
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-4">Tour Highlights</h3>
@@ -466,7 +466,7 @@ export default function TourDetails() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="itinerary" className="space-y-6 mt-6">
+                <TabsContent value="itinerary" className="space-y-6 mt-4">
                   <h3 className="text-xl font-semibold text-gray-900">Detailed Itinerary</h3>
                   {enhancedTour.itinerary.map((day, index) => (
                     <Card key={index}>
@@ -513,7 +513,7 @@ export default function TourDetails() {
                   ))}
                 </TabsContent>
 
-                <TabsContent value="included" className="space-y-6 mt-6">
+                <TabsContent value="included" className="space-y-6 mt-4">
                   <h3 className="text-xl font-semibold text-gray-900">What's Included</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -578,7 +578,7 @@ export default function TourDetails() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="reviews" className="space-y-6 mt-6">
+                <TabsContent value="reviews" className="space-y-6 mt-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-semibold text-gray-900">Customer Reviews</h3>
                     <div className="flex items-center space-x-2">
