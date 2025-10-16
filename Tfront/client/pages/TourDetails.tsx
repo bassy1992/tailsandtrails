@@ -210,6 +210,22 @@ export default function TourDetails() {
                 </div>
               )}
             </div>
+            
+            {/* Tour Title and Basic Info - Right under the image */}
+            <div className="mt-6">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{tour.name}</h1>
+              <div className="flex items-center space-x-4 text-gray-600 mb-4">
+                <div className="flex items-center space-x-1">
+                  <MapPin className="h-5 w-5" />
+                  <span>{tour.location}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  <span>{tour.rating} ({tour.reviews_count} reviews)</span>
+                </div>
+              </div>
+              <p className="text-lg text-gray-700 leading-relaxed">{tour.description}</p>
+            </div>
           </div>
 
           {/* Right Side - Booking Card */}
@@ -389,22 +405,6 @@ export default function TourDetails() {
         <div className="mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              {/* Title and Description */}
-              <div className="mb-6">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">{tour.name}</h1>
-                <div className="flex items-center space-x-4 text-gray-600 mb-6">
-                  <div className="flex items-center space-x-1">
-                    <MapPin className="h-5 w-5" />
-                    <span>{tour.location}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    <span>{tour.rating} ({tour.reviews_count} reviews)</span>
-                  </div>
-                </div>
-                <p className="text-lg text-gray-700 leading-relaxed">{tour.description}</p>
-              </div>
-
               {/* Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
