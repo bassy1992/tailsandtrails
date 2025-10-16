@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     Category, Destination, DestinationHighlight, 
-    DestinationInclude, DestinationImage, Review, Booking,
+    DestinationInclude, DestinationImage, PricingTier, Review, Booking,
     AddOnCategory, AddOnOption, ExperienceAddOn, BookingAddOn
 )
 
@@ -32,6 +32,16 @@ class DestinationImageSerializer(serializers.ModelSerializer):
             # obj.image is now a URL string, not a file
             return obj.image
         return None
+
+class PricingTierSerializer(serializers.ModelSerializer):
+    group_size_display = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = PricingTier
+        fields = [
+            'id', 'min_people', 'max_people', 'price_per_person', 
+            'group_size_display', 'is_active'
+        ]
 
 class ImageUploadSerializer(serializers.ModelSerializer):
     """Serializer for setting image URLs for destinations"""
@@ -100,8 +110,10 @@ class DestinationListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     highlights = DestinationHighlightSerializer(many=True, read_only=True)
     includes = DestinationIncludeSerializer(many=True, read_only=True)
+    pricing_tiers = PricingTierSerializer(many=True, read_only=True)
     duration_display = serializers.CharField(read_only=True)
     price_category = serializers.CharField(read_only=True)
+    has_tiered_pricing = serializers.BooleanField(read_only=True)
     image_url = serializers.SerializerMethodField()
     
     class Meta:
@@ -110,7 +122,7 @@ class DestinationListSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'location', 'description', 'image', 'image_url',
             'price', 'duration', 'duration_display', 'max_group_size',
             'rating', 'reviews_count', 'category', 'highlights', 'includes',
-            'price_category', 'is_featured'
+            'pricing_tiers', 'has_tiered_pricing', 'price_category', 'is_featured'
         ]
     
     def get_image_url(self, obj):
@@ -144,10 +156,12 @@ class DestinationDetailSerializer(serializers.ModelSerializer):
     highlights = DestinationHighlightSerializer(many=True, read_only=True)
     includes = DestinationIncludeSerializer(many=True, read_only=True)
     images = DestinationImageSerializer(many=True, read_only=True)
+    pricing_tiers = PricingTierSerializer(many=True, read_only=True)
     addon_options = AddOnOptionSerializer(many=True, read_only=True)
     experience_addons = ExperienceAddOnSerializer(many=True, read_only=True)
     duration_display = serializers.CharField(read_only=True)
     price_category = serializers.CharField(read_only=True)
+    has_tiered_pricing = serializers.BooleanField(read_only=True)
     image_url = serializers.SerializerMethodField()
     
     class Meta:
@@ -156,8 +170,8 @@ class DestinationDetailSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'location', 'description', 'image', 'image_url',
             'price', 'duration', 'duration_display', 'max_group_size',
             'rating', 'reviews_count', 'category', 'highlights', 'includes',
-            'images', 'addon_options', 'experience_addons', 'price_category', 
-            'is_featured', 'created_at'
+            'images', 'pricing_tiers', 'has_tiered_pricing', 'addon_options', 
+            'experience_addons', 'price_category', 'is_featured', 'created_at'
         ]
     
     def get_image_url(self, obj):

@@ -26,7 +26,9 @@ class DestinationListView(generics.ListAPIView):
     ordering = ['-created_at']
     
     def get_queryset(self):
-        queryset = Destination.objects.filter(is_active=True).select_related('category').prefetch_related('highlights', 'includes')
+        queryset = Destination.objects.filter(is_active=True).select_related('category').prefetch_related(
+            'highlights', 'includes', 'pricing_tiers'
+        )
         
         # Custom price filtering
         price_filter = self.request.query_params.get('price_category', None)
@@ -49,7 +51,9 @@ class DestinationListView(generics.ListAPIView):
         return queryset
 
 class DestinationDetailView(generics.RetrieveAPIView):
-    queryset = Destination.objects.filter(is_active=True).select_related('category').prefetch_related('highlights', 'includes', 'images')
+    queryset = Destination.objects.filter(is_active=True).select_related('category').prefetch_related(
+        'highlights', 'includes', 'images', 'pricing_tiers', 'addon_options__category', 'experience_addons'
+    )
     serializer_class = DestinationDetailSerializer
     permission_classes = [AllowAny]
     
@@ -102,6 +106,59 @@ def destination_stats(request):
         'categories_count': categories_count,
         'featured_destinations': featured_count,
     })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def destination_pricing(request, destination_id):
+    """Get pricing for a destination based on group size"""
+    try:
+        destination = Destination.objects.get(id=destination_id, is_active=True)
+    except Destination.DoesNotExist:
+        return Response(
+            {'error': 'Destination not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    group_size = request.query_params.get('group_size', 1)
+    try:
+        group_size = int(group_size)
+        if group_size < 1:
+            raise ValueError("Group size must be at least 1")
+    except (ValueError, TypeError):
+        return Response(
+            {'error': 'Invalid group_size parameter. Must be a positive integer.'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Get the appropriate price for the group size
+    price_per_person = destination.get_price_for_group(group_size)
+    total_price = price_per_person * group_size
+    
+    # Get all pricing tiers for display
+    pricing_tiers = destination.get_pricing_tiers_display()
+    
+    response_data = {
+        'destination_id': destination.id,
+        'destination_name': destination.name,
+        'group_size': group_size,
+        'price_per_person': price_per_person,
+        'total_price': total_price,
+        'base_price': destination.price,
+        'has_tiered_pricing': destination.has_tiered_pricing,
+        'pricing_tiers': [
+            {
+                'id': tier.id,
+                'min_people': tier.min_people,
+                'max_people': tier.max_people,
+                'price_per_person': tier.price_per_person,
+                'group_size_display': tier.group_size_display,
+                'total_price': tier.price_per_person * group_size if tier.min_people <= group_size and (tier.max_people is None or tier.max_people >= group_size) else None
+            }
+            for tier in pricing_tiers
+        ]
+    }
+    
+    return Response(response_data)
 
 # Booking views (require authentication)
 class UserBookingsView(generics.ListCreateAPIView):

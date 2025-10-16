@@ -10,6 +10,7 @@ urlpatterns = [
     path('destinations/<int:pk>/', views.DestinationDetailView.as_view(), name='destination-detail-by-id'),
     path('destinations/<slug:slug>/', views.DestinationDetailView.as_view(), name='destination-detail'),
     path('destinations/<int:destination_id>/reviews/', views.DestinationReviewsView.as_view(), name='destination-reviews'),
+    path('destinations/<int:destination_id>/pricing/', views.destination_pricing, name='destination-pricing'),
     
     # Statistics
     path('stats/', views.destination_stats, name='destination-stats'),

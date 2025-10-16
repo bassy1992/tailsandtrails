@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from .models import (
     Category, Destination, DestinationHighlight, 
-    DestinationInclude, DestinationImage, Review, Booking,
+    DestinationInclude, DestinationImage, PricingTier, Review, Booking,
     AddOnCategory, AddOnOption, ExperienceAddOn, BookingAddOn
 )
 
@@ -49,6 +49,12 @@ class ExperienceAddOnInline(admin.TabularInline):
     extra = 1
     fields = ('name', 'description', 'price', 'duration', 'max_participants', 'is_active', 'order')
 
+class PricingTierInline(admin.TabularInline):
+    model = PricingTier
+    extra = 1
+    fields = ('min_people', 'max_people', 'price_per_person', 'is_active')
+    ordering = ('min_people',)
+
 class BookingAddOnInline(admin.TabularInline):
     model = BookingAddOn
     extra = 0
@@ -65,14 +71,15 @@ class DestinationAdmin(admin.ModelAdmin):
     search_fields = ('name', 'location', 'description')
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ('created_at', 'updated_at')
-    inlines = [DestinationHighlightInline, DestinationIncludeInline, DestinationImageInline, AddOnOptionInline, ExperienceAddOnInline]
+    inlines = [DestinationHighlightInline, DestinationIncludeInline, DestinationImageInline, PricingTierInline, AddOnOptionInline, ExperienceAddOnInline]
     
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'slug', 'location', 'category', 'description')
         }),
         ('Tour Details', {
-            'fields': ('price', 'duration', 'max_group_size', 'image')
+            'fields': ('price', 'duration', 'max_group_size', 'image'),
+            'description': 'Base price is used when no pricing tiers are defined. Set up pricing tiers below for group-based pricing.'
         }),
         ('Ratings & Reviews', {
             'fields': ('rating', 'reviews_count')
@@ -237,3 +244,34 @@ class ExperienceAddOnAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         })
     )
+
+@admin.register(PricingTier)
+class PricingTierAdmin(admin.ModelAdmin):
+    list_display = ('destination', 'group_size_display', 'price_per_person', 'is_active', 'created_at')
+    list_filter = ('is_active', 'destination__category', 'min_people')
+    search_fields = ('destination__name',)
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('destination', 'min_people')
+    
+    fieldsets = (
+        ('Destination', {
+            'fields': ('destination',)
+        }),
+        ('Group Size', {
+            'fields': ('min_people', 'max_people'),
+            'description': 'Define the group size range for this pricing tier. Leave max_people blank for unlimited.'
+        }),
+        ('Pricing', {
+            'fields': ('price_per_person',)
+        }),
+        ('Settings', {
+            'fields': ('is_active',)
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('destination')

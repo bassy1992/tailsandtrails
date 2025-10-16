@@ -85,6 +85,31 @@ class Destination(models.Model):
             return 'mid'
         else:
             return 'luxury'
+    
+    def get_price_for_group(self, group_size):
+        """Get the appropriate price per person based on group size"""
+        # Try to find a matching pricing tier
+        pricing_tier = self.pricing_tiers.filter(
+            is_active=True,
+            min_people__lte=group_size
+        ).filter(
+            models.Q(max_people__gte=group_size) | models.Q(max_people__isnull=True)
+        ).first()
+        
+        if pricing_tier:
+            return pricing_tier.price_per_person
+        
+        # Fallback to base price if no tier found
+        return self.price
+    
+    def get_pricing_tiers_display(self):
+        """Get all pricing tiers for display"""
+        return self.pricing_tiers.filter(is_active=True).order_by('min_people')
+    
+    @property
+    def has_tiered_pricing(self):
+        """Check if destination has tiered pricing"""
+        return self.pricing_tiers.filter(is_active=True).exists()
 
 class DestinationHighlight(models.Model):
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='highlights')
@@ -123,6 +148,46 @@ class DestinationImage(models.Model):
     
     def __str__(self):
         return f"{self.destination.name} - Image {self.id}"
+
+class PricingTier(models.Model):
+    """Pricing tiers based on group size"""
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='pricing_tiers')
+    min_people = models.PositiveIntegerField(validators=[MinValueValidator(1)], help_text="Minimum number of people for this price")
+    max_people = models.PositiveIntegerField(validators=[MinValueValidator(1)], blank=True, null=True, help_text="Maximum number of people for this price (leave blank for unlimited)")
+    price_per_person = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], help_text="Price per person for this group size")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['min_people']
+        unique_together = ['destination', 'min_people']
+        indexes = [
+            models.Index(fields=['destination', 'min_people', 'max_people']),
+        ]
+    
+    def clean(self):
+        """Validate that max_people is greater than min_people"""
+        from django.core.exceptions import ValidationError
+        if self.max_people and self.max_people < self.min_people:
+            raise ValidationError("Maximum people must be greater than or equal to minimum people.")
+    
+    def __str__(self):
+        if self.max_people:
+            return f"{self.destination.name} - {self.min_people}-{self.max_people} people: GH₵{self.price_per_person}"
+        else:
+            return f"{self.destination.name} - {self.min_people}+ people: GH₵{self.price_per_person}"
+    
+    @property
+    def group_size_display(self):
+        """Display group size range"""
+        if self.max_people:
+            if self.min_people == self.max_people:
+                return f"{self.min_people} person" if self.min_people == 1 else f"{self.min_people} people"
+            else:
+                return f"{self.min_people}-{self.max_people} people"
+        else:
+            return f"{self.min_people}+ people"
 
 class Review(models.Model):
     RATING_CHOICES = [
