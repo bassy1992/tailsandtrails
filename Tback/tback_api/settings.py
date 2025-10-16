@@ -215,7 +215,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite dev server default (backup)
     "http://127.0.0.1:5173",
     "https://tailsandtrails.vercel.app",  # Vercel frontend (main)
-    "https://tfront-p8alihiea-bassys-projects-fca17413.vercel.app",  # Current Vercel deployment
+    "https://tfront-two.vercel.app",  # Current custom domain
+    "https://tfront-p8alihiea-bassys-projects-fca17413.vercel.app",  # Previous deployment
     "https://tailsandtrails-production.up.railway.app",  # Railway production backend
 ]
 
@@ -262,7 +263,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://tailsandtrails.vercel.app",
-    "https://tfront-p8alihiea-bassys-projects-fca17413.vercel.app",  # Current Vercel deployment
+    "https://tfront-two.vercel.app",  # Current custom domain
+    "https://tfront-p8alihiea-bassys-projects-fca17413.vercel.app",  # Previous deployment
     "https://tailsandtrails-production.up.railway.app",
 ]
 
