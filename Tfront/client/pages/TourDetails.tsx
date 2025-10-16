@@ -320,44 +320,7 @@ export default function TourDetails() {
                     {isAuthenticated ? "Book Now" : "Sign In to Book"}
                   </Button>
 
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-ghana-green text-ghana-green hover:bg-ghana-green hover:text-white"
-                    onClick={() => {
-                      // Check if user is authenticated
-                      if (!isAuthenticated) {
-                        showWarning("Please sign in to reserve this tour");
-                        // Redirect to login with return URL
-                        navigate('/login', { 
-                          state: { 
-                            from: `/tour/${tour.slug}`,
-                            message: "Please sign in to continue with your reservation"
-                          } 
-                        });
-                        return;
-                      }
 
-                      // Navigate to booking page with reservation flag
-                      navigate(`/booking/${tour.slug}`, {
-                        state: {
-                          tourId: tour.id.toString(),
-                          tourName: tour.name,
-                          duration: tour.duration_display,
-                          basePrice: currentPricing ? parseFloat(currentPricing.price_per_person) : parseFloat(tour.price),
-                          totalPrice: currentPricing ? parseFloat(currentPricing.total_price) : parseFloat(tour.price) * travelers,
-                          selectedDate: new Date().toISOString().split('T')[0],
-                          travelers: {
-                            adults: Math.max(1, travelers - (travelers > 2 ? 1 : 0)),
-                            children: travelers > 2 ? 1 : 0
-                          },
-                          pricingData: currentPricing,
-                          isReservation: true
-                        }
-                      });
-                    }}
-                  >
-                    {isAuthenticated ? "Reserve (Pay Later)" : "Sign In to Reserve"}
-                  </Button>
                 </div>
 
                 <Separator />
