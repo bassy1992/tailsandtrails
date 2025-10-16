@@ -343,7 +343,7 @@ def paystack_callback(request):
                     payment.log('info', f'Payment status updated via callback: {old_status} -> {new_status}', result)
                 
                 # Redirect to frontend with payment status
-                frontend_url = settings.BASE_URL.replace('8000', '8080')
+                frontend_url = settings.FRONTEND_URL
                 
                 if new_status == 'successful':
                     redirect_url = f"{frontend_url}/payment-success?reference={reference}&amount={payment.amount}&method={payment.payment_method}"
