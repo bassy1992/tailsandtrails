@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Add-ons API</title>
+</head>
+<body>
+    <h1>Debug Add-ons API</h1>
+    <div id="results"></div>
+
+    <script>
+        async function testAddonsAPI() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                // Test the same API call that the frontend makes
+                const apiUrl = 'https://tailsandtrails-production.up.railway.app/api';
+                const ticketId = 2; // Use the ticket ID we found in our test
+                const travelers = 2;
+                
+                resultsDiv.innerHTML += `<p>Testing: ${apiUrl}/tickets/${ticketId}/addons/?travelers=${travelers}</p>`;
+                
+                const response = await fetch(`${apiUrl}/tickets/${ticketId}/addons/?travelers=${travelers}`);
+                
+                resultsDiv.innerHTML += `<p>Status: ${response.status}</p>`;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML += `<p>✅ Success! Found ${data.categories?.length || 0} categories</p>`;
+                    resultsDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    const errorText = await response.text();
+                    resultsDiv.innerHTML += `<p>❌ Error: ${errorText}</p>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML += `<p>❌ Network Error: ${error.message}</p>`;
+                console.error('Error:', error);
+            }
+        }
+        
+        // Run the test when page loads
+        testAddonsAPI();
+    </script>
+</body>
+</html>
