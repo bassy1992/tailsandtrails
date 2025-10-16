@@ -162,7 +162,7 @@ export default function TourDetails() {
       </div>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Side - Images */}
           <div className="lg:col-span-2">
@@ -386,11 +386,11 @@ export default function TourDetails() {
         </div>
 
         {/* Main Content */}
-        <div className="mt-12">
+        <div className="mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               {/* Title and Description */}
-              <div className="mb-8">
+              <div className="mb-6">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">{tour.name}</h1>
                 <div className="flex items-center space-x-4 text-gray-600 mb-6">
                   <div className="flex items-center space-x-1">
