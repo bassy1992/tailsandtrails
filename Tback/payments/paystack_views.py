@@ -19,6 +19,63 @@ from .paystack_service import PaystackService
 from .utils import generate_payment_reference
 from .test_mode_views import simulate_test_payment_success
 
+def format_booking_details_for_admin(booking_details):
+    """Format booking details in a more readable format for admin logs"""
+    try:
+        if not booking_details:
+            return "No booking details"
+        
+        # Extract key information
+        booking_data = booking_details.get('bookingData', {})
+        selected_addons = booking_details.get('selectedAddOns', [])
+        
+        # Format the main booking info
+        formatted = {
+            "📋 BOOKING SUMMARY": {
+                "Tour": booking_data.get('tourName', 'N/A'),
+                "Duration": booking_data.get('duration', 'N/A'),
+                "Date": booking_details.get('selectedDate', 'N/A'),
+                "Travelers": f"{booking_data.get('travelers', {}).get('adults', 0)} adults, {booking_data.get('travelers', {}).get('children', 0)} children"
+            },
+            "💰 PRICING": {
+                "Base Price": f"GH₵{booking_details.get('baseTotal', 0)}",
+                "Add-ons Total": f"GH₵{booking_details.get('addonTotal', 0)}",
+                "Final Total": f"GH₵{booking_data.get('totalPrice', booking_details.get('baseTotal', 0))}"
+            }
+        }
+        
+        # Add pricing tiers if available
+        pricing_data = booking_data.get('pricingData', {})
+        if pricing_data.get('has_tiered_pricing') and pricing_data.get('pricing_tiers'):
+            formatted["🎯 PRICING TIERS"] = {}
+            for tier in pricing_data['pricing_tiers']:
+                tier_key = f"{tier['group_size_display']}"
+                formatted["🎯 PRICING TIERS"][tier_key] = f"GH₵{tier['price_per_person']} per person"
+        
+        # Add selected add-ons if any
+        if selected_addons:
+            formatted["🎁 SELECTED ADD-ONS"] = {}
+            for addon in selected_addons:
+                addon_name = addon.get('name', 'Unknown Add-on')
+                addon_price = addon.get('total_price', 0)
+                formatted["🎁 SELECTED ADD-ONS"][addon_name] = f"GH₵{addon_price}"
+        
+        # Format as readable string
+        result = []
+        for section, content in formatted.items():
+            result.append(f"\n{section}:")
+            if isinstance(content, dict):
+                for key, value in content.items():
+                    result.append(f"  • {key}: {value}")
+            else:
+                result.append(f"  {content}")
+        
+        return "\n".join(result)
+        
+    except Exception as e:
+        # Fallback to original format if formatting fails
+        return f"Formatting error: {str(e)}\nOriginal data: {json.dumps(booking_details, indent=2)}"
+
 logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
@@ -79,7 +136,9 @@ def create_paystack_payment(request):
             try:
                 from .booking_details_utils import add_booking_details_to_payment
                 add_booking_details_to_payment(payment, data['booking_details'])
-                payment.log('info', 'Booking details stored from request', data['booking_details'])
+                # Format booking details for better readability
+                formatted_details = format_booking_details_for_admin(data['booking_details'])
+                payment.log('info', 'Booking details stored from request', formatted_details)
                 logger.info(f"Successfully stored booking details for payment {payment.reference}")
             except Exception as e:
                 logger.error(f"Failed to store booking details for payment {payment.reference}: {str(e)}")

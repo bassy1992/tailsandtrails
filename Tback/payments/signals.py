@@ -8,6 +8,56 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def format_booking_details_for_admin(booking_details):
+    """Format booking details in a more readable format for admin logs"""
+    try:
+        if not booking_details:
+            return "No booking details"
+        
+        # Extract key information
+        booking_data = booking_details.get('bookingData', {})
+        selected_addons = booking_details.get('selectedAddOns', [])
+        
+        # Format the main booking info
+        formatted = {
+            "📋 BOOKING SUMMARY": {
+                "Tour": booking_data.get('tourName', 'N/A'),
+                "Duration": booking_data.get('duration', 'N/A'),
+                "Date": booking_details.get('selectedDate', 'N/A'),
+                "Travelers": f"{booking_data.get('travelers', {}).get('adults', 0)} adults, {booking_data.get('travelers', {}).get('children', 0)} children"
+            },
+            "💰 PRICING": {
+                "Base Price": f"GH₵{booking_details.get('baseTotal', 0)}",
+                "Add-ons Total": f"GH₵{booking_details.get('addonTotal', 0)}",
+                "Final Total": f"GH₵{booking_data.get('totalPrice', booking_details.get('baseTotal', 0))}"
+            }
+        }
+        
+        # Add selected add-ons if any
+        if selected_addons:
+            formatted["🎁 SELECTED ADD-ONS"] = {}
+            for addon in selected_addons:
+                addon_name = addon.get('name', 'Unknown Add-on')
+                addon_price = addon.get('total_price', 0)
+                formatted["🎁 SELECTED ADD-ONS"][addon_name] = f"GH₵{addon_price}"
+        
+        # Format as readable string
+        result = []
+        for section, content in formatted.items():
+            result.append(f"\n{section}:")
+            if isinstance(content, dict):
+                for key, value in content.items():
+                    result.append(f"  • {key}: {value}")
+            else:
+                result.append(f"  {content}")
+        
+        return "\n".join(result)
+        
+    except Exception as e:
+        # Fallback to original format if formatting fails
+        import json
+        return f"Formatting error: {str(e)}\nOriginal data: {json.dumps(booking_details, indent=2)}"
+
 @receiver(post_save, sender=Payment)
 def add_booking_details_to_payment(sender, instance, created, **kwargs):
     """
