@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { 
   MapPin, Calendar, Users, ArrowLeft, CreditCard, Smartphone, 
   Building2, Check, Star, Clock, Hotel, Car, Utensils, Shield,
-  Plus, Minus, ChevronDown, ChevronUp, Info
+  Plus, Minus, ChevronDown, ChevronUp, Info, DollarSign
 } from "lucide-react";
 
 interface BookingState {
@@ -392,81 +392,129 @@ export default function Booking() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
+                  {/* Tour Info Header */}
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-1">
                         {bookingData.tourName}
                       </h3>
-                      <p className="text-gray-600">{bookingData.duration}</p>
+                      <p className="text-gray-600 text-sm">{bookingData.duration}</p>
                     </div>
                     <Badge variant="outline" className="border-ghana-green text-ghana-green">
                       Heritage Tour
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
-                    <div>
-                      <Label className="text-sm text-gray-600">Dates</Label>
-                      <p className="font-medium">
-                        {new Date(bookingData.selectedDate).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })} – {new Date(new Date(bookingData.selectedDate).getTime() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })}
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <Label className="text-sm text-gray-600">Travelers</Label>
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('adults', false)}
-                            disabled={bookingData.travelers.adults <= 1}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="font-medium">{bookingData.travelers.adults} Adults</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('adults', true)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('children', false)}
-                            disabled={bookingData.travelers.children <= 0}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="font-medium">{bookingData.travelers.children} Child</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('children', true)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
+                  {/* Booking Details Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Dates Section */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700 flex items-center">
+                        <Calendar className="h-4 w-4 mr-2 text-ghana-green" />
+                        Dates
+                      </Label>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="font-medium text-gray-900">
+                          {new Date(bookingData.selectedDate).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })} – {new Date(new Date(bookingData.selectedDate).getTime() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </p>
                       </div>
                     </div>
-                    
-                    <div>
-                      <Label className="text-sm text-gray-600">Base Price</Label>
-                      <p className="font-medium text-lg">GH₵{bookingData.basePrice.toLocaleString()} per person</p>
+
+                    {/* Base Price Section */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700 flex items-center">
+                        <DollarSign className="h-4 w-4 mr-2 text-ghana-green" />
+                        Base Price
+                      </Label>
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <p className="font-semibold text-lg text-ghana-green">
+                          GH₵{bookingData.basePrice.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-gray-600">per person</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Travelers Section */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 flex items-center">
+                      <Users className="h-4 w-4 mr-2 text-ghana-green" />
+                      Travelers
+                    </Label>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {/* Adults */}
+                        <div className="flex items-center space-x-3">
+                          <span className="text-sm text-gray-600 min-w-[50px]">Adults:</span>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleTravelersChange('adults', false)}
+                              disabled={bookingData.travelers.adults <= 1}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="font-medium min-w-[20px] text-center">
+                              {bookingData.travelers.adults}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleTravelersChange('adults', true)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        {/* Children */}
+                        <div className="flex items-center space-x-3">
+                          <span className="text-sm text-gray-600 min-w-[60px]">Children:</span>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleTravelersChange('children', false)}
+                              disabled={bookingData.travelers.children <= 0}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="font-medium min-w-[20px] text-center">
+                              {bookingData.travelers.children}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleTravelersChange('children', true)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Total Travelers Summary */}
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <p className="text-sm text-gray-600">
+                          Total: <span className="font-medium text-gray-900">
+                            {bookingData.travelers.adults + bookingData.travelers.children} travelers
+                          </span>
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
