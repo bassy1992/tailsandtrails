@@ -175,7 +175,7 @@ if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
     AWS_S3_FILE_OVERWRITE = False
     
     # Debug: Print storage configuration (remove in production)
-    print(f"🔧 Using DigitalOcean Spaces storage")
+    print("INFO: Using DigitalOcean Spaces storage")
     print(f"   Bucket: {AWS_STORAGE_BUCKET_NAME}")
     print(f"   Region: {AWS_S3_REGION_NAME}")
     print(f"   Endpoint: {AWS_S3_ENDPOINT_URL}")
@@ -185,7 +185,7 @@ else:
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
-    print(f"⚠️  Using local file storage (no Spaces credentials)")
+    print("WARNING: Using local file storage (no Spaces credentials)")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
