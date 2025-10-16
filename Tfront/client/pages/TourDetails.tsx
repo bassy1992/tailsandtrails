@@ -175,7 +175,7 @@ export default function TourDetails() {
                 <img
                   src={enhancedTour.images[selectedImage]}
                   alt={tour.name}
-                  className="w-full h-96 object-cover rounded-lg"
+                  className="w-full h-[500px] object-cover rounded-lg"
                 />
                 <div className="absolute top-4 left-4">
                   <Badge className="bg-ghana-gold text-black font-semibold">
