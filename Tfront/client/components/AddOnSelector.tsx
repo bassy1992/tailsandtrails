@@ -177,7 +177,10 @@ const AddOnSelector: React.FC<AddOnSelectorProps> = ({
                       <Checkbox
                         id={addon.slug}
                         checked={isAddOnSelected(addon.id)}
-                        onCheckedChange={(checked) => handleAddOnToggle(addon, checked as boolean)}
+                        onCheckedChange={(checked) => {
+                          console.log(`🖱️ Checkbox clicked for ${addon.name}: ${checked}`);
+                          handleAddOnToggle(addon, checked as boolean);
+                        }}
                       />
                       <Label htmlFor={addon.slug} className="flex-1 cursor-pointer">
                         <div className="flex justify-between items-center">

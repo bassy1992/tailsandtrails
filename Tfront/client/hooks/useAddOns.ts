@@ -256,7 +256,9 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
         const defaultAddOns: SelectedAddOn[] = [];
         
         categories.forEach((category: AddOnCategory) => {
+          console.log(`📋 Processing category: ${category.name}`);
           category.addons.forEach((addon: AddOn) => {
+            console.log(`🎯 Processing add-on: ${addon.name} (ID: ${addon.id}, type: ${addon.addon_type}, is_default: ${addon.is_default})`);
             if (addon.is_required && addon.addon_type === 'multiple') {
               // Find default option
               const defaultOption = addon.options.find(opt => opt.is_default);
@@ -277,6 +279,7 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
               }
             } else if (addon.is_default && addon.addon_type === 'checkbox') {
               // Auto-select default checkbox add-ons
+              console.log(`🔄 Auto-selecting default checkbox add-on: ${addon.name} (ID: ${addon.id})`);
               defaultAddOns.push({
                 addon_id: addon.id,
                 quantity: 1,
@@ -414,7 +417,9 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
 
   // Check if an add-on is selected
   const isAddOnSelected = (addonId: number) => {
-    return selectedAddOns.some(item => item.addon_id === addonId);
+    const isSelected = selectedAddOns.some(item => item.addon_id === addonId);
+    console.log(`🔍 Checking if add-on ${addonId} is selected:`, isSelected, 'Current selections:', selectedAddOns.map(s => s.addon_id));
+    return isSelected;
   };
 
   // Get selected option for a multiple-choice add-on
