@@ -43,15 +43,7 @@ export default function Booking() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   
-  // Validate ticket ID and redirect if invalid
-  useEffect(() => {
-    const validTicketIds = ['1', '2']; // Only these tickets exist in the database
-    if (id && !validTicketIds.includes(id)) {
-      console.log(`Invalid ticket ID ${id}, redirecting to ticket 2`);
-      navigate('/booking/2', { replace: true });
-      return;
-    }
-  }, [id, navigate]);
+  // Note: ID validation is now handled by the TicketIdRedirect wrapper component
   
   // Get booking data from navigation state or use defaults
   const [bookingData, setBookingData] = useState<BookingState>(() => {
