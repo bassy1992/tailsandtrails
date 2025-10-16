@@ -231,6 +231,30 @@ def verify_paystack_payment(request, reference):
         public_key = getattr(settings, 'PAYSTACK_PUBLIC_KEY', '')
         is_test_mode = public_key.startswith('pk_test_')
         
+        # Check for test mode mobile money auto-approval
+        if is_test_mode and payment.payment_method == 'mobile_money' and payment.status == 'processing':
+            from .test_mobile_money_handler import TestMobileMoneyHandler
+            
+            if TestMobileMoneyHandler.should_simulate_success(payment):
+                # Auto-approve the payment
+                payment.status = 'successful'
+                from django.utils import timezone
+                payment.processed_at = timezone.now()
+                payment.save()
+                
+                payment.log('info', 'Test mode: Mobile money payment auto-approved', {
+                    'auto_approved': True,
+                    'test_mode': True,
+                    'elapsed_seconds': (timezone.now() - payment.created_at).total_seconds()
+                })
+                
+                return Response({
+                    'success': True,
+                    'payment': PaymentSerializer(payment).data,
+                    'test_mode': True,
+                    'message': 'Test mode: Mobile money payment auto-approved'
+                })
+        
         if is_test_mode and payment.status == 'successful':
             # Return local status without calling Paystack
             return Response({
@@ -260,9 +284,10 @@ def verify_paystack_payment(request, reference):
             
             new_status = status_map.get(paystack_status, 'processing')
             
-            # In test mode, don't override successful status with failed/cancelled
-            if is_test_mode and payment.status == 'successful' and new_status in ['failed', 'cancelled']:
-                # Keep the successful status
+            # In test mode, don't override successful status with failed/cancelled for mobile money
+            if (is_test_mode and payment.payment_method == 'mobile_money' and 
+                payment.status == 'successful' and new_status in ['failed', 'cancelled']):
+                # Keep the successful status for test mode mobile money
                 pass
             elif payment.status != new_status:
                 old_status = payment.status
@@ -278,7 +303,7 @@ def verify_paystack_payment(request, reference):
             return Response({
                 'success': True,
                 'payment': PaymentSerializer(payment).data,
-                'paystack_data': result['data'],
+                'paystack_data': result.get('data', {}),
                 'test_mode': is_test_mode
             })
         else:

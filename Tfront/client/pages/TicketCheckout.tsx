@@ -141,7 +141,13 @@ export default function TicketCheckout() {
 
             if (paymentResult.success) {
                 const paymentReference = paymentResult.payment.reference;
-                setStatusMessage('Payment request sent to your phone. Please check your mobile money app and authorize the payment.');
+                const isTestMode = paymentResult.paystack?.test_mode;
+                
+                const message = isTestMode ? 
+                    'Test Mode: Mobile money payment simulated. Payment will be automatically approved in 10 seconds.' :
+                    'Payment request sent to your phone. Please check your mobile money app and authorize the payment.';
+                    
+                setStatusMessage(message);
 
                 // Step 2: Poll for payment status
                 let attempts = 0;
@@ -153,9 +159,13 @@ export default function TicketCheckout() {
                         const statusResult = await statusResponse.json();
                         
                         const paymentStatus = statusResult.payment?.status;
+                        const isTestMode = statusResult.test_mode;
 
                         if (paymentStatus === 'successful') {
-                            setStatusMessage('Payment successful! Creating your tickets...');
+                            const message = isTestMode ? 
+                                'Test mode: Payment approved! Creating your tickets...' : 
+                                'Payment successful! Creating your tickets...';
+                            setStatusMessage(message);
                             // Step 3: Create ticket purchase after successful payment
                             const ticketResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/purchase/direct/`, {
                                 method: 'POST',

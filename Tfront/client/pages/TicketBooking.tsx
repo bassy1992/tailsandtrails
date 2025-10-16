@@ -288,16 +288,37 @@ export default function TicketBooking() {
   const selectedTicket = currentTicketTypes.find(t => t.id === selectedTicketType);
   const totalPrice = selectedTicket ? selectedTicket.price * quantity : 0;
 
+  // Debug logging
+  console.log('🎯 Ticket Debug Info:');
+  console.log('Event:', event);
+  console.log('Current ticket types:', currentTicketTypes);
+  console.log('Selected ticket type:', selectedTicketType);
+  console.log('Selected ticket:', selectedTicket);
+  console.log('Quantity:', quantity);
+  console.log('Total price:', totalPrice);
+
   const handleProceedToPayment = () => {
+    console.log('🎫 Payment button clicked!');
+    console.log('Payment method:', paymentMethod);
+    console.log('Customer info:', customerInfo);
+    console.log('Event:', event);
+    console.log('Selected ticket:', selectedTicket);
+    console.log('Quantity:', quantity);
+    console.log('Total price:', totalPrice);
+
     if (!paymentMethod || !customerInfo.firstName || !customerInfo.email || !customerInfo.phone) {
+      console.error('❌ Validation failed - missing required fields');
       alert("Please fill in all required fields and select a payment method");
       return;
     }
 
     if (!event || !selectedTicket) {
+      console.error('❌ Event or ticket type not found');
       alert("Event or ticket type not found");
       return;
     }
+
+    console.log('✅ Validation passed, proceeding to payment...');
 
     // Create ticket purchase data in the format expected by TicketCheckout
     const ticketPurchaseData = {
