@@ -44,7 +44,21 @@ class TicketCategoryListView(generics.ListAPIView):
 def get_ticket_addons(request, ticket_id):
     """Get available add-ons for a specific ticket"""
     try:
-        ticket = get_object_or_404(Ticket, id=ticket_id)
+        # Check if ticket exists, if not, suggest valid alternatives
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+        except Ticket.DoesNotExist:
+            # Get available ticket IDs
+            available_tickets = Ticket.objects.filter(status='published').values_list('id', flat=True)
+            available_ids = list(available_tickets)
+            
+            return Response({
+                'success': False,
+                'error': f'Ticket ID {ticket_id} not found',
+                'available_tickets': available_ids,
+                'suggestion': f'Try ticket ID {available_ids[0] if available_ids else 1}',
+                'redirect_url': f'/tickets/{available_ids[0] if available_ids else 1}/addons/'
+            }, status=status.HTTP_404_NOT_FOUND)
         
         # Get add-ons applicable to this ticket or its category
         addons = AddOn.objects.filter(

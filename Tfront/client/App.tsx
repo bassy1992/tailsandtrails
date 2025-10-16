@@ -11,6 +11,7 @@ import { ToastProvider } from "./contexts/ToastContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SafeTooltipProvider from "./components/SafeTooltipProvider";
+import TicketIdRedirect from "./components/TicketIdRedirect";
 import Index from "./pages/Index";
 import Destinations from "./pages/Destinations";
 import Gallery from "./pages/Gallery";
@@ -49,7 +50,11 @@ function AppRoutes() {
       <Route path="/tour/:id" element={<TourDetails />} />
       <Route path="/tickets" element={<Tickets />} />
       <Route path="/tickets/:slug" element={<TicketBooking />} />
-      <Route path="/ticket-booking/:id" element={<TicketBooking />} />
+      <Route path="/ticket-booking/:id" element={
+        <TicketIdRedirect>
+          <TicketBooking />
+        </TicketIdRedirect>
+      } />
       <Route path="/ticket-checkout" element={
         <ProtectedRoute>
           <TicketCheckout />
@@ -71,7 +76,11 @@ function AppRoutes() {
           <Dashboard />
         </ProtectedRoute>
       } />
-      <Route path="/booking/:id" element={<Booking />} />
+      <Route path="/booking/:id" element={
+        <TicketIdRedirect>
+          <Booking />
+        </TicketIdRedirect>
+      } />
       <Route path="/momo-checkout" element={<MomoCheckout />} />
       <Route path="/paystack-checkout" element={<PaystackCheckout />} />
       <Route path="/paystack-demo" element={<PaystackDemo />} />
