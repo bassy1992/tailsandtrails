@@ -241,7 +241,7 @@ export default function TourDetails() {
                       destination={tour}
                       groupSize={travelers}
                       onPricingChange={setCurrentPricing}
-                      showTiers={true}
+                      showTiers={false}
                     />
                   </div>
                   <div className="flex items-center space-x-1 ml-4">

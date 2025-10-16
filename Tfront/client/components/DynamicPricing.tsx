@@ -82,34 +82,35 @@ export default function DynamicPricing({
   const savingsPercentage = basePrice > 0 ? ((savings / basePrice) * 100) : 0;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Main Price Display */}
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="text-3xl font-bold text-ghana-green">
-            GH₵{parseFloat(pricing.price_per_person).toLocaleString()}
-          </div>
-          <div className="text-sm text-gray-500">per person</div>
-          
-          {/* Show savings if applicable */}
-          {pricing.has_tiered_pricing && savings > 0 && (
-            <div className="flex items-center space-x-2 mt-1">
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                <TrendingDown className="h-3 w-3 mr-1" />
-                Save GH₵{savings.toFixed(2)} ({savingsPercentage.toFixed(0)}%)
-              </Badge>
-            </div>
-          )}
+      <div>
+        <div className="text-3xl font-bold text-ghana-green mb-1">
+          GH₵{parseFloat(pricing.price_per_person).toLocaleString()}
         </div>
+        <div className="text-sm text-gray-500 mb-2">per person</div>
         
-        {/* Group Size Indicator */}
-        <div className="text-right">
-          <div className="flex items-center space-x-1 text-sm text-gray-600">
+        {/* Show savings if applicable */}
+        {pricing.has_tiered_pricing && savings > 0 && (
+          <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+            <TrendingDown className="h-3 w-3 mr-1" />
+            Save GH₵{savings.toFixed(0)} ({savingsPercentage.toFixed(0)}%)
+          </Badge>
+        )}
+      </div>
+      
+      {/* Group Size and Total */}
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
             <Users className="h-4 w-4" />
             <span>{groupSize} {groupSize === 1 ? 'person' : 'people'}</span>
           </div>
-          <div className="text-lg font-semibold text-gray-900">
-            Total: GH₵{parseFloat(pricing.total_price).toLocaleString()}
+          <div className="text-right">
+            <div className="text-lg font-semibold text-gray-900">
+              GH₵{parseFloat(pricing.total_price).toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-500">total</div>
           </div>
         </div>
       </div>
