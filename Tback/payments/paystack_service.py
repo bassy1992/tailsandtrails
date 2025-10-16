@@ -82,9 +82,9 @@ class PaystackService:
             is_test_mode = self.secret_key.startswith('sk_test_')
             is_mobile_money = payment_data.get('payment_method') == 'mobile_money'
             
-            # In test mode, simulate mobile money payments locally
+            # In test mode for mobile money, create real Paystack transaction but mark as simulation
             if is_test_mode and is_mobile_money:
-                logger.info("Test mode detected for mobile money - using local simulation")
+                logger.info("Test mode detected for mobile money - creating real Paystack transaction for compatibility")
                 return self._simulate_test_mobile_money(payment_data)
             
             # Convert amount to kobo (Paystack uses kobo for GHS)
@@ -113,8 +113,8 @@ class PaystackService:
             
             # Configure payment channels
             if payment_data.get('payment_method') == 'mobile_money':
-                # For MoMo payments, enable mobile_money channel and include phone number
-                transaction_data['channels'] = ['mobile_money', 'card']  # MoMo first, then card as fallback
+                # For MoMo payments, enable mobile_money channel and redirect to Paystack website
+                transaction_data['channels'] = ['mobile_money']  # Only mobile money channel
                 
                 # Add mobile money specific configuration
                 phone = payment_data.get('phone_number', '')
@@ -164,25 +164,80 @@ class PaystackService:
             }
     
     def _simulate_test_mobile_money(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Simulate mobile money payment in test mode"""
+        """Simulate mobile money payment in test mode using real Paystack transaction"""
         try:
-            # Create a simulated authorization URL for test mode
-            test_auth_url = f"https://checkout.paystack.com/test-momo-{payment_data['reference']}"
+            # In test mode, create a real Paystack transaction but mark it as mobile money simulation
+            # This ensures the access code and reference are valid for verification
             
-            return {
-                'success': True,
-                'data': {
-                    'authorization_url': test_auth_url,
-                    'access_code': f"test_momo_{payment_data['reference']}",
-                    'reference': payment_data['reference'],
-                    'status': 'send_otp'
-                },
-                'authorization_url': test_auth_url,
-                'access_code': f"test_momo_{payment_data['reference']}",
+            # Convert amount to kobo
+            amount_kobo = int(float(payment_data['amount']) * 100)
+            
+            # Create a real transaction with card channel but mark as mobile money simulation
+            transaction_data = {
+                'email': payment_data['email'],
+                'amount': amount_kobo,
+                'currency': payment_data.get('currency', 'GHS'),
                 'reference': payment_data['reference'],
-                'test_mode': True,
-                'display_text': 'Test Mode: Mobile money payment simulated. Payment will be automatically approved in 10 seconds.'
+                'callback_url': payment_data.get('callback_url', ''),
+                'channels': ['card'],  # Use card channel for valid access code
+                'metadata': {
+                    'payment_method': 'mobile_money',
+                    'phone_number': payment_data.get('phone_number', ''),
+                    'description': payment_data.get('description', ''),
+                    'test_mode_simulation': True,
+                    'simulated_mobile_money': True,
+                    'provider': payment_data.get('provider', 'mtn'),
+                    'custom_fields': [
+                        {
+                            'display_name': 'Payment Type',
+                            'variable_name': 'payment_type',
+                            'value': 'mobile_money_simulation'
+                        },
+                        {
+                            'display_name': 'Test Mode',
+                            'variable_name': 'test_mode',
+                            'value': 'true'
+                        }
+                    ]
+                }
             }
+            
+            # Initialize real transaction
+            response = Transaction.initialize(**transaction_data)
+            
+            if response['status']:
+                return {
+                    'success': True,
+                    'data': {
+                        'authorization_url': response['data']['authorization_url'],
+                        'access_code': response['data']['access_code'],
+                        'reference': response['data']['reference'],
+                        'status': 'send_otp'
+                    },
+                    'authorization_url': response['data']['authorization_url'],
+                    'access_code': response['data']['access_code'],
+                    'reference': response['data']['reference'],
+                    'test_mode': True,
+                    'simulated_mobile_money': True,
+                    'display_text': 'Test Mode: Mobile money payment simulated with valid Paystack transaction. Payment will be automatically approved in 10 seconds.'
+                }
+            else:
+                # Fallback to basic simulation if Paystack fails
+                return {
+                    'success': True,
+                    'data': {
+                        'authorization_url': f"https://checkout.paystack.com/{payment_data['reference']}",
+                        'access_code': f"fallback_{payment_data['reference']}",
+                        'reference': payment_data['reference'],
+                        'status': 'send_otp'
+                    },
+                    'authorization_url': f"https://checkout.paystack.com/{payment_data['reference']}",
+                    'access_code': f"fallback_{payment_data['reference']}",
+                    'reference': payment_data['reference'],
+                    'test_mode': True,
+                    'fallback_mode': True,
+                    'display_text': 'Test Mode: Fallback mobile money simulation. Use reference for verification.'
+                }
             
         except Exception as e:
             logger.error(f"Test mobile money simulation error: {str(e)}")
@@ -422,53 +477,53 @@ class PaystackService:
     def verify_payment(self, reference: str) -> Dict[str, Any]:
         """Verify payment status with Paystack"""
         try:
-            # Check if this is a test mode mobile money payment
-            is_test_mode = self.secret_key.startswith('sk_test_')
-            
-            # For test mode, check if we should simulate success for mobile money
-            if is_test_mode:
-                # Import here to avoid circular imports
-                from .models import Payment
-                try:
-                    payment = Payment.objects.get(reference=reference)
-                    if (payment.payment_method == 'mobile_money' and 
-                        payment.status == 'processing' and
-                        payment.created_at):
-                        
-                        # Auto-approve mobile money payments after 10 seconds in test mode
-                        from django.utils import timezone
-                        time_elapsed = (timezone.now() - payment.created_at).total_seconds()
-                        
-                        if time_elapsed > 10:  # 10 seconds have passed
-                            return {
-                                'success': True,
-                                'data': {
-                                    'status': 'success',
-                                    'amount': int(float(payment.amount) * 100),
-                                    'currency': payment.currency,
-                                    'reference': reference,
-                                    'paid_at': timezone.now().isoformat(),
-                                    'channel': 'mobile_money',
-                                    'gateway_response': 'Test mode: Mobile money payment auto-approved'
-                                },
-                                'status': 'success',
-                                'amount': float(payment.amount),
-                                'currency': payment.currency,
-                                'reference': reference,
-                                'paid_at': timezone.now().isoformat(),
-                                'channel': 'mobile_money',
-                                'gateway_response': 'Test mode: Mobile money payment auto-approved',
-                                'test_mode': True
-                            }
-                except Payment.DoesNotExist:
-                    pass
-            
-            # Regular Paystack verification
+            # First try regular Paystack verification
             response = Transaction.verify(reference)
             
             if response['status']:
                 transaction_data = response['data']
                 
+                # Check if this is a simulated mobile money payment
+                metadata = transaction_data.get('metadata', {})
+                is_simulated_momo = metadata.get('simulated_mobile_money', False)
+                
+                # For simulated mobile money in test mode, auto-approve after delay
+                if is_simulated_momo and self.secret_key.startswith('sk_test_'):
+                    # Import here to avoid circular imports
+                    from .models import Payment
+                    try:
+                        payment = Payment.objects.get(reference=reference)
+                        if payment.status == 'processing' and payment.created_at:
+                            from django.utils import timezone
+                            time_elapsed = (timezone.now() - payment.created_at).total_seconds()
+                            
+                            if time_elapsed > 10:  # Auto-approve after 10 seconds
+                                return {
+                                    'success': True,
+                                    'data': {
+                                        'status': 'success',
+                                        'amount': int(float(payment.amount) * 100),
+                                        'currency': payment.currency,
+                                        'reference': reference,
+                                        'paid_at': timezone.now().isoformat(),
+                                        'channel': 'mobile_money',
+                                        'gateway_response': 'Test mode: Mobile money payment auto-approved',
+                                        'metadata': metadata
+                                    },
+                                    'status': 'success',
+                                    'amount': float(payment.amount),
+                                    'currency': payment.currency,
+                                    'reference': reference,
+                                    'paid_at': timezone.now().isoformat(),
+                                    'channel': 'mobile_money',
+                                    'gateway_response': 'Test mode: Mobile money payment auto-approved',
+                                    'test_mode': True,
+                                    'simulated_mobile_money': True
+                                }
+                    except Payment.DoesNotExist:
+                        pass
+                
+                # Return regular Paystack response
                 return {
                     'success': True,
                     'data': transaction_data,
@@ -478,9 +533,71 @@ class PaystackService:
                     'reference': transaction_data['reference'],
                     'paid_at': transaction_data.get('paid_at'),
                     'channel': transaction_data.get('channel'),
-                    'gateway_response': transaction_data.get('gateway_response')
+                    'gateway_response': transaction_data.get('gateway_response'),
+                    'metadata': transaction_data.get('metadata', {})
                 }
             else:
+                # If Paystack verification fails, check if it's a test mode mobile money payment
+                is_test_mode = self.secret_key.startswith('sk_test_')
+                
+                if is_test_mode:
+                    # Import here to avoid circular imports
+                    from .models import Payment
+                    try:
+                        payment = Payment.objects.get(reference=reference)
+                        if (payment.payment_method == 'mobile_money' and 
+                            payment.status == 'processing' and
+                            payment.created_at):
+                            
+                            # Auto-approve mobile money payments after 10 seconds in test mode
+                            from django.utils import timezone
+                            time_elapsed = (timezone.now() - payment.created_at).total_seconds()
+                            
+                            if time_elapsed > 10:  # 10 seconds have passed
+                                return {
+                                    'success': True,
+                                    'data': {
+                                        'status': 'success',
+                                        'amount': int(float(payment.amount) * 100),
+                                        'currency': payment.currency,
+                                        'reference': reference,
+                                        'paid_at': timezone.now().isoformat(),
+                                        'channel': 'mobile_money',
+                                        'gateway_response': 'Test mode: Mobile money payment auto-approved (fallback)'
+                                    },
+                                    'status': 'success',
+                                    'amount': float(payment.amount),
+                                    'currency': payment.currency,
+                                    'reference': reference,
+                                    'paid_at': timezone.now().isoformat(),
+                                    'channel': 'mobile_money',
+                                    'gateway_response': 'Test mode: Mobile money payment auto-approved (fallback)',
+                                    'test_mode': True,
+                                    'fallback_verification': True
+                                }
+                            else:
+                                # Still processing
+                                return {
+                                    'success': True,
+                                    'data': {
+                                        'status': 'pending',
+                                        'amount': int(float(payment.amount) * 100),
+                                        'currency': payment.currency,
+                                        'reference': reference,
+                                        'channel': 'mobile_money',
+                                        'gateway_response': f'Test mode: Processing mobile money payment ({int(time_elapsed)}s elapsed)'
+                                    },
+                                    'status': 'pending',
+                                    'amount': float(payment.amount),
+                                    'currency': payment.currency,
+                                    'reference': reference,
+                                    'channel': 'mobile_money',
+                                    'gateway_response': f'Test mode: Processing mobile money payment ({int(time_elapsed)}s elapsed)',
+                                    'test_mode': True
+                                }
+                    except Payment.DoesNotExist:
+                        pass
+                
                 return {
                     'success': False,
                     'error': response.get('message', 'Failed to verify payment')

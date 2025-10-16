@@ -163,14 +163,14 @@ def create_paystack_payment(request):
         
         # Handle different payment methods
         if data['payment_method'] == 'mobile_money':
-            # For MoMo payments, use standard Paystack checkout (will redirect to Paystack website)
-            # This allows testing with test cards and ensures payments appear in Paystack dashboard
-            payment_data['channels'] = ['card', 'mobile_money']  # Allow both for flexibility
+            # For MoMo payments, redirect to Paystack website for processing
             payment_data['provider'] = data.get('provider', 'mtn')  # mtn, vodafone, airteltigo
             
+            # Use standard payment initialization which will redirect to Paystack website
+            # This allows users to complete mobile money payments on Paystack's secure platform
             result = paystack_service.initialize_payment(payment_data)
         else:
-            # Card payment
+            # Card payment - uses standard checkout
             result = paystack_service.initialize_payment(payment_data)
         
         if result['success']:
@@ -458,6 +458,160 @@ def paystack_callback(request):
         return Response({
             'success': False,
             'error': 'An error occurred while processing the callback'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def verify_access_code(request, access_code):
+    """Verify payment using access code (for test mode compatibility)"""
+    try:
+        # Extract reference from access code if it's a test mode access code
+        if access_code.startswith('test-momo-'):
+            # Extract reference from test access code format: test-momo-PAY-XXXXXXXX-XXXXXX
+            reference = access_code.replace('test-momo-', '')
+            
+            # Find payment by reference
+            try:
+                payment = Payment.objects.get(reference=reference)
+                
+                # Check if this is test mode
+                public_key = getattr(settings, 'PAYSTACK_PUBLIC_KEY', '')
+                is_test_mode = public_key.startswith('pk_test_')
+                
+                if is_test_mode and payment.payment_method == 'mobile_money':
+                    # Check if enough time has passed for auto-approval
+                    from django.utils import timezone
+                    time_elapsed = (timezone.now() - payment.created_at).total_seconds()
+                    
+                    if time_elapsed > 10:  # Auto-approve after 10 seconds
+                        payment.status = 'successful'
+                        payment.processed_at = timezone.now()
+                        payment.save()
+                        
+                        payment.log('info', 'Test mode: Mobile money payment auto-approved via access code', {
+                            'access_code': access_code,
+                            'auto_approved': True,
+                            'elapsed_seconds': time_elapsed
+                        })
+                        
+                        return Response({
+                            'success': True,
+                            'data': {
+                                'status': 'success',
+                                'amount': int(float(payment.amount) * 100),
+                                'currency': payment.currency,
+                                'reference': payment.reference,
+                                'paid_at': payment.processed_at.isoformat(),
+                                'channel': 'mobile_money',
+                                'gateway_response': 'Test mode: Mobile money payment auto-approved'
+                            },
+                            'payment': PaymentSerializer(payment).data,
+                            'test_mode': True
+                        })
+                    else:
+                        # Still processing
+                        return Response({
+                            'success': True,
+                            'data': {
+                                'status': 'pending',
+                                'amount': int(float(payment.amount) * 100),
+                                'currency': payment.currency,
+                                'reference': payment.reference,
+                                'channel': 'mobile_money',
+                                'gateway_response': f'Test mode: Processing mobile money payment ({int(time_elapsed)}s elapsed)'
+                            },
+                            'payment': PaymentSerializer(payment).data,
+                            'test_mode': True
+                        })
+                
+                # For non-test mode or non-mobile money, use regular verification
+                return verify_paystack_payment(request, payment.reference)
+                
+            except Payment.DoesNotExist:
+                return Response({
+                    'success': False,
+                    'error': 'Payment not found'
+                }, status=status.HTTP_404_NOT_FOUND)
+        
+        # For regular access codes, try to find payment by access code in metadata
+        try:
+            payment = Payment.objects.filter(
+                metadata__access_code=access_code
+            ).first()
+            
+            if payment:
+                return verify_paystack_payment(request, payment.reference)
+            else:
+                return Response({
+                    'success': False,
+                    'error': 'Payment not found for access code'
+                }, status=status.HTTP_404_NOT_FOUND)
+                
+        except Exception as e:
+            logger.error(f"Access code verification error: {str(e)}")
+            return Response({
+                'success': False,
+                'error': 'Failed to verify access code'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    except Exception as e:
+        logger.error(f"Access code verification error: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'An error occurred while verifying access code'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def paystack_api_proxy(request, endpoint_path):
+    """Proxy for Paystack API calls to handle test mode access codes"""
+    try:
+        # Check if this is a verify_access_code call for test mode
+        if 'verify_access_code' in endpoint_path:
+            # Extract access code from path
+            access_code = endpoint_path.split('/')[-1]
+            
+            # If it's a test mode access code, handle it locally
+            if access_code.startswith('test-momo-') or access_code.startswith('fallback_'):
+                return verify_access_code(request, access_code)
+        
+        # For other endpoints, proxy to real Paystack API
+        import requests
+        
+        paystack_url = f"https://api.paystack.co/{endpoint_path}"
+        
+        # Get authorization header
+        secret_key = getattr(settings, 'PAYSTACK_SECRET_KEY', '')
+        headers = {
+            'Authorization': f'Bearer {secret_key}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Forward the request to Paystack
+        if request.method == 'GET':
+            response = requests.get(paystack_url, headers=headers, params=request.GET)
+        elif request.method == 'POST':
+            response = requests.post(paystack_url, headers=headers, json=request.data)
+        else:
+            return Response({
+                'success': False,
+                'error': 'Method not allowed'
+            }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        
+        # Return Paystack response
+        try:
+            return Response(response.json(), status=response.status_code)
+        except:
+            return Response({
+                'success': False,
+                'error': 'Invalid response from Paystack'
+            }, status=response.status_code)
+            
+    except Exception as e:
+        logger.error(f"Paystack API proxy error: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'Proxy error'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
