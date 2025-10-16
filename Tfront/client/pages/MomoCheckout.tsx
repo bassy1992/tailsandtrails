@@ -211,19 +211,24 @@ export default function MomoCheckout() {
             
             // Wait a moment then redirect
             setTimeout(() => {
-              navigate('/payment-success', {
-                state: {
-                  ...paymentData,
-                  paymentDetails: {
-                    method: 'Mobile Money',
-                    provider: momoProvider,
-                    phone: phoneNumber,
-                    transactionId: paymentReference,
-                    status: 'completed',
-                    timestamp: payment.processed_at || new Date().toISOString(),
-                    gateway: 'Paystack'
-                  }
+              const successData = {
+                ...paymentData,
+                paymentDetails: {
+                  method: 'Mobile Money',
+                  provider: momoProvider,
+                  phone: phoneNumber,
+                  transactionId: paymentReference,
+                  status: 'completed',
+                  timestamp: payment.processed_at || new Date().toISOString(),
+                  gateway: 'Paystack'
                 }
+              };
+              
+              // Store in localStorage as backup
+              localStorage.setItem('completedPaymentData', JSON.stringify(successData));
+              
+              navigate('/payment-success', {
+                state: successData
               });
               sessionStorage.removeItem('paymentReference');
             }, 2000);

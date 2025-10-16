@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Payment Success Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-link { 
+            display: block; 
+            margin: 10px 0; 
+            padding: 10px; 
+            background: #f0f0f0; 
+            text-decoration: none; 
+            border-radius: 5px;
+        }
+        .test-link:hover { background: #e0e0e0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Payment Success Page</h1>
+    
+    <p>Use these links to test the payment success page with different scenarios:</p>
+    
+    <h2>Test Links for Your Frontend:</h2>
+    
+    <a href="https://tailsandtrails.vercel.app/payment-success?reference=TEST-123&amount=100&method=Mobile%20Money" 
+       class="test-link" target="_blank">
+        ✅ Test Success Page with URL Parameters
+    </a>
+    
+    <a href="https://tailsandtrails.vercel.app/payment-success" 
+       class="test-link" target="_blank">
+        🔄 Test Success Page without Data (should show generic success)
+    </a>
+    
+    <h2>What Should Happen:</h2>
+    <ul>
+        <li><strong>With URL parameters:</strong> Should show payment details from URL</li>
+        <li><strong>Without data:</strong> Should show generic success message with buttons to dashboard/tickets</li>
+        <li><strong>No more redirects to dashboard automatically</strong></li>
+    </ul>
+    
+    <h2>Real Payment Flow:</h2>
+    <ol>
+        <li>Go to <a href="https://tailsandtrails.vercel.app/tickets" target="_blank">https://tailsandtrails.vercel.app/tickets</a></li>
+        <li>Select a ticket and proceed to checkout</li>
+        <li>Complete payment with Mobile Money or Card</li>
+        <li>Should be redirected to success page (not dashboard)</li>
+    </ol>
+    
+    <h2>Debugging:</h2>
+    <p>If you still get redirected to dashboard, check browser console for:</p>
+    <ul>
+        <li>"PaymentSuccess - Received payment data: null"</li>
+        <li>"Found payment data in localStorage"</li>
+        <li>"Found payment info in URL params"</li>
+    </ul>
+</body>
+</html>

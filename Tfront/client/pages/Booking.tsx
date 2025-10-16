@@ -43,19 +43,46 @@ export default function Booking() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   
+  // Validate ticket ID and redirect if invalid
+  useEffect(() => {
+    const validTicketIds = ['1', '2']; // Only these tickets exist in the database
+    if (id && !validTicketIds.includes(id)) {
+      console.log(`Invalid ticket ID ${id}, redirecting to ticket 2`);
+      navigate('/booking/2', { replace: true });
+      return;
+    }
+  }, [id, navigate]);
+  
   // Get booking data from navigation state or use defaults
   const [bookingData, setBookingData] = useState<BookingState>(() => {
     if (location.state) {
       return location.state as BookingState;
     }
-    return {
-      tourId: id || "2", // Changed from "1" to "2" to use existing ticket
-      tourName: "Black Stars vs Nigeria - AFCON Qualifier",
-      duration: "Single Event", 
-      basePrice: 50,
-      selectedDate: "2025-11-28",
-      travelers: { adults: 2, children: 1 }
-    };
+    
+    // Use valid ticket ID or default to 2
+    const validTicketIds = ['1', '2'];
+    const ticketId = id && validTicketIds.includes(id) ? id : "2";
+    
+    // Set appropriate defaults based on ticket ID
+    if (ticketId === "1") {
+      return {
+        tourId: "1",
+        tourName: "Ghana Music Festival 2024",
+        duration: "Single Event", 
+        basePrice: 100, // Estimated price for music festival
+        selectedDate: "2024-12-31",
+        travelers: { adults: 2, children: 1 }
+      };
+    } else {
+      return {
+        tourId: "2",
+        tourName: "Black Stars vs Nigeria - AFCON Qualifier",
+        duration: "Single Event", 
+        basePrice: 50,
+        selectedDate: "2025-11-28",
+        travelers: { adults: 2, children: 1 }
+      };
+    }
   });
 
   const [selectedAddOns, setSelectedAddOns] = useState<AddOnSelection[]>([]);

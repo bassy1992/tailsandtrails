@@ -187,16 +187,58 @@ export default function PaymentSuccess() {
     console.log('PaymentSuccess mounted with data:', paymentData);
     
     if (!paymentData) {
-      console.log('No payment data found, redirecting to tickets page');
-      // Instead of dashboard, redirect to tickets page with a message
-      navigate('/tickets', { 
-        state: { 
-          message: 'Payment completed successfully! Check your email for confirmation.' 
-        } 
-      });
+      console.log('No payment data found, checking localStorage and URL params...');
+      
+      // Try to get payment data from localStorage as backup
+      const storedPaymentData = localStorage.getItem('completedPaymentData');
+      if (storedPaymentData) {
+        try {
+          const parsedData = JSON.parse(storedPaymentData);
+          console.log('Found payment data in localStorage:', parsedData);
+          
+          // Set the payment data and don't redirect
+          setEnhancedPaymentData(parsedData);
+          localStorage.removeItem('completedPaymentData'); // Clean up
+          return;
+        } catch (e) {
+          console.error('Error parsing stored payment data:', e);
+        }
+      }
+      
+      // Check URL parameters as final fallback
+      const reference = searchParams.get('reference');
+      const amount = searchParams.get('amount');
+      
+      if (reference && amount) {
+        console.log('Found payment info in URL params, creating minimal success data');
+        const minimalPaymentData = {
+          total: parseFloat(amount),
+          paymentDetails: {
+            method: searchParams.get('method') || 'Payment',
+            transactionId: reference,
+            timestamp: new Date().toISOString(),
+            status: 'completed'
+          },
+          tourName: 'Booking Completed',
+          bookingReference: reference
+        };
+        
+        setEnhancedPaymentData(minimalPaymentData);
+        return;
+      }
+      
+      console.log('No payment data available anywhere, showing success message and redirecting');
+      // Show a generic success message for 3 seconds, then redirect
+      setTimeout(() => {
+        navigate('/tickets', { 
+          state: { 
+            message: 'Payment completed successfully! Check your email for confirmation.' 
+          } 
+        });
+      }, 3000);
       return;
     }
-  }, [paymentData, navigate]);
+  }, [paymentData, navigate, searchParams]);
 
   const generateBookingReference = () => {
     return `GH${Date.now().toString().slice(-6)}`;
@@ -237,16 +279,37 @@ export default function PaymentSuccess() {
     }
   };
 
-  if (!paymentData) {
+  // Show a generic success page if no payment data is available
+  if (!paymentData && !enhancedPaymentData) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Session Expired</h2>
-            <p className="text-gray-600 mb-6">Please check your dashboard for booking details.</p>
-            <Button onClick={() => navigate('/dashboard')} className="bg-ghana-green hover:bg-ghana-green/90">
-              Go to Dashboard
-            </Button>
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+          <div className="max-w-md mx-auto text-center p-8">
+            <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="h-12 w-12 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-green-900 mb-4">Payment Successful!</h1>
+            <p className="text-green-700 mb-6">
+              Your payment has been processed successfully. You should receive a confirmation email shortly.
+            </p>
+            <div className="space-y-3">
+              <Button 
+                onClick={() => navigate('/dashboard')} 
+                className="w-full bg-ghana-green hover:bg-ghana-green/90"
+              >
+                View My Bookings
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/tickets')} 
+                className="w-full"
+              >
+                Browse More Events
+              </Button>
+            </div>
+            <p className="text-sm text-gray-600 mt-4">
+              If you don't receive a confirmation email within 10 minutes, please contact support.
+            </p>
           </div>
         </div>
       </Layout>

@@ -258,8 +258,18 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
       if (validTicketIds.includes(ticketId)) {
         loadAddOns(ticketId, travelers);
       } else {
-        setError(`Ticket ID ${ticketId} not found. Available tickets: ${validTicketIds.join(', ')}`);
+        console.warn(`Invalid ticket ID ${ticketId}, not loading add-ons`);
+        setError(`Ticket ID ${ticketId} not found. Please select a valid ticket.`);
+        setCategories([]);
+        setSelectedAddOns([]);
+        setLoading(false);
       }
+    } else {
+      // Clear state if no valid ticket ID
+      setCategories([]);
+      setSelectedAddOns([]);
+      setError(null);
+      setLoading(false);
     }
   }, [ticketId, travelers]);
 

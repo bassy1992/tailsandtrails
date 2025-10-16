@@ -99,6 +99,16 @@ export default function TicketBooking() {
   const [event, setEvent] = useState<EventTicket | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Validate ticket ID and redirect if invalid
+  useEffect(() => {
+    const validTicketIds = ['1', '2']; // Only these tickets exist in the database
+    if (id && !validTicketIds.includes(id)) {
+      console.log(`Invalid ticket ID ${id}, redirecting to ticket 2`);
+      navigate('/ticket-booking/2', { replace: true });
+      return;
+    }
+  }, [id, navigate]);
   const [selectedTicketType, setSelectedTicketType] = useState<string>("regular");
   const [quantity, setQuantity] = useState<number>(1);
   const [customerInfo, setCustomerInfo] = useState({

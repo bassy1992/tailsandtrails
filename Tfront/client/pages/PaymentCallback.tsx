@@ -75,10 +75,25 @@ export default function PaymentCallback() {
               
               console.log('Redirecting to payment success with data:', successData);
               
-              navigate('/payment-success', {
-                state: successData,
-                replace: true // Use replace to prevent back button issues
-              });
+              // Store payment data in localStorage as backup
+              localStorage.setItem('completedPaymentData', JSON.stringify(successData));
+              
+              // Try multiple redirect methods to ensure success page is reached
+              try {
+                navigate('/payment-success', {
+                  state: successData,
+                  replace: true
+                });
+              } catch (error) {
+                console.error('Navigation failed, trying URL redirect:', error);
+                // Fallback: redirect with URL parameters
+                const params = new URLSearchParams({
+                  reference: paymentRef,
+                  amount: (payment.amount || 0).toString(),
+                  method: paymentMethod
+                });
+                window.location.href = `/payment-success?${params.toString()}`;
+              }
             }, 2000);
           } else if (payment.status === 'failed') {
             setStatus('failed');
