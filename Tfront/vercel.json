@@ -1,12 +1,18 @@
 {
-  "framework": "vite",
-  "buildCommand": "npm run vercel-build",
-  "outputDirectory": "dist/spa",
-  "installCommand": "npm install",
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/spa"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "env": {
