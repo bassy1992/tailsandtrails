@@ -277,19 +277,6 @@ export default function TourDetails() {
 
                 {/* Booking Form */}
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Date
-                    </label>
-                    <input
-                      type="date"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-ghana-green focus:border-ghana-green"
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-
                   <CompactTravelerSelector
                     destination={tour}
                     selectedTravelers={travelers}
@@ -298,11 +285,6 @@ export default function TourDetails() {
 
                   <Button
                     onClick={() => {
-                      if (!selectedDate) {
-                        showWarning("Please select a date first");
-                        return;
-                      }
-
                       // Check if user is authenticated
                       if (!isAuthenticated) {
                         showWarning("Please sign in to book this tour");
@@ -324,7 +306,7 @@ export default function TourDetails() {
                           duration: tour.duration_display,
                           basePrice: currentPricing ? parseFloat(currentPricing.price_per_person) : parseFloat(tour.price),
                           totalPrice: currentPricing ? parseFloat(currentPricing.total_price) : parseFloat(tour.price) * travelers,
-                          selectedDate: selectedDate,
+                          selectedDate: new Date().toISOString().split('T')[0],
                           travelers: {
                             adults: Math.max(1, travelers - (travelers > 2 ? 1 : 0)), // Assume children if more than 2
                             children: travelers > 2 ? 1 : 0
@@ -342,11 +324,6 @@ export default function TourDetails() {
                     variant="outline" 
                     className="w-full border-ghana-green text-ghana-green hover:bg-ghana-green hover:text-white"
                     onClick={() => {
-                      if (!selectedDate) {
-                        showWarning("Please select a date first");
-                        return;
-                      }
-
                       // Check if user is authenticated
                       if (!isAuthenticated) {
                         showWarning("Please sign in to reserve this tour");
@@ -368,7 +345,7 @@ export default function TourDetails() {
                           duration: tour.duration_display,
                           basePrice: currentPricing ? parseFloat(currentPricing.price_per_person) : parseFloat(tour.price),
                           totalPrice: currentPricing ? parseFloat(currentPricing.total_price) : parseFloat(tour.price) * travelers,
-                          selectedDate: selectedDate,
+                          selectedDate: new Date().toISOString().split('T')[0],
                           travelers: {
                             adults: Math.max(1, travelers - (travelers > 2 ? 1 : 0)),
                             children: travelers > 2 ? 1 : 0
