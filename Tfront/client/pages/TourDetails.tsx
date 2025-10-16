@@ -227,7 +227,7 @@ export default function TourDetails() {
                   <span>{tour.rating} ({tour.reviews_count} reviews)</span>
                 </div>
               </div>
-              <p className="text-lg text-gray-700 leading-relaxed">{tour.description}</p>
+              <p className="text-lg text-gray-700 leading-relaxed mb-2">{tour.description}</p>
             </div>
           </div>
 
@@ -402,7 +402,7 @@ export default function TourDetails() {
         </div>
 
         {/* Main Content */}
-        <div className="mt-4">
+        <div className="mt-2">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               {/* Tabs */}
