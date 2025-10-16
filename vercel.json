@@ -1,9 +1,9 @@
 {
-  "buildCommand": "npm run build:client",
-  "outputDirectory": "dist/spa",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "vite",
+  "buildCommand": "cd Tfront && npm run build:client",
+  "outputDirectory": "Tfront/dist/spa",
+  "devCommand": "cd Tfront && npm run dev",
+  "installCommand": "cd Tfront && npm install",
+  "framework": null,
   "rewrites": [
     {
       "source": "/(.*)",
