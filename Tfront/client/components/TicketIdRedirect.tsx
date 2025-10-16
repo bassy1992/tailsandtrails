@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { validateAndRedirect } from '../utils/ticketValidation';
 
 interface TicketIdRedirectProps {
   children: React.ReactNode;
@@ -11,28 +12,21 @@ interface TicketIdRedirectProps {
 export default function TicketIdRedirect({ children }: TicketIdRedirectProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // List of valid ticket IDs that exist in the database
-  const validTicketIds = ['1', '2'];
+  // Comprehensive ticket ID validation and redirect
+  const isValid = validateAndRedirect(id, location.pathname, navigate);
   
-  // Check immediately if ID is invalid
-  if (id && !validTicketIds.includes(id)) {
-    console.log(`Invalid ticket ID ${id} detected, redirecting to ticket 2`);
-    
-    // Determine the current path to redirect appropriately
-    const currentPath = window.location.pathname;
-    
-    if (currentPath.includes('/booking/')) {
-      navigate('/booking/2', { replace: true });
-    } else if (currentPath.includes('/ticket-booking/')) {
-      navigate('/ticket-booking/2', { replace: true });
-    } else {
-      // Default redirect to tickets page
-      navigate('/tickets', { replace: true });
-    }
-    
-    // Return null to prevent rendering while redirecting
-    return null;
+  // If validation failed, redirect is in progress - don't render children
+  if (!isValid) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ghana-gold mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting to available ticket...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

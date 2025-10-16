@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { validateTicketId, shouldMakeApiCall, getTicketErrorMessage } from '../utils/ticketValidation';
 
 export interface AddOnOption {
   id: number;
@@ -80,11 +81,11 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
 
   // Load add-ons for a specific ticket
   const loadAddOns = async (ticketId: number, travelers: number = 1) => {
-    // Validate ticket ID before making API call
-    const validTicketIds = [1, 2];
-    if (!validTicketIds.includes(ticketId)) {
-      console.warn(`Preventing API call for invalid ticket ID ${ticketId}`);
-      setError(`Ticket ID ${ticketId} not found. Available tickets: ${validTicketIds.join(', ')}`);
+    // Comprehensive ticket ID validation
+    if (!shouldMakeApiCall(ticketId)) {
+      const errorMessage = getTicketErrorMessage(ticketId);
+      console.warn(`🚫 Preventing API call for invalid ticket ID ${ticketId}`);
+      setError(errorMessage);
       setCategories([]);
       setSelectedAddOns([]);
       setLoading(false);
@@ -264,13 +265,13 @@ export const useAddOns = (ticketId?: number, travelers: number = 1) => {
   // Load add-ons when ticketId changes
   useEffect(() => {
     if (ticketId && ticketId > 0) {
-      // Validate ticket ID exists before loading add-ons
-      const validTicketIds = [1, 2]; // Update this list based on your available tickets
-      if (validTicketIds.includes(ticketId)) {
+      // Comprehensive ticket ID validation
+      const validation = validateTicketId(ticketId);
+      if (validation.isValid) {
         loadAddOns(ticketId, travelers);
       } else {
-        console.warn(`Invalid ticket ID ${ticketId}, not loading add-ons`);
-        setError(`Ticket ID ${ticketId} not found. Please select a valid ticket.`);
+        console.warn(`🚫 Invalid ticket ID ${ticketId}, not loading add-ons`);
+        setError(validation.errorMessage || 'Invalid ticket ID');
         setCategories([]);
         setSelectedAddOns([]);
         setLoading(false);
