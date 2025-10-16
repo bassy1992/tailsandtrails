@@ -51,9 +51,11 @@ class ExperienceAddOnInline(admin.TabularInline):
 
 class PricingTierInline(admin.TabularInline):
     model = PricingTier
-    extra = 1
+    extra = 3  # Show 3 empty forms to encourage setting up multiple tiers
     fields = ('min_people', 'max_people', 'price_per_person', 'is_active')
     ordering = ('min_people',)
+    verbose_name = "Pricing Tier"
+    verbose_name_plural = "🎯 Pricing Tiers (Set different prices for different group sizes)"
 
 class BookingAddOnInline(admin.TabularInline):
     model = BookingAddOn
@@ -71,21 +73,26 @@ class DestinationAdmin(admin.ModelAdmin):
     search_fields = ('name', 'location', 'description')
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ('created_at', 'updated_at')
-    inlines = [DestinationHighlightInline, DestinationIncludeInline, DestinationImageInline, PricingTierInline, AddOnOptionInline, ExperienceAddOnInline]
+    inlines = [PricingTierInline, DestinationHighlightInline, DestinationIncludeInline, DestinationImageInline, AddOnOptionInline, ExperienceAddOnInline]
     
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'slug', 'location', 'category', 'description')
         }),
         ('Tour Details', {
-            'fields': ('price', 'duration', 'max_group_size', 'image'),
-            'description': 'Base price is used when no pricing tiers are defined. Set up pricing tiers below for group-based pricing.'
+            'fields': ('duration', 'max_group_size', 'image'),
+            'description': 'Set up pricing tiers below for group-based pricing. The base price field is kept for API compatibility but pricing tiers take precedence.'
         }),
         ('Ratings & Reviews', {
             'fields': ('rating', 'reviews_count')
         }),
         ('Status', {
             'fields': ('is_active', 'is_featured')
+        }),
+        ('Legacy Pricing (API Compatibility)', {
+            'fields': ('price',),
+            'classes': ('collapse',),
+            'description': 'Base price field kept for API compatibility. Use pricing tiers above for actual pricing.'
         }),
         ('Metadata', {
             'fields': ('created_at', 'updated_at'),
