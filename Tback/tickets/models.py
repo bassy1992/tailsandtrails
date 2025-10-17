@@ -207,7 +207,7 @@ class TicketPurchase(models.Model):
     # Purchase Information
     purchase_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='purchases')
-    user = models.ForeignKey('authentication.User', on_delete=models.CASCADE, related_name='ticket_purchases')
+    user = models.ForeignKey('authentication.User', on_delete=models.CASCADE, related_name='ticket_purchases', blank=True, null=True)
     
     # Quantity and Pricing
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])

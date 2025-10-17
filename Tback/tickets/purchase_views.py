@@ -11,13 +11,13 @@ import logging
 import uuid
 
 from .models import Ticket, TicketPurchase, TicketCode
-from .serializers import TicketPurchaseSerializer, TicketListSerializer
+from .serializers import TicketPurchaseSerializer, TicketSerializer
 from authentication.models import User
 
 logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])  # Require authentication for purchases
+@permission_classes([AllowAny])  # Allow unauthenticated purchases for direct checkout
 def create_ticket_purchase(request):
     """Create a ticket purchase directly (separate from Payment model)"""
     try:
@@ -48,8 +48,8 @@ def create_ticket_purchase(request):
                 'error': f'Only {ticket.available_quantity} tickets available'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Use authenticated user
-        user = request.user
+        # Use authenticated user if available, otherwise None for guest purchases
+        user = request.user if request.user.is_authenticated else None
         
         # Calculate pricing - use provided amount if available (for VIP/Premium tickets)
         provided_total = data.get('total_amount')
