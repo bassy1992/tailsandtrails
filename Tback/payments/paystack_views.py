@@ -158,7 +158,7 @@ def create_paystack_payment(request):
             'payment_method': data['payment_method'],
             'phone_number': data.get('phone_number', ''),
             'description': data.get('description', 'Payment via Paystack'),
-            'callback_url': f"{settings.BASE_URL}/api/payments/paystack/callback/"
+            'callback_url': f"{settings.FRONTEND_URL}/payment-callback"
         }
         
         # Handle different payment methods

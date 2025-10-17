@@ -141,17 +141,41 @@ export default function TicketCheckout() {
 
             if (paymentResult.success) {
                 const paymentReference = paymentResult.payment.reference;
-                const isTestMode = paymentResult.paystack?.test_mode;
+                const authorizationUrl = paymentResult.paystack?.authorization_url;
                 
-                const message = isTestMode ? 
-                    'Test Mode: Mobile money payment simulated. Payment will be automatically approved in 10 seconds.' :
-                    'Payment request sent to your phone. Please check your mobile money app and authorize the payment.';
-                    
-                setStatusMessage(message);
+                // Store payment reference and customer info for later verification
+                localStorage.setItem('pendingPaymentReference', paymentReference);
+                
+                // Update the stored ticket purchase data with customer info
+                const updatedPurchaseData = {
+                    ...purchaseData,
+                    customerInfo: {
+                        name: customerInfo.name,
+                        email: customerInfo.email,
+                        phone: customerInfo.phone
+                    },
+                    paymentProvider: momoProvider,
+                    accountName: accountName
+                };
+                localStorage.setItem('pendingTicketPurchase', JSON.stringify(updatedPurchaseData));
+                
+                // Redirect to Paystack for payment processing
+                if (authorizationUrl) {
+                    console.log('🎫 Redirecting to Paystack:', authorizationUrl);
+                    window.location.href = authorizationUrl;
+                    return; // Exit here as we're redirecting
+                } else {
+                    // Fallback: If no authorization URL, use polling (for test mode)
+                    const isTestMode = paymentResult.paystack?.test_mode;
+                    const message = isTestMode ? 
+                        'Test Mode: Mobile money payment simulated. Payment will be automatically approved in 10 seconds.' :
+                        'Payment request sent to your phone. Please check your mobile money app and authorize the payment.';
+                        
+                    setStatusMessage(message);
 
-                // Step 2: Poll for payment status
-                let attempts = 0;
-                const maxAttempts = 60; // 5 minutes (5 second intervals)
+                    // Step 2: Poll for payment status (fallback only)
+                    let attempts = 0;
+                    const maxAttempts = 60; // 5 minutes (5 second intervals)
 
                 const pollPaymentStatus = async () => {
                     try {

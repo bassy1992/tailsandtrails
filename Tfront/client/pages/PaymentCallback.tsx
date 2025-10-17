@@ -39,9 +39,72 @@ export default function PaymentCallback() {
             // Clear stored reference
             sessionStorage.removeItem('paymentReference');
             
-            // Redirect to success page after a short delay
-            setTimeout(() => {
-              // Try to restore original payment data
+            // Handle ticket purchase completion
+            setTimeout(async () => {
+              // Check if this is a ticket purchase
+              const ticketPurchaseData = localStorage.getItem('pendingTicketPurchase');
+              
+              if (ticketPurchaseData) {
+                try {
+                  const purchaseData = JSON.parse(ticketPurchaseData);
+                  
+                  // Create the ticket purchase after successful payment
+                  const ticketResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/tickets/purchase/direct/`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      ticket_id: purchaseData.ticketId,
+                      quantity: purchaseData.quantity,
+                      total_amount: purchaseData.totalAmount,
+                      customer_name: purchaseData.customerInfo?.name || 'Customer',
+                      customer_email: purchaseData.customerInfo?.email || '',
+                      customer_phone: purchaseData.customerInfo?.phone || '',
+                      payment_method: 'paystack_momo',
+                      payment_reference: paymentRef,
+                      special_requests: `Paystack Mobile Money Payment - ${paymentRef}`
+                    })
+                  });
+
+                  const ticketResult = await ticketResponse.json();
+
+                  if (ticketResult.success) {
+                    // Clear the stored data
+                    localStorage.removeItem('pendingTicketPurchase');
+                    localStorage.removeItem('pendingPaymentReference');
+
+                    // Navigate to ticket purchase success page
+                    navigate('/ticket-purchase-success', {
+                      state: {
+                        purchase: ticketResult.purchase,
+                        paymentReference: paymentRef,
+                        paymentDetails: {
+                          method: 'Mobile Money',
+                          provider: 'Paystack',
+                          transactionId: paymentRef,
+                          amount: payment.amount,
+                          currency: payment.currency
+                        }
+                      },
+                      replace: true
+                    });
+                    return;
+                  } else {
+                    console.error('Failed to create ticket purchase:', ticketResult);
+                    setStatus('failed');
+                    setMessage('Payment successful but failed to create ticket. Please contact support.');
+                    return;
+                  }
+                } catch (error) {
+                  console.error('Error processing ticket purchase:', error);
+                  setStatus('failed');
+                  setMessage('Payment successful but failed to create ticket. Please contact support.');
+                  return;
+                }
+              }
+              
+              // Handle regular tour booking payments
               const storedPaymentData = sessionStorage.getItem('pendingPaymentData');
               let originalPaymentData = null;
               
@@ -59,7 +122,7 @@ export default function PaymentCallback() {
               
               // Ensure we have the necessary data for the success page
               const successData = {
-                ...originalPaymentData, // Restore original booking/ticket data
+                ...originalPaymentData, // Restore original booking data
                 total: payment.amount || originalPaymentData?.total || 0,
                 paymentDetails: {
                   method: paymentMethod,
@@ -69,7 +132,7 @@ export default function PaymentCallback() {
                   gateway: 'Paystack',
                   amount: payment.amount,
                   currency: payment.currency,
-                  provider: payment.payment_method === 'mobile_money' ? 'MTN' : undefined
+                  provider: payment.payment_method === 'mobile_money' ? 'Paystack' : undefined
                 }
               };
               
