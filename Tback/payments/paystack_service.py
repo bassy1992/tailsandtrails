@@ -82,10 +82,8 @@ class PaystackService:
             is_test_mode = self.secret_key.startswith('sk_test_')
             is_mobile_money = payment_data.get('payment_method') == 'mobile_money'
             
-            # In test mode for mobile money, create real Paystack transaction but mark as simulation
-            if is_test_mode and is_mobile_money:
-                logger.info("Test mode detected for mobile money - creating real Paystack transaction for compatibility")
-                return self._simulate_test_mobile_money(payment_data)
+            # Let Paystack handle mobile money normally, even in test mode
+            # This will redirect users to Paystack's website for payment approval
             
             # Convert amount to kobo (Paystack uses kobo for GHS)
             amount_kobo = int(float(payment_data['amount']) * 100)
@@ -172,14 +170,18 @@ class PaystackService:
             # Convert amount to kobo
             amount_kobo = int(float(payment_data['amount']) * 100)
             
-            # Create a real transaction with card channel but mark as mobile money simulation
+            # Create a real transaction with mobile money channel first, fallback to card if needed
             transaction_data = {
                 'email': payment_data['email'],
                 'amount': amount_kobo,
                 'currency': payment_data.get('currency', 'GHS'),
                 'reference': payment_data['reference'],
                 'callback_url': payment_data.get('callback_url', ''),
-                'channels': ['card'],  # Use card channel for valid access code
+                'channels': ['mobile_money', 'card'],  # Try mobile money first, fallback to card
+                'mobile_money': {
+                    'phone': payment_data.get('phone_number', '').replace('+', '').replace(' ', ''),
+                    'provider': payment_data.get('provider', 'mtn')
+                },
                 'metadata': {
                     'payment_method': 'mobile_money',
                     'phone_number': payment_data.get('phone_number', ''),
@@ -187,6 +189,10 @@ class PaystackService:
                     'test_mode_simulation': True,
                     'simulated_mobile_money': True,
                     'provider': payment_data.get('provider', 'mtn'),
+                    'mobile_money': {
+                        'phone': payment_data.get('phone_number', ''),
+                        'provider': payment_data.get('provider', 'mtn')
+                    },
                     'custom_fields': [
                         {
                             'display_name': 'Payment Type',
