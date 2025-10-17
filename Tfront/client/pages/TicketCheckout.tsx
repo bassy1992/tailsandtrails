@@ -108,7 +108,7 @@ export default function TicketCheckout() {
         setError(null);
 
         try {
-            // Step 1: Create payment using Paystack
+            // Use Paystack for mobile money (same as other working checkouts)
             const paymentResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/payments/paystack/create/`, {
                 method: 'POST',
                 headers: {
@@ -119,7 +119,7 @@ export default function TicketCheckout() {
                     currency: 'GHS',
                     payment_method: 'mobile_money',
                     provider: momoProvider.toLowerCase(), // mtn, vodafone, airteltigo
-                    phone_number: phoneNumber.startsWith('0') ? phoneNumber : `0${phoneNumber}`, // Ensure proper format
+                    phone_number: phoneNumber.startsWith('0') ? phoneNumber : `0${phoneNumber}`,
                     email: customerInfo.email,
                     description: `Ticket Purchase: ${purchaseData.ticketTitle} (${purchaseData.quantity} tickets)`,
                     booking_details: {
@@ -143,9 +143,6 @@ export default function TicketCheckout() {
                 const paymentReference = paymentResult.payment.reference;
                 const authorizationUrl = paymentResult.paystack?.authorization_url;
                 
-                // Store payment reference and customer info for later verification
-                localStorage.setItem('pendingPaymentReference', paymentReference);
-                
                 // Update the stored ticket purchase data with customer info
                 const updatedPurchaseData = {
                     ...purchaseData,
@@ -159,23 +156,27 @@ export default function TicketCheckout() {
                 };
                 localStorage.setItem('pendingTicketPurchase', JSON.stringify(updatedPurchaseData));
                 
-                // Redirect to Paystack for payment processing
+                // Check if we have an authorization URL (this should always be present for Paystack)
                 if (authorizationUrl) {
-                    console.log('🎫 Redirecting to Paystack:', authorizationUrl);
+                    console.log('🎫 Redirecting to Paystack for mobile money:', authorizationUrl);
+                    // Store payment reference for callback
+                    localStorage.setItem('pendingPaymentReference', paymentReference);
+                    // Redirect to Paystack website
                     window.location.href = authorizationUrl;
                     return; // Exit here as we're redirecting
-                } else {
-                    // Fallback: If no authorization URL, use polling (for test mode)
-                    const isTestMode = paymentResult.paystack?.test_mode;
-                    const message = isTestMode ? 
-                        'Test Mode: Mobile money payment simulated. Payment will be automatically approved in 10 seconds.' :
-                        'Payment request sent to your phone. Please check your mobile money app and authorize the payment.';
-                        
-                    setStatusMessage(message);
+                }
+                
+                // Fallback for test mode or if no authorization URL
+                const isTestMode = paymentResult.test_mode;
+                const message = isTestMode ? 
+                    'Test Mode: Mobile money payment simulated. Payment will be automatically approved in 10 seconds.' :
+                    'Payment request sent to your phone. Please check your mobile money app and authorize the payment.';
+                    
+                setStatusMessage(message);
 
-                    // Step 2: Poll for payment status (fallback only)
-                    let attempts = 0;
-                    const maxAttempts = 60; // 5 minutes (5 second intervals)
+                // Step 2: Poll for payment status (fallback only)
+                let attempts = 0;
+                const maxAttempts = 60; // 5 minutes (5 second intervals)
 
                 const pollPaymentStatus = async () => {
                     try {
