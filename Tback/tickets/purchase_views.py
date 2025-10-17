@@ -94,7 +94,7 @@ def create_ticket_purchase(request):
             payment_method = data.get('payment_method', 'momo')
             payment_reference = data.get('payment_reference')
             
-            if payment_method in ['momo', 'mtn_momo', 'vodafone_cash', 'airteltigo_money']:
+            if payment_method in ['momo', 'mtn_momo', 'vodafone_cash', 'airteltigo_money', 'paystack_momo']:
                 # Use provided payment reference if available, otherwise create one
                 if payment_reference:
                     purchase.payment_reference = payment_reference
