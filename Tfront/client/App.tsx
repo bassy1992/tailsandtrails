@@ -55,16 +55,8 @@ function AppRoutes() {
           <TicketBooking />
         </TicketIdRedirect>
       } />
-      <Route path="/ticket-checkout" element={
-        <ProtectedRoute>
-          <TicketCheckout />
-        </ProtectedRoute>
-      } />
-      <Route path="/ticket-purchase-success" element={
-        <ProtectedRoute>
-          <TicketPurchaseSuccess />
-        </ProtectedRoute>
-      } />
+      <Route path="/ticket-checkout" element={<TicketCheckout />} />
+      <Route path="/ticket-purchase-success" element={<TicketPurchaseSuccess />} />
       <Route path="/tours" element={<Placeholder />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
