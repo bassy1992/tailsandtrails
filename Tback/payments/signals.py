@@ -207,7 +207,7 @@ def track_payment_status_change(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Payment)
 def create_booking_on_successful_payment(sender, instance, created, **kwargs):
-    """Create booking when payment becomes successful"""
+    """Create booking and send confirmation email when payment becomes successful"""
     if not created and hasattr(instance, '_old_status'):
         # Check if payment status changed to successful
         if (instance._old_status != 'successful' and 
@@ -216,10 +216,22 @@ def create_booking_on_successful_payment(sender, instance, created, **kwargs):
             
             try:
                 from .booking_details_utils import create_booking_from_payment
+                from .email_service import EmailService
                 
                 booking = create_booking_from_payment(instance)
                 if booking:
                     logger.info(f"Auto-created booking {booking.booking_reference} for successful payment {instance.reference}")
+                    
+                    # Send booking confirmation email
+                    try:
+                        booking_details = instance.metadata.get('booking_details', {}) if instance.metadata else {}
+                        email_sent = EmailService.send_booking_confirmation(instance, booking_details)
+                        if email_sent:
+                            logger.info(f"Booking confirmation email sent for payment {instance.reference}")
+                        else:
+                            logger.warning(f"Failed to send booking confirmation email for payment {instance.reference}")
+                    except Exception as email_error:
+                        logger.error(f"Error sending booking confirmation email for payment {instance.reference}: {str(email_error)}")
                 else:
                     logger.warning(f"Failed to create booking for successful payment {instance.reference} - no valid booking details found")
                     

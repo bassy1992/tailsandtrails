@@ -71,7 +71,7 @@ ROOT_URLCONF = 'tback_api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -292,9 +292,15 @@ MTN_MOMO_COLLECTION_API_KEY = os.getenv('MTN_MOMO_COLLECTION_API_KEY', '')
 MTN_MOMO_COLLECTION_SUBSCRIPTION_KEY = os.getenv('MTN_MOMO_COLLECTION_SUBSCRIPTION_KEY', '')
 MTN_MOMO_CALLBACK_URL = os.getenv('MTN_MOMO_CALLBACK_URL', 'http://localhost:8000/api/payments/mtn-momo/webhook/')
 
-# Email settings (configure for production)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For development
-DEFAULT_FROM_EMAIL = 'noreply@trailsandtrails.com'
+# Email settings - Brevo SMTP Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = '81d61b003@smtp-brevo.com'
+EMAIL_HOST_PASSWORD = os.getenv('BREVO_SMTP_PASSWORD', '')  # Add this to your environment variables
+DEFAULT_FROM_EMAIL = 'Tails & Trails <noreply@tailsandtrails.com>'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Logging configuration
 LOGGING = {

@@ -50,8 +50,6 @@ export default function TicketCheckout() {
         phone: ''
     });
     const [momoProvider, setMomoProvider] = useState<string>("");
-    const [phoneNumber, setPhoneNumber] = useState<string>("");
-    const [accountName, setAccountName] = useState<string>("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [step, setStep] = useState<'details' | 'processing' | 'verify'>('details');
     const [statusMessage, setStatusMessage] = useState<string>('Payment request sent to your phone');
@@ -98,8 +96,8 @@ export default function TicketCheckout() {
             return;
         }
 
-        if (!momoProvider || !phoneNumber || !accountName) {
-            setError('Please fill in all payment details');
+        if (!momoProvider) {
+            setError('Please select a mobile money provider');
             return;
         }
 
@@ -119,7 +117,7 @@ export default function TicketCheckout() {
                     currency: 'GHS',
                     payment_method: 'mobile_money',
                     provider: momoProvider.toLowerCase(), // mtn, vodafone, airteltigo
-                    phone_number: phoneNumber.startsWith('0') ? phoneNumber : `0${phoneNumber}`,
+                    phone_number: customerInfo.phone.startsWith('0') ? customerInfo.phone : `0${customerInfo.phone}`,
                     email: customerInfo.email,
                     description: `Ticket Purchase: ${purchaseData.ticketTitle} (${purchaseData.quantity} tickets)`,
                     booking_details: {
@@ -131,8 +129,7 @@ export default function TicketCheckout() {
                         customer_name: customerInfo.name,
                         customer_email: customerInfo.email,
                         customer_phone: customerInfo.phone,
-                        payment_provider: momoProvider,
-                        account_name: accountName
+                        payment_provider: momoProvider
                     }
                 })
             });
@@ -151,8 +148,7 @@ export default function TicketCheckout() {
                         email: customerInfo.email,
                         phone: customerInfo.phone
                     },
-                    paymentProvider: momoProvider,
-                    accountName: accountName
+                    paymentProvider: momoProvider
                 };
                 localStorage.setItem('pendingTicketPurchase', JSON.stringify(updatedPurchaseData));
                 
@@ -455,30 +451,7 @@ export default function TicketCheckout() {
                                         </RadioGroup>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label htmlFor="phoneNumber">Mobile Money Number *</Label>
-                                            <Input
-                                                id="phoneNumber"
-                                                type="tel"
-                                                placeholder="e.g., 0241234567"
-                                                value={phoneNumber}
-                                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="accountName">Account Name *</Label>
-                                            <Input
-                                                id="accountName"
-                                                type="text"
-                                                placeholder="Name on mobile money account"
-                                                value={accountName}
-                                                onChange={(e) => setAccountName(e.target.value)}
-                                                required
-                                            />
-                                        </div>
-                                    </div>
+
                                 </CardContent>
                             </Card>
 

@@ -113,6 +113,17 @@ def create_ticket_purchase(request):
                 # Generate ticket codes
                 generate_ticket_codes(purchase)
                 
+                # Send ticket confirmation email
+                try:
+                    from payments.email_service import EmailService
+                    email_sent = EmailService.send_ticket_confirmation(purchase)
+                    if email_sent:
+                        logger.info(f"Ticket confirmation email sent for purchase {purchase.purchase_id}")
+                    else:
+                        logger.warning(f"Failed to send ticket confirmation email for purchase {purchase.purchase_id}")
+                except Exception as email_error:
+                    logger.error(f"Error sending ticket confirmation email for purchase {purchase.purchase_id}: {str(email_error)}")
+                
                 return Response({
                     'success': True,
                     'message': 'Ticket purchase completed successfully',
