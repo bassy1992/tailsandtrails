@@ -299,7 +299,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = '81d61b003@smtp-brevo.com'
 EMAIL_HOST_PASSWORD = os.getenv('BREVO_SMTP_PASSWORD', '')  # Add this to your environment variables
-DEFAULT_FROM_EMAIL = 'TailsAndTrails <awuleynovember@gmail.com>'
+DEFAULT_FROM_EMAIL = 'TrailsAndTrails <awuleynovember@8508955.brevosend.com>'
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Logging configuration
