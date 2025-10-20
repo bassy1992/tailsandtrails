@@ -105,8 +105,10 @@
   }
 
   /* Ensure proper touch targets on mobile */
-  button, a, input, select, textarea {
-    @apply min-h-[44px] sm:min-h-auto;
+  @media (max-width: 640px) {
+    button, a, input, select, textarea {
+      min-height: 44px;
+    }
   }
 
   /* Improve text readability on mobile */
