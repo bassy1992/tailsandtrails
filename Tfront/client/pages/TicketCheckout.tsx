@@ -334,124 +334,129 @@ export default function TicketCheckout() {
 
     return (
         <Layout>
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8">
-                <div className="max-w-4xl mx-auto px-4">
-                    {/* Header */}
-                    <div className="flex items-center gap-4 mb-8">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-4 sm:py-8">
+                <div className="mobile-container max-w-4xl">
+                    {/* Header - Mobile Optimized */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 sm:mb-8">
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => navigate(-1)}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-2 w-fit"
                         >
                             <ArrowLeft className="w-4 h-4" />
                             Back
                         </Button>
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Complete Your Ticket Purchase</h1>
-                            <p className="text-gray-600">Secure checkout for your event tickets</p>
+                        <div className="flex-1">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                                Complete Your Ticket Purchase
+                            </h1>
+                            <p className="text-gray-600 text-sm sm:text-base mt-1">
+                                Secure checkout for your event tickets
+                            </p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Payment Form */}
-                        <div className="lg:col-span-2 space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                        {/* Payment Form - Mobile Optimized */}
+                        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                             {/* Customer Information */}
                             <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                                         <User className="w-5 h-5" />
                                         Customer Information
                                     </CardTitle>
-                                    <CardDescription>
+                                    <CardDescription className="text-sm">
                                         Please provide your details for the ticket purchase
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-4">
                                         <div>
-                                            <Label htmlFor="name">Full Name *</Label>
+                                            <Label htmlFor="name" className="mobile-form-label">Full Name *</Label>
                                             <Input
                                                 id="name"
                                                 type="text"
                                                 placeholder="Enter your full name"
+                                                className="mobile-input"
                                                 value={customerInfo.name}
                                                 onChange={(e) => handleInputChange('name', e.target.value)}
                                                 required
                                             />
                                         </div>
                                         <div>
-                                            <Label htmlFor="email">Email Address *</Label>
+                                            <Label htmlFor="email" className="mobile-form-label">Email Address *</Label>
                                             <Input
                                                 id="email"
                                                 type="email"
                                                 placeholder="Enter your email"
+                                                className="mobile-input"
                                                 value={customerInfo.email}
                                                 onChange={(e) => handleInputChange('email', e.target.value)}
                                                 required
                                             />
                                         </div>
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="phone">Phone Number *</Label>
-                                        <Input
-                                            id="phone"
-                                            type="tel"
-                                            placeholder="e.g., 0241234567"
-                                            value={customerInfo.phone}
-                                            onChange={(e) => handleInputChange('phone', e.target.value)}
-                                            required
-                                        />
+                                        <div>
+                                            <Label htmlFor="phone" className="mobile-form-label">Phone Number *</Label>
+                                            <Input
+                                                id="phone"
+                                                type="tel"
+                                                placeholder="e.g., 0241234567"
+                                                className="mobile-input"
+                                                value={customerInfo.phone}
+                                                onChange={(e) => handleInputChange('phone', e.target.value)}
+                                                required
+                                            />
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            {/* Payment Method */}
+                            {/* Payment Method - Mobile Optimized */}
                             <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                                         <Smartphone className="w-5 h-5" />
                                         Mobile Money Payment
                                     </CardTitle>
-                                    <CardDescription>
+                                    <CardDescription className="text-sm">
                                         Choose your mobile money provider
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div>
-                                        <Label>Select Provider *</Label>
-                                        <RadioGroup value={momoProvider} onValueChange={setMomoProvider} className="mt-2">
-                                            <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                                                <RadioGroupItem value="mtn" id="mtn" />
-                                                <Label htmlFor="mtn" className="flex items-center gap-2 cursor-pointer flex-1">
-                                                    <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                                                        <span className="text-xs font-bold text-black">MTN</span>
+                                        <Label className="mobile-form-label">Select Provider *</Label>
+                                        <RadioGroup value={momoProvider} onValueChange={setMomoProvider} className="mt-3 space-y-3">
+                                            <div className="touch-target flex items-center space-x-3 p-4 border-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                                <RadioGroupItem value="mtn" id="mtn" className="flex-shrink-0" />
+                                                <Label htmlFor="mtn" className="flex items-center gap-3 cursor-pointer flex-1">
+                                                    <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <span className="text-sm font-bold text-black">MTN</span>
                                                     </div>
-                                                    MTN Mobile Money
+                                                    <span className="font-medium">MTN Mobile Money</span>
                                                 </Label>
                                             </div>
-                                            <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                                                <RadioGroupItem value="vodafone" id="vodafone" />
-                                                <Label htmlFor="vodafone" className="flex items-center gap-2 cursor-pointer flex-1">
-                                                    <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                                                        <span className="text-xs font-bold text-white">VOD</span>
+                                            <div className="touch-target flex items-center space-x-3 p-4 border-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                                <RadioGroupItem value="vodafone" id="vodafone" className="flex-shrink-0" />
+                                                <Label htmlFor="vodafone" className="flex items-center gap-3 cursor-pointer flex-1">
+                                                    <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <span className="text-sm font-bold text-white">VOD</span>
                                                     </div>
-                                                    Vodafone Cash
+                                                    <span className="font-medium">Vodafone Cash</span>
                                                 </Label>
                                             </div>
-                                            <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
-                                                <RadioGroupItem value="airteltigo" id="airteltigo" />
-                                                <Label htmlFor="airteltigo" className="flex items-center gap-2 cursor-pointer flex-1">
-                                                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                                                        <span className="text-xs font-bold text-white">AT</span>
+                                            <div className="touch-target flex items-center space-x-3 p-4 border-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                                <RadioGroupItem value="airteltigo" id="airteltigo" className="flex-shrink-0" />
+                                                <Label htmlFor="airteltigo" className="flex items-center gap-3 cursor-pointer flex-1">
+                                                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                                        <span className="text-sm font-bold text-white">AT</span>
                                                     </div>
-                                                    AirtelTigo Money
+                                                    <span className="font-medium">AirtelTigo Money</span>
                                                 </Label>
                                             </div>
                                         </RadioGroup>
                                     </div>
-
-
                                 </CardContent>
                             </Card>
 
@@ -462,34 +467,36 @@ export default function TicketCheckout() {
                             )}
                         </div>
 
-                        {/* Order Summary */}
-                        <div className="lg:col-span-1">
-                            <Card className="sticky top-8">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
+                        {/* Order Summary - Mobile Optimized */}
+                        <div className="lg:col-span-1 order-first lg:order-last">
+                            <Card className="lg:sticky lg:top-8">
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                                         <Ticket className="w-5 h-5" />
                                         Order Summary
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-3">
-                                        <h3 className="font-semibold text-lg">{purchaseData.ticketTitle}</h3>
+                                        <h3 className="font-semibold text-base sm:text-lg leading-tight">
+                                            {purchaseData.ticketTitle}
+                                        </h3>
 
-                                        <div className="space-y-2 text-sm text-gray-600">
-                                            <div className="flex items-center gap-2">
-                                                <MapPin className="w-4 h-4" />
-                                                <span>{purchaseData.venue}</span>
+                                        <div className="space-y-3 text-sm text-gray-600">
+                                            <div className="flex items-start gap-3">
+                                                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                                <span className="flex-1">{purchaseData.venue}</span>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <Calendar className="w-4 h-4" />
+                                            <div className="flex items-center gap-3">
+                                                <Calendar className="w-4 h-4 flex-shrink-0" />
                                                 <span>{new Date(purchaseData.eventDate).toLocaleDateString()}</span>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <Clock className="w-4 h-4" />
+                                            <div className="flex items-center gap-3">
+                                                <Clock className="w-4 h-4 flex-shrink-0" />
                                                 <span>{new Date(purchaseData.eventDate).toLocaleTimeString()}</span>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <Users className="w-4 h-4" />
+                                            <div className="flex items-center gap-3">
+                                                <Users className="w-4 h-4 flex-shrink-0" />
                                                 <span>{purchaseData.quantity} ticket{purchaseData.quantity > 1 ? 's' : ''}</span>
                                             </div>
                                         </div>

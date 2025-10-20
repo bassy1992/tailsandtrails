@@ -324,30 +324,30 @@ export default function Index() {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-ghana-green to-ghana-blue text-white">
+      {/* Hero Section - Mobile Optimized */}
+      <section className="relative bg-gradient-to-r from-ghana-green to-ghana-blue text-white min-h-[60vh] sm:min-h-[70vh] flex items-center">
         <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center space-y-8">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+        <div className="relative mobile-container py-12 sm:py-16 lg:py-24">
+          <div className="text-center space-y-6 sm:space-y-8">
+            <h1 className="mobile-heading text-white">
               Discover Ghana's
-              <span className="block text-ghana-gold">Rich Heritage</span>
+              <span className="block text-ghana-gold mt-2">Rich Heritage</span>
             </h1>
-            <p className="text-xl md:text-2xl max-w-3xl mx-auto text-gray-200">
+            <p className="mobile-text text-gray-200 max-w-3xl mx-auto">
               Experience the beauty, culture, and history of Ghana with our comprehensive tour packages including transport, accommodation, meals, and medical support.
             </p>
             
-            {/* Enhanced Search Bar */}
-            <div className="max-w-4xl mx-auto bg-white rounded-lg p-6 shadow-lg" ref={searchResultsRef}>
+            {/* Enhanced Search Bar - Mobile Optimized */}
+            <div className="max-w-4xl mx-auto bg-white rounded-lg p-4 sm:p-6 shadow-lg" ref={searchResultsRef}>
               <div className="space-y-4">
-                {/* Main Search Row */}
-                <div className="flex flex-col lg:flex-row gap-4">
-                  <div className="flex-1 relative">
+                {/* Main Search Row - Stack on Mobile */}
+                <div className="flex flex-col gap-4">
+                  <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <Input
                       type="text"
-                      placeholder="Search destinations, locations, or activities..."
-                      className="pl-10 text-gray-900"
+                      placeholder="Search destinations..."
+                      className="mobile-input pl-10 text-gray-900"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onFocus={() => searchResults.length > 0 && setShowResults(true)}
@@ -356,33 +356,36 @@ export default function Index() {
                       <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 animate-spin" />
                     )}
                   </div>
-                  <div className="flex-1 relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                    <Input
-                      type="date"
-                      className="pl-10 text-gray-900"
-                      value={searchDate}
-                      onChange={(e) => setSearchDate(e.target.value)}
-                    />
+                  
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      <Input
+                        type="date"
+                        className="mobile-input pl-10 text-gray-900"
+                        value={searchDate}
+                        onChange={(e) => setSearchDate(e.target.value)}
+                      />
+                    </div>
+                    <Button 
+                      className="mobile-button bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold"
+                      onClick={handleSearchSubmit}
+                    >
+                      Search Tours
+                    </Button>
                   </div>
-                  <Button 
-                    className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold px-8"
-                    onClick={handleSearchSubmit}
-                  >
-                    Search Tours
-                  </Button>
                 </div>
 
-                {/* Filters Row */}
-                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                {/* Filters Row - Mobile Optimized */}
+                <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-gray-500" />
                     <span className="text-sm text-gray-600 font-medium">Filters:</span>
                   </div>
                   
-                  <div className="flex flex-wrap gap-3 flex-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <Select value={priceFilter} onValueChange={setPriceFilter}>
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Price" />
                       </SelectTrigger>
                       <SelectContent>
@@ -393,7 +396,7 @@ export default function Index() {
                     </Select>
 
                     <Select value={durationFilter} onValueChange={setDurationFilter}>
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Duration" />
                       </SelectTrigger>
                       <SelectContent>

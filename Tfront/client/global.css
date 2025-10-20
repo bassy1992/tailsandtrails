@@ -103,4 +103,100 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Ensure proper touch targets on mobile */
+  button, a, input, select, textarea {
+    @apply min-h-[44px] sm:min-h-auto;
+  }
+
+  /* Improve text readability on mobile */
+  p, span, div {
+    @apply text-base leading-relaxed;
+  }
+
+  /* Better spacing for mobile */
+  .container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer components {
+  /* Mobile-first responsive utilities */
+  .mobile-container {
+    @apply px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto;
+  }
+
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  .mobile-card {
+    @apply bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition-shadow;
+  }
+
+  .mobile-button {
+    @apply w-full sm:w-auto px-6 py-3 text-base font-medium rounded-lg transition-colors;
+  }
+
+  .mobile-input {
+    @apply w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+
+  .mobile-heading {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight;
+  }
+
+  .mobile-subheading {
+    @apply text-lg sm:text-xl lg:text-2xl font-semibold text-gray-800;
+  }
+
+  .mobile-text {
+    @apply text-base sm:text-lg text-gray-600 leading-relaxed;
+  }
+
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Safe area handling for mobile devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Responsive image handling */
+  .responsive-image {
+    @apply w-full h-auto object-cover rounded-lg;
+  }
+
+  /* Mobile-optimized forms */
+  .mobile-form {
+    @apply space-y-4 sm:space-y-6;
+  }
+
+  .mobile-form-group {
+    @apply space-y-2;
+  }
+
+  .mobile-form-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  /* Mobile navigation styles */
+  .mobile-nav-link {
+    @apply block px-3 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md transition-colors;
+  }
+
+  /* Responsive spacing utilities */
+  .mobile-section {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+
+  .mobile-section-sm {
+    @apply py-4 sm:py-6 lg:py-8;
+  }
 }
