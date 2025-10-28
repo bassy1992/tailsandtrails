@@ -612,6 +612,7 @@ export default function Index() {
                     <CardTitle className="text-lg line-clamp-2">
                       {tour.name}
                     </CardTitle>
+                    <div className="text-xs text-red-500 font-bold">PRICE REMOVED v3.0</div>
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <MapPin className="h-4 w-4" />
                       <span>{tour.location}</span>
