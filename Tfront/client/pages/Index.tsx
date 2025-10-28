@@ -589,8 +589,6 @@ export default function Index() {
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Discover our most popular destinations and experience the best of Ghana
             </p>
-            {/* Temporary version indicator - remove after verification */}
-            <p className="text-xs text-gray-400">v2.0 - Prices Hidden</p>
           </div>
 
           {isLoadingFeatured ? (
@@ -639,7 +637,6 @@ export default function Index() {
                     <CardTitle className="text-lg line-clamp-2">
                       {tour.name}
                     </CardTitle>
-                    <div className="text-xs text-red-500 font-bold">PRICE REMOVED v3.0</div>
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <MapPin className="h-4 w-4" />
                       <span>{tour.location}</span>
