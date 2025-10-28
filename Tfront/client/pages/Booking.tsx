@@ -347,68 +347,6 @@ export default function Booking() {
                     </div>
                   </div>
 
-                  {/* Travelers Section */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-gray-700 flex items-center">
-                      <Users className="h-4 w-4 mr-2 text-ghana-green" />
-                      Travelers
-                    </Label>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Adults */}
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <p className="font-medium">Adults</p>
-                          <p className="text-sm text-gray-600">Age 18+</p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('adults', false)}
-                            disabled={bookingData.travelers.adults <= 1}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="font-semibold w-8 text-center">{bookingData.travelers.adults}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('adults', true)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Children */}
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <p className="font-medium">Children</p>
-                          <p className="text-sm text-gray-600">Age 2-17</p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('children', false)}
-                            disabled={bookingData.travelers.children <= 0}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <span className="font-semibold w-8 text-center">{bookingData.travelers.children}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('children', true)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
               </CardContent>
             </Card>
@@ -506,7 +444,6 @@ export default function Booking() {
                   <h3 className="font-semibold text-gray-900">{bookingData.tourName}</h3>
                   <div className="text-sm text-gray-600 space-y-1">
                     <p>{bookingData.duration}</p>
-                    <p>{bookingData.travelers.adults} Adults, {bookingData.travelers.children} Children</p>
                     <p>{new Date(bookingData.selectedDate).toLocaleDateString('en-GB')}</p>
                   </div>
                 </div>
