@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, MapPin, Search, Star, Users, Clock, Car, Hotel, Utensils, Shield, Filter, X, Loader2, DollarSign } from "lucide-react";
+import { Calendar, MapPin, Search, Star, Users, Clock, Car, Hotel, Utensils, Shield, Filter, X, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import VideoSection from "@/components/VideoSection";
 import Currency from "@/lib/currency";
@@ -478,7 +478,7 @@ export default function Index() {
                       <Select value={priceFilter} onValueChange={setPriceFilter}>
                         <SelectTrigger className="h-11 border-2 border-gray-200 rounded-lg hover:border-ghana-green transition-colors">
                           <div className="flex items-center gap-2 text-left">
-                            <DollarSign className="h-4 w-4 text-ghana-green flex-shrink-0" />
+                            <span className="text-ghana-green font-bold flex-shrink-0">₵</span>
                             <SelectValue placeholder="Price Range" />
                           </div>
                         </SelectTrigger>
