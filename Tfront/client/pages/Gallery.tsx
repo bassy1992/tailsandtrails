@@ -311,14 +311,14 @@ export default function Gallery() {
       <section className="mobile-section">
         <div className="mobile-container">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-sm sm:max-w-md mx-auto mb-6 sm:mb-8">
-              <TabsTrigger value="photos" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-                <Camera className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>Photos ({imageCount})</span>
+            <TabsList className="grid w-full grid-cols-2 max-w-[95%] xs:max-w-sm sm:max-w-md mx-auto mb-6 sm:mb-8 h-auto">
+              <TabsTrigger value="photos" className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2.5 sm:py-3 px-2 sm:px-4">
+                <Camera className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="whitespace-nowrap">Photos ({imageCount})</span>
               </TabsTrigger>
-              <TabsTrigger value="videos" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
-                <Video className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span>Videos ({videoCount})</span>
+              <TabsTrigger value="videos" className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm py-2.5 sm:py-3 px-2 sm:px-4">
+                <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="whitespace-nowrap">Videos ({videoCount})</span>
               </TabsTrigger>
             </TabsList>
 
