@@ -417,12 +417,13 @@ export default function Index() {
                   
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <div className="relative flex-1">
-                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5 pointer-events-none z-10" />
+                      <Calendar className="hidden sm:block absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none z-10" />
                       <Input
                         type="date"
-                        className="pl-10 sm:pl-11 pr-3 text-gray-900 h-11 sm:h-12 text-sm sm:text-base w-full [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                        className="px-3 sm:pl-10 text-gray-900 h-11 sm:h-12 text-sm sm:text-base w-full"
                         value={searchDate}
                         onChange={(e) => setSearchDate(e.target.value)}
+                        placeholder="Select date"
                       />
                     </div>
                     <Button 
