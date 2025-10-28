@@ -405,21 +405,7 @@ export default function TourDetails() {
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-3 text-base sm:text-lg">Meeting Point</h4>
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{enhancedTour.meetingPoint}</p>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-3 text-base sm:text-lg">Cancellation Policy</h4>
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{enhancedTour.cancellation}</p>
-                        </div>
-                      </div>
-                    </div>
+                    {/* Meeting Point and Cancellation Policy sections removed */}
                   </div>
                 </TabsContent>
 
