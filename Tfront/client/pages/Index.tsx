@@ -26,13 +26,22 @@ interface SearchResult {
 // Helper function to remove price information from text
 const removePriceInfo = (text: string): string => {
   if (!text) return '';
-  return text
-    .replace(/GH¢\s*\d+\s*per\s*person/gi, '')
-    .replace(/GH₵\s*\d+\s*per\s*person/gi, '')
-    .replace(/GH¢\s*\d+/gi, '')
-    .replace(/GH₵\s*\d+/gi, '')
-    .replace(/\d+\s*per\s*person/gi, '')
+  // Remove all variations of price patterns
+  let cleaned = text
+    // Remove GH¢ or GH₵ followed by numbers and "per person"
+    .replace(/GH[¢₵]\s*\d+\s*per\s*person/gi, '')
+    // Remove just GH¢ or GH₵ followed by numbers
+    .replace(/GH[¢₵]\s*\d+/gi, '')
+    // Remove any remaining "per person" text
+    .replace(/per\s*person/gi, '')
+    // Remove standalone numbers that might be prices
+    .replace(/\b\d{2,4}\b(?=\s|$)/g, '')
     .trim();
+  
+  // Remove extra spaces
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  
+  return cleaned;
 };
 
 export default function Index() {
@@ -593,6 +602,7 @@ export default function Index() {
                     <CardTitle className="text-lg line-clamp-2">
                       {removePriceInfo(tour.name)}
                     </CardTitle>
+                    {/* Price removed from display */}
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <MapPin className="h-4 w-4" />
                       <span>{removePriceInfo(tour.location)}</span>
