@@ -152,42 +152,42 @@ export default function TourDetails() {
   return (
     <Layout>
       {/* Breadcrumb */}
-      <div className="bg-gray-50 py-4">
+      <div className="bg-gray-50 py-3 sm:py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center space-x-2 text-sm">
-            <Link to="/" className="text-gray-500 hover:text-ghana-green">Home</Link>
+          <nav className="flex items-center space-x-2 text-xs sm:text-sm overflow-x-auto">
+            <Link to="/" className="text-gray-500 hover:text-ghana-green whitespace-nowrap">Home</Link>
             <span className="text-gray-400">/</span>
-            <Link to="/destinations" className="text-gray-500 hover:text-ghana-green">Destinations</Link>
+            <Link to="/destinations" className="text-gray-500 hover:text-ghana-green whitespace-nowrap">Destinations</Link>
             <span className="text-gray-400">/</span>
-            <span className="text-gray-900">{tour.name}</span>
+            <span className="text-gray-900 truncate">{tour.name}</span>
           </nav>
         </div>
       </div>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
           {/* Left Side - Images */}
           <div className="lg:col-span-2">
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {/* Main Image */}
               <div className="relative">
                 <img
                   src={enhancedTour.images[selectedImage]}
                   alt={tour.name}
-                  className="w-full h-[500px] object-cover rounded-lg"
+                  className="w-full h-[250px] sm:h-[400px] lg:h-[500px] object-cover rounded-lg"
                 />
-                <div className="absolute top-4 left-4">
-                  <Badge className="bg-ghana-gold text-black font-semibold">
+                <div className="absolute top-2 sm:top-4 left-2 sm:left-4">
+                  <Badge className="bg-ghana-gold text-black font-semibold text-xs sm:text-sm">
                     {tour.category.name}
                   </Badge>
                 </div>
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <Button size="sm" variant="secondary" className="bg-white/90 hover:bg-white">
-                    <Heart className="h-4 w-4" />
+                <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex space-x-2">
+                  <Button size="sm" variant="secondary" className="bg-white/90 hover:bg-white h-8 w-8 sm:h-9 sm:w-9 p-0">
+                    <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <Button size="sm" variant="secondary" className="bg-white/90 hover:bg-white">
-                    <Share2 className="h-4 w-4" />
+                  <Button size="sm" variant="secondary" className="bg-white/90 hover:bg-white h-8 w-8 sm:h-9 sm:w-9 p-0">
+                    <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
@@ -215,27 +215,27 @@ export default function TourDetails() {
             </div>
             
             {/* Tour Title and Basic Info - Right under the image */}
-            <div className="mt-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">{tour.name}</h1>
-              <div className="flex items-center space-x-4 text-gray-600 mb-4">
+            <div className="mt-4 sm:mt-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">{tour.name}</h1>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-gray-600 mb-3 sm:mb-4">
                 <div className="flex items-center space-x-1">
-                  <MapPin className="h-5 w-5" />
-                  <span>{tour.location}</span>
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">{tour.location}</span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span>{tour.rating} ({tour.reviews_count} reviews)</span>
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm sm:text-base">{tour.rating} ({tour.reviews_count} reviews)</span>
                 </div>
               </div>
-              <p className="text-lg text-gray-700 leading-relaxed mb-2">{tour.description}</p>
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-2">{tour.description}</p>
             </div>
           </div>
 
           {/* Right Side - Booking Card */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-4">
-              <CardHeader>
-                <div className="flex justify-between items-start">
+            <Card className="lg:sticky lg:top-4">
+              <CardHeader className="pb-3 sm:pb-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                   <div className="flex-1">
                     <DynamicPricing 
                       destination={tour}
@@ -244,39 +244,39 @@ export default function TourDetails() {
                       showTiers={false}
                     />
                   </div>
-                  <div className="flex items-center space-x-1 ml-4">
+                  <div className="flex items-center space-x-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{tour.rating}</span>
-                    <span className="text-gray-500">({tour.reviews_count} reviews)</span>
+                    <span className="font-semibold text-sm sm:text-base">{tour.rating}</span>
+                    <span className="text-gray-500 text-sm sm:text-base">({tour.reviews_count})</span>
                   </div>
                 </div>
               </CardHeader>
               
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 {/* Quick Info */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
                   <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-gray-600" />
-                    <span>{tour.duration_display}</span>
+                    <Clock className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                    <span className="truncate">{tour.duration_display}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4 text-gray-600" />
-                    <span>Max {tour.max_group_size}</span>
+                    <Users className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                    <span className="truncate">Max {tour.max_group_size}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-gray-600" />
-                    <span>{tour.location}</span>
+                    <MapPin className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                    <span className="truncate">{tour.location}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Calendar className="h-4 w-4 text-gray-600" />
-                    <span>Daily</span>
+                    <Calendar className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                    <span className="truncate">Daily</span>
                   </div>
                 </div>
 
                 <Separator />
 
                 {/* Booking Form */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <CompactTravelerSelector
                     destination={tour}
                     selectedTravelers={travelers}
@@ -315,7 +315,7 @@ export default function TourDetails() {
                         }
                       });
                     }}
-                    className="w-full bg-ghana-green hover:bg-ghana-green/90 text-white"
+                    className="w-full bg-ghana-green hover:bg-ghana-green/90 text-white text-sm sm:text-base py-5 sm:py-6"
                   >
                     {isAuthenticated ? "Book Now" : "Sign In to Book"}
                   </Button>
@@ -326,14 +326,14 @@ export default function TourDetails() {
                 <Separator />
 
                 {/* Contact Info */}
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs sm:text-sm">
                   <div className="flex items-center space-x-2">
-                    <Phone className="h-4 w-4 text-ghana-green" />
-                    <span>+233 24 122 7481</span>
+                    <Phone className="h-4 w-4 text-ghana-green flex-shrink-0" />
+                    <span className="break-all">+233 24 122 7481</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-ghana-green" />
-                    <span>tours@talesandtrails.gh</span>
+                    <Mail className="h-4 w-4 text-ghana-green flex-shrink-0" />
+                    <span className="break-all">tours@talesandtrails.gh</span>
                   </div>
                 </div>
               </CardContent>
@@ -342,8 +342,8 @@ export default function TourDetails() {
         </div>
 
         {/* Main Content */}
-        <div className="mt-2">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="mt-4 sm:mt-6 lg:mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
             <div className="lg:col-span-2">
               {/* Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -525,34 +525,34 @@ export default function TourDetails() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="reviews" className="space-y-6 mt-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-semibold text-gray-900">Customer Reviews</h3>
+                <TabsContent value="reviews" className="space-y-4 sm:space-y-6 mt-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Customer Reviews</h3>
                     <div className="flex items-center space-x-2">
-                      <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                      <span className="text-lg font-semibold">{tour.rating}</span>
-                      <span className="text-gray-500">({tour.reviews_count} reviews)</span>
+                      <Star className="h-4 w-4 sm:h-5 sm:w-5 fill-yellow-400 text-yellow-400" />
+                      <span className="text-base sm:text-lg font-semibold">{tour.rating}</span>
+                      <span className="text-gray-500 text-sm sm:text-base">({tour.reviews_count} reviews)</span>
                     </div>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {enhancedTour.reviews_data.map((review, index) => (
                       <Card key={index}>
-                        <CardContent className="pt-6">
-                          <div className="flex items-start space-x-4">
-                            <Avatar>
+                        <CardContent className="pt-4 sm:pt-6">
+                          <div className="flex items-start space-x-3 sm:space-x-4">
+                            <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                               <AvatarImage src={review.avatar} />
                               <AvatarFallback>{review.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <h4 className="font-semibold text-gray-900">{review.name}</h4>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2 mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{review.name}</h4>
                                   <div className="flex items-center space-x-1">
                                     {[...Array(5)].map((_, i) => (
                                       <Star
                                         key={i}
-                                        className={`h-4 w-4 ${
+                                        className={`h-3 w-3 sm:h-4 sm:w-4 ${
                                           i < review.rating
                                             ? "fill-yellow-400 text-yellow-400"
                                             : "text-gray-300"
@@ -561,9 +561,9 @@ export default function TourDetails() {
                                     ))}
                                   </div>
                                 </div>
-                                <span className="text-sm text-gray-500">{review.date}</span>
+                                <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">{review.date}</span>
                               </div>
-                              <p className="text-gray-700">{review.comment}</p>
+                              <p className="text-gray-700 text-sm sm:text-base leading-relaxed">{review.comment}</p>
                             </div>
                           </div>
                         </CardContent>
@@ -575,7 +575,7 @@ export default function TourDetails() {
             </div>
 
             {/* Right Sidebar */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 hidden lg:block">
               <div className="space-y-6">
                 {/* Similar Tours */}
                 <Card>
@@ -587,10 +587,10 @@ export default function TourDetails() {
                       <img
                         src="https://images.pexels.com/photos/27116488/pexels-photo-27116488.jpeg?auto=compress&cs=tinysrgb&w=200"
                         alt="Aburi Gardens"
-                        className="w-16 h-16 object-cover rounded-lg"
+                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">Aburi Gardens Nature Escape</h4>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">Aburi Gardens Nature Escape</h4>
                         <p className="text-xs text-gray-500">1 Day • GH₵280</p>
                         <div className="flex items-center space-x-1 mt-1">
                           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
