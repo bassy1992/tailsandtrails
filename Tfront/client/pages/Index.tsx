@@ -576,15 +576,7 @@ export default function Index() {
                     )}
                   </div>
                   <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg line-clamp-2">{tour.name}</CardTitle>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-ghana-green">
-                          {Currency.format(tour.price)}
-                        </div>
-                        <div className="text-sm text-gray-500">per person</div>
-                      </div>
-                    </div>
+                    <CardTitle className="text-lg line-clamp-2">{tour.name}</CardTitle>
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <MapPin className="h-4 w-4" />
                       <span>{tour.location}</span>
