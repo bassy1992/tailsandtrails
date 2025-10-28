@@ -400,38 +400,56 @@ export default function Index() {
               <div className="space-y-3 sm:space-y-4">
                 {/* Main Search Row - Stack on Mobile */}
                 <div className="flex flex-col gap-3 sm:gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
-                    <Input
-                      type="text"
-                      placeholder="Search destinations..."
-                      className="pl-9 sm:pl-10 text-gray-900 h-11 sm:h-12 text-sm sm:text-base"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      onFocus={() => searchResults.length > 0 && setShowResults(true)}
-                    />
-                    {isSearching && (
-                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                    )}
+                  {/* Search Input with Label */}
+                  <div className="space-y-1.5">
+                    <label htmlFor="search-input" className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
+                      Where do you want to go?
+                    </label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5 pointer-events-none" />
+                      <Input
+                        id="search-input"
+                        type="text"
+                        placeholder="e.g., Cape Coast, Kakum, Mole..."
+                        className="pl-9 sm:pl-10 text-gray-900 h-11 sm:h-12 text-sm sm:text-base"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onFocus={() => searchResults.length > 0 && setShowResults(true)}
+                      />
+                      {isSearching && (
+                        <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                      )}
+                    </div>
                   </div>
                   
+                  {/* Date and Search Button Row */}
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                    <div className="relative flex-1">
-                      <Calendar className="hidden sm:block absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none z-10" />
-                      <Input
-                        type="date"
-                        className="px-3 sm:pl-10 text-gray-900 h-11 sm:h-12 text-sm sm:text-base w-full"
-                        value={searchDate}
-                        onChange={(e) => setSearchDate(e.target.value)}
-                        placeholder="Select date"
-                      />
+                    {/* Date Input with Label */}
+                    <div className="flex-1 space-y-1.5">
+                      <label htmlFor="date-input" className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
+                        When? (Optional)
+                      </label>
+                      <div className="relative">
+                        <Input
+                          id="date-input"
+                          type="date"
+                          className="px-3 text-gray-900 h-11 sm:h-12 text-sm sm:text-base w-full"
+                          value={searchDate}
+                          onChange={(e) => setSearchDate(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                        />
+                      </div>
                     </div>
-                    <Button 
-                      className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 sm:h-12 text-sm sm:text-base px-6 whitespace-nowrap"
-                      onClick={handleSearchSubmit}
-                    >
-                      Search Tours
-                    </Button>
+                    
+                    {/* Search Button - Aligned to bottom on mobile */}
+                    <div className="sm:flex sm:items-end">
+                      <Button 
+                        className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 sm:h-12 text-sm sm:text-base px-6 whitespace-nowrap w-full sm:w-auto"
+                        onClick={handleSearchSubmit}
+                      >
+                        Search Tours
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -439,13 +457,13 @@ export default function Index() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-gray-500" />
-                    <span className="text-xs sm:text-sm text-gray-600 font-medium">Filters:</span>
+                    <span className="text-xs sm:text-sm text-gray-600 font-medium">Refine your search:</span>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <Select value={priceFilter} onValueChange={setPriceFilter}>
                       <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                        <SelectValue placeholder="Price" />
+                        <SelectValue placeholder="Select Price Range" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="budget">Budget (&lt; {Currency.symbol}300)</SelectItem>
@@ -456,7 +474,7 @@ export default function Index() {
 
                     <Select value={durationFilter} onValueChange={setDurationFilter}>
                       <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                        <SelectValue placeholder="Duration" />
+                        <SelectValue placeholder="Select Duration" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="day">Day Trip</SelectItem>
@@ -467,7 +485,7 @@ export default function Index() {
 
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                       <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                        <SelectValue placeholder="Category" />
+                        <SelectValue placeholder="Select Category" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((category) => (
