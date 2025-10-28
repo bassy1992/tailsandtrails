@@ -123,12 +123,28 @@ export default function Index() {
       
       // Clean price info from all tour data
       const cleanTourData = (tours: Destination[]) => {
-        return tours.map(tour => ({
-          ...tour,
-          name: removePriceInfo(tour.name),
-          location: removePriceInfo(tour.location),
-          description: removePriceInfo(tour.description)
-        }));
+        return tours.map(tour => {
+          console.log('BEFORE CLEANING:', {
+            name: tour.name,
+            location: tour.location,
+            description: tour.description.substring(0, 100)
+          });
+          
+          const cleaned = {
+            ...tour,
+            name: removePriceInfo(tour.name),
+            location: removePriceInfo(tour.location),
+            description: removePriceInfo(tour.description)
+          };
+          
+          console.log('AFTER CLEANING:', {
+            name: cleaned.name,
+            location: cleaned.location,
+            description: cleaned.description.substring(0, 100)
+          });
+          
+          return cleaned;
+        });
       };
       
       // If we don't have enough featured destinations, fill with top-rated ones
