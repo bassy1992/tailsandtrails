@@ -121,12 +121,22 @@ export default function Index() {
       // Get featured destinations or top-rated ones
       const featured = destinations.filter(dest => dest.is_featured).slice(0, 4);
       
+      // Clean price info from all tour data
+      const cleanTourData = (tours: Destination[]) => {
+        return tours.map(tour => ({
+          ...tour,
+          name: removePriceInfo(tour.name),
+          location: removePriceInfo(tour.location),
+          description: removePriceInfo(tour.description)
+        }));
+      };
+      
       // If we don't have enough featured destinations, fill with top-rated ones
       if (featured.length < 4) {
         const topRated = destinations.slice(0, 4 - featured.length);
-        setFeaturedTours([...featured, ...topRated]);
+        setFeaturedTours(cleanTourData([...featured, ...topRated]));
       } else {
-        setFeaturedTours(featured);
+        setFeaturedTours(cleanTourData(featured));
       }
     } catch (error) {
       console.error('Error fetching featured tours:', error);
@@ -600,17 +610,16 @@ export default function Index() {
                   </div>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg line-clamp-2">
-                      {removePriceInfo(tour.name)}
+                      {tour.name}
                     </CardTitle>
-                    {/* Price removed from display */}
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <MapPin className="h-4 w-4" />
-                      <span>{removePriceInfo(tour.location)}</span>
+                      <span>{tour.location}</span>
                     </div>
                   </CardHeader>
                   <CardContent className="pb-2">
                     <CardDescription className="mb-3 line-clamp-2">
-                      {removePriceInfo(tour.description)}
+                      {tour.description}
                     </CardDescription>
                     <div className="flex items-center space-x-1 mb-3">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
