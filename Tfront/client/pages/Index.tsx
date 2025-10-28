@@ -385,18 +385,18 @@ export default function Index() {
       {/* Hero Section - Mobile Optimized */}
       <section className="relative bg-gradient-to-r from-ghana-green to-ghana-blue text-white min-h-[50vh] sm:min-h-[60vh] lg:min-h-[70vh] flex items-center">
         <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative mobile-container mobile-section">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center space-y-4 sm:space-y-6 lg:space-y-8">
-            <h1 className="mobile-heading text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
               Discover Ghana's
               <span className="block text-ghana-gold mt-1 sm:mt-2">Rich Heritage</span>
             </h1>
-            <p className="mobile-text text-gray-200 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-xl text-gray-200 max-w-3xl mx-auto px-4">
               Experience the beauty, culture, and history of Ghana with our comprehensive tour packages including transport, accommodation, meals, and medical support.
             </p>
             
             {/* Enhanced Search Bar - Mobile Optimized */}
-            <div className="max-w-4xl mx-auto bg-white rounded-lg mobile-card shadow-lg" ref={searchResultsRef}>
+            <div className="max-w-4xl mx-auto bg-white rounded-lg p-4 sm:p-6 shadow-lg" ref={searchResultsRef}>
               <div className="space-y-3 sm:space-y-4">
                 {/* Main Search Row - Stack on Mobile */}
                 <div className="flex flex-col gap-3 sm:gap-4">
@@ -405,7 +405,7 @@ export default function Index() {
                     <Input
                       type="text"
                       placeholder="Search destinations..."
-                      className="mobile-input pl-9 sm:pl-10 text-gray-900"
+                      className="pl-9 sm:pl-10 text-gray-900 h-11 sm:h-12 text-sm sm:text-base"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onFocus={() => searchResults.length > 0 && setShowResults(true)}
@@ -420,13 +420,13 @@ export default function Index() {
                       <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
                       <Input
                         type="date"
-                        className="mobile-input pl-9 sm:pl-10 text-gray-900"
+                        className="pl-9 sm:pl-10 text-gray-900 h-11 sm:h-12 text-sm sm:text-base"
                         value={searchDate}
                         onChange={(e) => setSearchDate(e.target.value)}
                       />
                     </div>
                     <Button 
-                      className="mobile-button bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold"
+                      className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 sm:h-12 text-sm sm:text-base px-6"
                       onClick={handleSearchSubmit}
                     >
                       Search Tours
@@ -438,12 +438,12 @@ export default function Index() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-600 font-medium">Filters:</span>
+                    <span className="text-xs sm:text-sm text-gray-600 font-medium">Filters:</span>
                   </div>
                   
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <Select value={priceFilter} onValueChange={setPriceFilter}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
                         <SelectValue placeholder="Price" />
                       </SelectTrigger>
                       <SelectContent>
@@ -454,7 +454,7 @@ export default function Index() {
                     </Select>
 
                     <Select value={durationFilter} onValueChange={setDurationFilter}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
                         <SelectValue placeholder="Duration" />
                       </SelectTrigger>
                       <SelectContent>
@@ -465,7 +465,7 @@ export default function Index() {
                     </Select>
 
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="w-40">
+                      <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
                         <SelectValue placeholder="Category" />
                       </SelectTrigger>
                       <SelectContent>
@@ -483,7 +483,7 @@ export default function Index() {
                       variant="ghost"
                       size="sm"
                       onClick={clearFilters}
-                      className="text-gray-500 hover:text-gray-700"
+                      className="text-gray-500 hover:text-gray-700 text-xs sm:text-sm"
                     >
                       <X className="h-4 w-4 mr-1" />
                       Clear
@@ -493,10 +493,10 @@ export default function Index() {
 
                 {/* Search Results Dropdown */}
                 {showResults && searchResults.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-                    <div className="p-3 border-b border-gray-100">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-[60vh] sm:max-h-96 overflow-y-auto">
+                    <div className="p-2 sm:p-3 border-b border-gray-100">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-xs sm:text-sm font-medium text-gray-700">
                           Found {searchResults.length} destination{searchResults.length !== 1 ? 's' : ''}
                         </span>
                         <Button
@@ -505,51 +505,51 @@ export default function Index() {
                           onClick={() => setShowResults(false)}
                           className="h-6 w-6 p-0"
                         >
-                          <X className="h-4 w-4" />
+                          <X className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
                     </div>
-                    <div className="max-h-80 overflow-y-auto">
+                    <div className="max-h-[50vh] sm:max-h-80 overflow-y-auto">
                       {searchResults.map((result) => (
                         <Link
                           key={result.id}
                           to={`/tour/${result.id}`}
-                          className="block p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                          className="block p-3 sm:p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                           onClick={() => setShowResults(false)}
                         >
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-3 sm:space-x-4">
                             <img
                               src={result.image || 'https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=100'}
                               alt={result.name}
-                              className="w-16 h-16 object-cover rounded-lg"
+                              className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-lg flex-shrink-0"
                             />
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900">{result.name}</h4>
-                              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                <MapPin className="h-3 w-3" />
-                                <span>{result.location}</span>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{result.name}</h4>
+                              <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
+                                <MapPin className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">{result.location}</span>
                                 <span>•</span>
-                                <Clock className="h-3 w-3" />
-                                <span>{result.duration}</span>
+                                <Clock className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">{result.duration}</span>
                               </div>
                               <div className="flex items-center justify-between mt-1">
                                 <div className="flex items-center space-x-1">
                                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                  <span className="text-sm font-medium">{result.rating}</span>
+                                  <span className="text-xs sm:text-sm font-medium">{result.rating}</span>
                                 </div>
-                                <span className="font-bold text-ghana-green">{result.price}</span>
+                                <span className="font-bold text-ghana-green text-xs sm:text-sm">{result.price}</span>
                               </div>
                             </div>
                           </div>
                         </Link>
                       ))}
                     </div>
-                    <div className="p-3 border-t border-gray-100">
+                    <div className="p-2 sm:p-3 border-t border-gray-100">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={handleSearchSubmit}
-                        className="w-full"
+                        className="w-full text-xs sm:text-sm"
                       >
                         View All Results
                       </Button>
@@ -559,21 +559,21 @@ export default function Index() {
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <div className="flex items-center space-x-2">
-                <Car className="h-5 w-5" />
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm px-4">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Car className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Transport Included</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Hotel className="h-5 w-5" />
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Hotel className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Quality Hotels</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Utensils className="h-5 w-5" />
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Utensils className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Local Cuisine</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Shield className="h-5 w-5" />
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Medical Support</span>
               </div>
             </div>
