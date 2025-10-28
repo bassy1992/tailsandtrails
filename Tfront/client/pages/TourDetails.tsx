@@ -101,7 +101,7 @@ export default function TourDetails() {
         accommodation: tour.duration_display.includes("Day") ? undefined : "Comfortable accommodation included"
       }
     ],
-    meetingPoint: "Kwame Nkrumah Memorial Park, Accra",
+    meetingPoint: "",
     difficulty: "Easy",
     ageLimit: "Suitable for all ages",
     languages: ["English", "Local languages"],
@@ -347,104 +347,125 @@ export default function TourDetails() {
             <div className="lg:col-span-2">
               {/* Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="itinerary">Itinerary</TabsTrigger>
-                  <TabsTrigger value="included">What's Included</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
+                  <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 py-2 sm:px-3 sm:py-2">
+                    Overview
+                  </TabsTrigger>
+                  <TabsTrigger value="itinerary" className="text-xs sm:text-sm px-2 py-2 sm:px-3 sm:py-2">
+                    Itinerary
+                  </TabsTrigger>
+                  <TabsTrigger value="included" className="text-xs sm:text-sm px-2 py-2 sm:px-3 sm:py-2">
+                    <span className="hidden sm:inline">What's Included</span>
+                    <span className="sm:hidden">Included</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="reviews" className="text-xs sm:text-sm px-2 py-2 sm:px-3 sm:py-2">
+                    Reviews
+                  </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="space-y-6 mt-4">
+                <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4">
                   {/* Highlights */}
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Tour Highlights</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Tour Highlights</h3>
+                    <div className="grid grid-cols-1 gap-3">
                       {tour.highlights.map((highlight, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <CheckCircle className="h-5 w-5 text-ghana-green flex-shrink-0" />
-                          <span className="text-gray-700">{highlight.highlight}</span>
+                        <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <CheckCircle className="h-5 w-5 text-ghana-green flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700 text-sm sm:text-base leading-relaxed">{highlight.highlight}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Tour Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-6">
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">Tour Details</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Duration:</span>
-                          <span className="font-medium">{tour.duration_display}</span>
+                      <h4 className="font-semibold text-gray-900 mb-3 text-base sm:text-lg">Tour Details</h4>
+                      <div className="bg-white border rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                          <span className="text-gray-600 text-sm sm:text-base">Duration:</span>
+                          <span className="font-medium text-sm sm:text-base">{tour.duration_display}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Group Size:</span>
-                          <span className="font-medium">Max {tour.max_group_size} people</span>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                          <span className="text-gray-600 text-sm sm:text-base">Group Size:</span>
+                          <span className="font-medium text-sm sm:text-base">Max {tour.max_group_size} people</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Difficulty:</span>
-                          <span className="font-medium">{enhancedTour.difficulty}</span>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                          <span className="text-gray-600 text-sm sm:text-base">Difficulty:</span>
+                          <span className="font-medium text-sm sm:text-base">{enhancedTour.difficulty}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Age Limit:</span>
-                          <span className="font-medium">{enhancedTour.ageLimit}</span>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                          <span className="text-gray-600 text-sm sm:text-base">Age Limit:</span>
+                          <span className="font-medium text-sm sm:text-base">{enhancedTour.ageLimit}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Languages:</span>
-                          <span className="font-medium">{enhancedTour.languages.join(", ")}</span>
+                        <div className="flex justify-between items-start py-2">
+                          <span className="text-gray-600 text-sm sm:text-base">Languages:</span>
+                          <span className="font-medium text-sm sm:text-base text-right">{enhancedTour.languages.join(", ")}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">Meeting Point</h4>
-                      <p className="text-sm text-gray-700 mb-2">{enhancedTour.meetingPoint}</p>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-3 text-base sm:text-lg">Meeting Point</h4>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{enhancedTour.meetingPoint}</p>
+                        </div>
+                      </div>
                       
-                      <h4 className="font-semibold text-gray-900 mb-3 mt-4">Cancellation Policy</h4>
-                      <p className="text-sm text-gray-700">{enhancedTour.cancellation}</p>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-3 text-base sm:text-lg">Cancellation Policy</h4>
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                          <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{enhancedTour.cancellation}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
 
-                <TabsContent value="itinerary" className="space-y-6 mt-4">
-                  <h3 className="text-xl font-semibold text-gray-900">Detailed Itinerary</h3>
+                <TabsContent value="itinerary" className="space-y-4 sm:space-y-6 mt-4">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Detailed Itinerary</h3>
                   {enhancedTour.itinerary.map((day, index) => (
-                    <Card key={index}>
-                      <CardHeader>
-                        <CardTitle className="flex items-center space-x-2">
-                          <span className="bg-ghana-green text-white rounded-full w-8 h-8 flex items-center justify-center text-sm">
+                    <Card key={index} className="overflow-hidden">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center space-x-3">
+                          <span className="bg-ghana-green text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-base font-bold flex-shrink-0">
                             {day.day}
                           </span>
-                          <span>Day {day.day}: {day.title}</span>
+                          <span className="text-base sm:text-lg leading-tight">Day {day.day}: {day.title}</span>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div>
-                          <h5 className="font-semibold text-gray-900 mb-2">Activities</h5>
-                          <ul className="space-y-1">
+                          <h5 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Activities</h5>
+                          <ul className="space-y-2">
                             {day.activities.map((activity, actIndex) => (
-                              <li key={actIndex} className="text-sm text-gray-700 flex items-start space-x-2">
-                                <span className="text-ghana-green">•</span>
-                                <span>{activity}</span>
+                              <li key={actIndex} className="text-sm sm:text-base text-gray-700 flex items-start space-x-3 p-2 bg-gray-50 rounded-lg">
+                                <span className="text-ghana-green font-bold flex-shrink-0 mt-1">•</span>
+                                <span className="leading-relaxed">{activity}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                         
-                        <div className="flex flex-wrap gap-4">
+                        <div className="space-y-4">
                           <div>
-                            <h6 className="font-medium text-gray-900 mb-1">Meals Included</h6>
-                            <div className="flex space-x-2">
+                            <h6 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Meals Included</h6>
+                            <div className="flex flex-wrap gap-2">
                               {day.meals.map((meal, mealIndex) => (
-                                <Badge key={mealIndex} variant="secondary">{meal}</Badge>
+                                <Badge key={mealIndex} variant="secondary" className="text-xs sm:text-sm px-2 py-1">
+                                  {meal}
+                                </Badge>
                               ))}
                             </div>
                           </div>
                           
                           {day.accommodation && (
                             <div>
-                              <h6 className="font-medium text-gray-900 mb-1">Accommodation</h6>
-                              <Badge variant="outline">{day.accommodation}</Badge>
+                              <h6 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Accommodation</h6>
+                              <Badge variant="outline" className="text-xs sm:text-sm px-3 py-1">
+                                {day.accommodation}
+                              </Badge>
                             </div>
                           )}
                         </div>
@@ -453,67 +474,67 @@ export default function TourDetails() {
                   ))}
                 </TabsContent>
 
-                <TabsContent value="included" className="space-y-6 mt-4">
-                  <h3 className="text-xl font-semibold text-gray-900">What's Included</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <TabsContent value="included" className="space-y-4 sm:space-y-6 mt-4">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">What's Included</h3>
+                  <div className="space-y-6">
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2 text-base sm:text-lg">
                         <CheckCircle className="h-5 w-5 text-ghana-green" />
                         <span>Included</span>
                       </h4>
-                      <ul className="space-y-2">
+                      <div className="space-y-3">
                         {tour.includes.map((item, index) => (
-                          <li key={index} className="flex items-start space-x-2">
-                            <CheckCircle className="h-4 w-4 text-ghana-green mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-gray-700">{item.item}</span>
-                          </li>
+                          <div key={index} className="flex items-start space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <CheckCircle className="h-5 w-5 text-ghana-green mt-0.5 flex-shrink-0" />
+                            <span className="text-sm sm:text-base text-gray-700 leading-relaxed">{item.item}</span>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2 text-base sm:text-lg">
                         <AlertCircle className="h-5 w-5 text-red-500" />
                         <span>Not Included</span>
                       </h4>
-                      <ul className="space-y-2">
-                        <li className="flex items-start space-x-2">
-                          <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">Personal expenses and souvenirs</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">Tips for guides and drivers</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">Travel insurance (basic coverage included)</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">Alcoholic beverages</span>
-                        </li>
-                      </ul>
+                      <div className="space-y-3">
+                        <div className="flex items-start space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm sm:text-base text-gray-700 leading-relaxed">Personal expenses and souvenirs</span>
+                        </div>
+                        <div className="flex items-start space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm sm:text-base text-gray-700 leading-relaxed">Tips for guides and drivers</span>
+                        </div>
+                        <div className="flex items-start space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm sm:text-base text-gray-700 leading-relaxed">Travel insurance (basic coverage included)</span>
+                        </div>
+                        <div className="flex items-start space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm sm:text-base text-gray-700 leading-relaxed">Alcoholic beverages</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Service Icons */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Car className="h-8 w-8 text-ghana-green mx-auto mb-2" />
-                      <div className="text-sm font-medium">Transport</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
+                    <div className="text-center p-4 sm:p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <Car className="h-8 w-8 sm:h-10 sm:w-10 text-ghana-green mx-auto mb-2" />
+                      <div className="text-sm sm:text-base font-medium">Transport</div>
                     </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Hotel className="h-8 w-8 text-ghana-green mx-auto mb-2" />
-                      <div className="text-sm font-medium">Accommodation</div>
+                    <div className="text-center p-4 sm:p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <Hotel className="h-8 w-8 sm:h-10 sm:w-10 text-ghana-green mx-auto mb-2" />
+                      <div className="text-sm sm:text-base font-medium">Accommodation</div>
                     </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Utensils className="h-8 w-8 text-ghana-green mx-auto mb-2" />
-                      <div className="text-sm font-medium">Meals</div>
+                    <div className="text-center p-4 sm:p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <Utensils className="h-8 w-8 sm:h-10 sm:w-10 text-ghana-green mx-auto mb-2" />
+                      <div className="text-sm sm:text-base font-medium">Meals</div>
                     </div>
-                    <div className="text-center p-4 bg-gray-50 rounded-lg">
-                      <Shield className="h-8 w-8 text-ghana-green mx-auto mb-2" />
-                      <div className="text-sm font-medium">Insurance</div>
+                    <div className="text-center p-4 sm:p-6 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <Shield className="h-8 w-8 sm:h-10 sm:w-10 text-ghana-green mx-auto mb-2" />
+                      <div className="text-sm sm:text-base font-medium">Insurance</div>
                     </div>
                   </div>
                 </TabsContent>

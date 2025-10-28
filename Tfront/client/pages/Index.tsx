@@ -325,44 +325,44 @@ export default function Index() {
   return (
     <Layout>
       {/* Hero Section - Mobile Optimized */}
-      <section className="relative bg-gradient-to-r from-ghana-green to-ghana-blue text-white min-h-[60vh] sm:min-h-[70vh] flex items-center">
+      <section className="relative bg-gradient-to-r from-ghana-green to-ghana-blue text-white min-h-[50vh] sm:min-h-[60vh] lg:min-h-[70vh] flex items-center">
         <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative mobile-container py-12 sm:py-16 lg:py-24">
-          <div className="text-center space-y-6 sm:space-y-8">
+        <div className="relative mobile-container mobile-section">
+          <div className="text-center space-y-4 sm:space-y-6 lg:space-y-8">
             <h1 className="mobile-heading text-white">
               Discover Ghana's
-              <span className="block text-ghana-gold mt-2">Rich Heritage</span>
+              <span className="block text-ghana-gold mt-1 sm:mt-2">Rich Heritage</span>
             </h1>
             <p className="mobile-text text-gray-200 max-w-3xl mx-auto">
               Experience the beauty, culture, and history of Ghana with our comprehensive tour packages including transport, accommodation, meals, and medical support.
             </p>
             
             {/* Enhanced Search Bar - Mobile Optimized */}
-            <div className="max-w-4xl mx-auto bg-white rounded-lg p-4 sm:p-6 shadow-lg" ref={searchResultsRef}>
-              <div className="space-y-4">
+            <div className="max-w-4xl mx-auto bg-white rounded-lg mobile-card shadow-lg" ref={searchResultsRef}>
+              <div className="space-y-3 sm:space-y-4">
                 {/* Main Search Row - Stack on Mobile */}
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3 sm:gap-4">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
                     <Input
                       type="text"
                       placeholder="Search destinations..."
-                      className="mobile-input pl-10 text-gray-900"
+                      className="mobile-input pl-9 sm:pl-10 text-gray-900"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onFocus={() => searchResults.length > 0 && setShowResults(true)}
                     />
                     {isSearching && (
-                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 animate-spin" />
+                      <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                     )}
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <div className="relative flex-1">
-                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5" />
                       <Input
                         type="date"
-                        className="mobile-input pl-10 text-gray-900"
+                        className="mobile-input pl-9 sm:pl-10 text-gray-900"
                         value={searchDate}
                         onChange={(e) => setSearchDate(e.target.value)}
                       />
