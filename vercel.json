@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Tfront/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "Tfront/dist/spa"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/Tfront/dist/spa/$1"
+    }
+  ]
+}
