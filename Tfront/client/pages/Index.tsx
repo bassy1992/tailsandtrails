@@ -531,6 +531,8 @@ export default function Index() {
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Discover our most popular destinations and experience the best of Ghana
             </p>
+            {/* Temporary version indicator - remove after verification */}
+            <p className="text-xs text-gray-400">v2.0 - Prices Hidden</p>
           </div>
 
           {isLoadingFeatured ? (
