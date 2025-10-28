@@ -532,8 +532,8 @@ export default function Index() {
                 </div>
               </div>
 
-                {/* Search Results Dropdown */}
-                {showResults && searchResults.length > 0 && (
+              {/* Search Results Dropdown */}
+              {showResults && searchResults.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-[60vh] sm:max-h-96 overflow-y-auto">
                     <div className="p-2 sm:p-3 border-b border-gray-100">
                       <div className="flex items-center justify-between">
@@ -597,10 +597,9 @@ export default function Index() {
                     </div>
                   </div>
                 )}
-              </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm px-4">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm px-4 mt-8">
               <div className="flex items-center space-x-1 sm:space-x-2">
                 <Car className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Transport Included</span>
