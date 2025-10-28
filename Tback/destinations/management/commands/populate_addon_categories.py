@@ -21,25 +21,32 @@ class Command(BaseCommand):
                 'order': 2
             },
             {
+                'name': 'group_transport',
+                'display_name': 'Group Transport',
+                'description': 'Shared transportation options for groups',
+                'icon': 'Bus',
+                'order': 3
+            },
+            {
                 'name': 'meals',
                 'display_name': 'Meal Options',
                 'description': 'Customize your dining experience',
                 'icon': 'Utensils',
-                'order': 3
+                'order': 4
             },
             {
                 'name': 'medical',
                 'display_name': 'Medical & Insurance',
                 'description': 'Additional health and safety coverage',
                 'icon': 'Shield',
-                'order': 4
+                'order': 5
             },
             {
                 'name': 'experience',
                 'display_name': 'Additional Experiences',
                 'description': 'Extra activities and experiences',
                 'icon': 'Star',
-                'order': 5
+                'order': 6
             }
         ]
 

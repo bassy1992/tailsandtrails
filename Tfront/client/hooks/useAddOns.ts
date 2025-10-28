@@ -125,6 +125,10 @@ export const useAddOns = (id?: number, travelers: number = 1, itemType: 'destina
                 categoryName = 'transport';
                 categoryDisplayName = 'Transport Options';
                 categoryIcon = 'car';
+              } else if (optionName.includes('group') && (optionName.includes('transport') || optionName.includes('bus') || optionName.includes('shuttle'))) {
+                categoryName = 'group_transport';
+                categoryDisplayName = 'Group Transport';
+                categoryIcon = 'bus';
               } else if (optionName.includes('meal') || optionName.includes('food') || optionName.includes('dining') || optionName.includes('lunch') || optionName.includes('dinner') || optionName.includes('breakfast')) {
                 categoryName = 'meals';
                 categoryDisplayName = 'Meal Options';
