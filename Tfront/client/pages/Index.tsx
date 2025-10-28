@@ -423,33 +423,29 @@ export default function Index() {
                   </div>
                   
                   {/* Date and Search Button Row */}
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 sm:gap-4 sm:items-end">
                     {/* Date Input with Label */}
-                    <div className="flex-1 space-y-1.5">
+                    <div className="space-y-1.5">
                       <label htmlFor="date-input" className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
                         When? (Optional)
                       </label>
-                      <div className="relative">
-                        <Input
-                          id="date-input"
-                          type="date"
-                          className="px-3 text-gray-900 h-11 sm:h-12 text-sm sm:text-base w-full"
-                          value={searchDate}
-                          onChange={(e) => setSearchDate(e.target.value)}
-                          min={new Date().toISOString().split('T')[0]}
-                        />
-                      </div>
+                      <Input
+                        id="date-input"
+                        type="date"
+                        className="px-3 text-gray-900 h-11 sm:h-12 text-sm sm:text-base w-full [&::-webkit-datetime-edit-text]:text-gray-500 [&::-webkit-datetime-edit-month-field]:text-gray-900 [&::-webkit-datetime-edit-day-field]:text-gray-900 [&::-webkit-datetime-edit-year-field]:text-gray-900"
+                        value={searchDate}
+                        onChange={(e) => setSearchDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
                     </div>
                     
-                    {/* Search Button - Aligned to bottom on mobile */}
-                    <div className="sm:flex sm:items-end">
-                      <Button 
-                        className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 sm:h-12 text-sm sm:text-base px-6 whitespace-nowrap w-full sm:w-auto"
-                        onClick={handleSearchSubmit}
-                      >
-                        Search Tours
-                      </Button>
-                    </div>
+                    {/* Search Button */}
+                    <Button 
+                      className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 sm:h-12 text-sm sm:text-base px-6 whitespace-nowrap w-full sm:w-auto"
+                      onClick={handleSearchSubmit}
+                    >
+                      Search Tours
+                    </Button>
                   </div>
                 </div>
 
@@ -461,40 +457,55 @@ export default function Index() {
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <Select value={priceFilter} onValueChange={setPriceFilter}>
-                      <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                        <SelectValue placeholder="Select Price Range" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="budget">Budget (&lt; {Currency.symbol}300)</SelectItem>
-                        <SelectItem value="mid">Mid-range ({Currency.symbol}300-600)</SelectItem>
-                        <SelectItem value="luxury">Luxury (&gt; {Currency.symbol}600)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-1.5">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
+                        Price Range
+                      </label>
+                      <Select value={priceFilter} onValueChange={setPriceFilter}>
+                        <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
+                          <SelectValue placeholder="Any Price" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="budget">Budget (&lt; {Currency.symbol}300)</SelectItem>
+                          <SelectItem value="mid">Mid-range ({Currency.symbol}300-600)</SelectItem>
+                          <SelectItem value="luxury">Luxury (&gt; {Currency.symbol}600)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                    <Select value={durationFilter} onValueChange={setDurationFilter}>
-                      <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                        <SelectValue placeholder="Select Duration" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="day">Day Trip</SelectItem>
-                        <SelectItem value="weekend">Weekend (2-3 days)</SelectItem>
-                        <SelectItem value="week">Week+ (4+ days)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-1.5">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
+                        Duration
+                      </label>
+                      <Select value={durationFilter} onValueChange={setDurationFilter}>
+                        <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
+                          <SelectValue placeholder="Any Duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="day">Day Trip</SelectItem>
+                          <SelectItem value="weekend">Weekend (2-3 days)</SelectItem>
+                          <SelectItem value="week">Week+ (4+ days)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id.toString()}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-1.5">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
+                        Category
+                      </label>
+                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
+                          <SelectValue placeholder="All Categories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id.toString()}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   {(searchTerm || priceFilter || durationFilter || categoryFilter) && (
