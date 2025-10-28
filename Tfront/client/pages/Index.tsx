@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, MapPin, Search, Star, Users, Clock, Car, Hotel, Utensils, Shield, Filter, X, Loader2 } from "lucide-react";
+import { Calendar, MapPin, Search, Star, Users, Clock, Car, Hotel, Utensils, Shield, Filter, X, Loader2, DollarSign } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import VideoSection from "@/components/VideoSection";
 import Currency from "@/lib/currency";
@@ -395,91 +395,115 @@ export default function Index() {
               Experience the beauty, culture, and history of Ghana with our comprehensive tour packages including transport, accommodation, meals, and medical support.
             </p>
             
-            {/* Enhanced Search Bar - Mobile Optimized */}
-            <div className="max-w-4xl mx-auto bg-white rounded-lg p-4 sm:p-6 shadow-lg" ref={searchResultsRef}>
-              <div className="space-y-3 sm:space-y-4">
-                {/* Main Search Row - Stack on Mobile */}
-                <div className="flex flex-col gap-3 sm:gap-4">
-                  {/* Search Input with Label */}
-                  <div className="space-y-1.5">
-                    <label htmlFor="search-input" className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
-                      Where do you want to go?
-                    </label>
+            {/* Redesigned Search Bar - Mobile Responsive */}
+            <div className="max-w-5xl mx-auto" ref={searchResultsRef}>
+              {/* Main Search Card */}
+              <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                {/* Search Input Section */}
+                <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-white to-gray-50">
+                  <div className="space-y-4">
+                    {/* Primary Search */}
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5 pointer-events-none" />
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <Search className="h-5 w-5 text-ghana-green" />
+                      </div>
                       <Input
-                        id="search-input"
                         type="text"
-                        placeholder="e.g., Cape Coast, Kakum, Mole..."
-                        className="pl-9 sm:pl-10 text-gray-900 h-11 sm:h-12 text-sm sm:text-base"
+                        placeholder="Search destinations (e.g., Cape Coast, Kakum, Mole...)"
+                        className="pl-12 pr-4 h-14 text-base border-2 border-gray-200 rounded-xl focus:border-ghana-green focus:ring-ghana-green shadow-sm"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onFocus={() => searchResults.length > 0 && setShowResults(true)}
                       />
                       {isSearching && (
-                        <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          <Loader2 className="h-5 w-5 text-ghana-green animate-spin" />
+                        </div>
                       )}
                     </div>
-                  </div>
-                  
-                  {/* Date and Search Button Row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 sm:gap-4 sm:items-end">
-                    {/* Date Input with Label */}
-                    <div className="space-y-1.5">
-                      <label htmlFor="date-input" className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
-                        When? (Optional)
-                      </label>
-                      <Input
-                        id="date-input"
-                        type="date"
-                        className="px-3 text-gray-900 h-11 sm:h-12 text-sm sm:text-base w-full [&::-webkit-datetime-edit-text]:text-gray-500 [&::-webkit-datetime-edit-month-field]:text-gray-900 [&::-webkit-datetime-edit-day-field]:text-gray-900 [&::-webkit-datetime-edit-year-field]:text-gray-900"
-                        value={searchDate}
-                        onChange={(e) => setSearchDate(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
+
+                    {/* Date and Button Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none sm:hidden">
+                          <Calendar className="h-5 w-5 text-ghana-green" />
+                        </div>
+                        <Input
+                          type="date"
+                          className="pl-12 sm:pl-4 pr-4 h-12 sm:h-14 text-sm sm:text-base border-2 border-gray-200 rounded-xl focus:border-ghana-green focus:ring-ghana-green shadow-sm"
+                          value={searchDate}
+                          onChange={(e) => setSearchDate(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                        />
+                      </div>
+                      <Button 
+                        onClick={handleSearchSubmit}
+                        className="h-12 sm:h-14 px-8 bg-ghana-gold hover:bg-ghana-gold/90 text-black font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all"
+                      >
+                        <Search className="h-5 w-5 mr-2" />
+                        Search
+                      </Button>
                     </div>
-                    
-                    {/* Search Button */}
-                    <Button 
-                      className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 sm:h-12 text-sm sm:text-base px-6 whitespace-nowrap w-full sm:w-auto"
-                      onClick={handleSearchSubmit}
-                    >
-                      Search Tours
-                    </Button>
                   </div>
                 </div>
 
-                {/* Filters Row - Mobile Optimized */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-gray-500" />
-                    <span className="text-xs sm:text-sm text-gray-600 font-medium">Refine your search:</span>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
-                        Price Range
-                      </label>
+                {/* Filters Section - Collapsible on Mobile */}
+                <div className="border-t border-gray-200 bg-gray-50/50">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-ghana-green" />
+                        <span className="text-sm font-semibold text-gray-700">Filters</span>
+                      </div>
+                      {(searchTerm || priceFilter || durationFilter || categoryFilter || searchDate) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={clearFilters}
+                          className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 h-8"
+                        >
+                          <X className="h-3 w-3 mr-1" />
+                          Clear All
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <Select value={priceFilter} onValueChange={setPriceFilter}>
-                        <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                          <SelectValue placeholder="Any Price" />
+                        <SelectTrigger className="h-11 border-2 border-gray-200 rounded-lg hover:border-ghana-green transition-colors">
+                          <div className="flex items-center gap-2 text-left">
+                            <DollarSign className="h-4 w-4 text-ghana-green flex-shrink-0" />
+                            <SelectValue placeholder="Price Range" />
+                          </div>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="budget">Budget (&lt; {Currency.symbol}300)</SelectItem>
-                          <SelectItem value="mid">Mid-range ({Currency.symbol}300-600)</SelectItem>
-                          <SelectItem value="luxury">Luxury (&gt; {Currency.symbol}600)</SelectItem>
+                          <SelectItem value="budget">
+                            <div className="flex items-center gap-2">
+                              <span className="text-green-600">●</span>
+                              Budget (&lt; {Currency.symbol}300)
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="mid">
+                            <div className="flex items-center gap-2">
+                              <span className="text-yellow-600">●</span>
+                              Mid-range ({Currency.symbol}300-600)
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="luxury">
+                            <div className="flex items-center gap-2">
+                              <span className="text-purple-600">●</span>
+                              Luxury (&gt; {Currency.symbol}600)
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
 
-                    <div className="space-y-1.5">
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
-                        Duration
-                      </label>
                       <Select value={durationFilter} onValueChange={setDurationFilter}>
-                        <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                          <SelectValue placeholder="Any Duration" />
+                        <SelectTrigger className="h-11 border-2 border-gray-200 rounded-lg hover:border-ghana-green transition-colors">
+                          <div className="flex items-center gap-2 text-left">
+                            <Clock className="h-4 w-4 text-ghana-green flex-shrink-0" />
+                            <SelectValue placeholder="Duration" />
+                          </div>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="day">Day Trip</SelectItem>
@@ -487,15 +511,13 @@ export default function Index() {
                           <SelectItem value="week">Week+ (4+ days)</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
 
-                    <div className="space-y-1.5">
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 px-1">
-                        Category
-                      </label>
                       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                        <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
-                          <SelectValue placeholder="All Categories" />
+                        <SelectTrigger className="h-11 border-2 border-gray-200 rounded-lg hover:border-ghana-green transition-colors">
+                          <div className="flex items-center gap-2 text-left">
+                            <MapPin className="h-4 w-4 text-ghana-green flex-shrink-0" />
+                            <SelectValue placeholder="Category" />
+                          </div>
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((category) => (
@@ -507,19 +529,8 @@ export default function Index() {
                       </Select>
                     </div>
                   </div>
-
-                  {(searchTerm || priceFilter || durationFilter || categoryFilter) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearFilters}
-                      className="text-gray-500 hover:text-gray-700 text-xs sm:text-sm"
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Clear
-                    </Button>
-                  )}
                 </div>
+              </div>
 
                 {/* Search Results Dropdown */}
                 {showResults && searchResults.length > 0 && (
