@@ -23,23 +23,29 @@ interface SearchResult {
   category: string;
 }
 
-// Helper function to remove price information from text
+// Helper function to remove price information from text - AGGRESSIVE VERSION
 const removePriceInfo = (text: string): string => {
   if (!text) return '';
-  // Remove all variations of price patterns
-  let cleaned = text
-    // Remove GH¢ or GH₵ followed by numbers and "per person"
-    .replace(/GH[¢₵]\s*\d+\s*per\s*person/gi, '')
-    // Remove just GH¢ or GH₵ followed by numbers
-    .replace(/GH[¢₵]\s*\d+/gi, '')
-    // Remove any remaining "per person" text
-    .replace(/per\s*person/gi, '')
-    // Remove standalone numbers that might be prices
-    .replace(/\b\d{2,4}\b(?=\s|$)/g, '')
-    .trim();
   
-  // Remove extra spaces
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  // Convert to string and handle all possible encodings
+  let cleaned = String(text);
+  
+  // Remove ALL price patterns - be very aggressive
+  cleaned = cleaned
+    // Remove any GH followed by currency symbol and numbers
+    .replace(/GH[¢₵￠]\s*\d+/gi, '')
+    .replace(/GH\s*¢\s*\d+/gi, '')
+    .replace(/GH\s*₵\s*\d+/gi, '')
+    // Remove standalone currency symbols with numbers
+    .replace(/[¢₵￠]\s*\d+/gi, '')
+    // Remove "per person" in any form
+    .replace(/per\s*person/gi, '')
+    .replace(/perperson/gi, '')
+    // Remove any remaining standalone numbers that look like prices (50-9999)
+    .replace(/\b\d{2,4}\b/g, '')
+    // Remove extra whitespace
+    .replace(/\s+/g, ' ')
+    .trim();
   
   return cleaned;
 };
