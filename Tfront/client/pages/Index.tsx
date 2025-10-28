@@ -579,16 +579,16 @@ export default function Index() {
                   </div>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg line-clamp-2">
-                      {tour.name.replace(/GH¢\d+.*?per person/gi, '').trim()}
+                      {tour.name.replace(/GH¢\d+\s*per\s*person/gi, '').replace(/GH¢\d+/gi, '').trim()}
                     </CardTitle>
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
                       <MapPin className="h-4 w-4" />
-                      <span>{tour.location.replace(/GH¢\d+.*?per person/gi, '').trim()}</span>
+                      <span>{tour.location.replace(/GH¢\d+\s*per\s*person/gi, '').replace(/GH¢\d+/gi, '').trim()}</span>
                     </div>
                   </CardHeader>
                   <CardContent className="pb-2">
                     <CardDescription className="mb-3 line-clamp-2">
-                      {tour.description.replace(/GH¢\d+.*?per person/gi, '').trim()}
+                      {tour.description.replace(/GH¢\d+\s*per\s*person/gi, '').replace(/GH¢\d+/gi, '').trim()}
                     </CardDescription>
                     <div className="flex items-center space-x-1 mb-3">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
