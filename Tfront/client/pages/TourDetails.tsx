@@ -333,7 +333,7 @@ export default function TourDetails() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Mail className="h-4 w-4 text-ghana-green flex-shrink-0" />
-                    <span className="break-all">tours@talesandtrails.gh</span>
+                    <span className="break-all">Talesandtrailsghana@gmail.com</span>
                   </div>
                 </div>
               </CardContent>
