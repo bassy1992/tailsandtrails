@@ -395,21 +395,21 @@ export default function Index() {
               Experience the beauty, culture, and history of Ghana with our comprehensive tour packages including transport, accommodation, meals, and medical support.
             </p>
             
-            {/* Redesigned Search Bar - Mobile Responsive */}
+            {/* Redesigned Search Bar - Mobile Simplified */}
             <div className="max-w-5xl mx-auto" ref={searchResultsRef}>
               {/* Main Search Card */}
               <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
                 {/* Search Input Section */}
                 <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-white to-gray-50">
                   <div className="space-y-4">
-                    {/* Primary Search */}
+                    {/* Primary Search - Mobile Only Shows This */}
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
                         <Search className="h-5 w-5 text-ghana-green" />
                       </div>
                       <Input
                         type="text"
-                        placeholder="Search destinations (e.g., Cape Coast, Kakum, Mole...)"
+                        placeholder="Search destinations..."
                         className="pl-12 pr-4 h-14 text-base border-2 border-gray-200 rounded-xl focus:border-ghana-green focus:ring-ghana-green shadow-sm"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -422,15 +422,12 @@ export default function Index() {
                       )}
                     </div>
 
-                    {/* Date and Button Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+                    {/* Date and Button Row - Hidden on Mobile */}
+                    <div className="hidden sm:grid sm:grid-cols-[1fr_auto] gap-3">
                       <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none sm:hidden">
-                          <Calendar className="h-5 w-5 text-ghana-green" />
-                        </div>
                         <Input
                           type="date"
-                          className="pl-12 sm:pl-4 pr-4 h-12 sm:h-14 text-sm sm:text-base border-2 border-gray-200 rounded-xl focus:border-ghana-green focus:ring-ghana-green shadow-sm"
+                          className="pl-4 pr-4 h-14 text-base border-2 border-gray-200 rounded-xl focus:border-ghana-green focus:ring-ghana-green shadow-sm"
                           value={searchDate}
                           onChange={(e) => setSearchDate(e.target.value)}
                           min={new Date().toISOString().split('T')[0]}
@@ -438,17 +435,26 @@ export default function Index() {
                       </div>
                       <Button 
                         onClick={handleSearchSubmit}
-                        className="h-12 sm:h-14 px-8 bg-ghana-gold hover:bg-ghana-gold/90 text-black font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all"
+                        className="h-14 px-8 bg-ghana-gold hover:bg-ghana-gold/90 text-black font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all"
                       >
                         <Search className="h-5 w-5 mr-2" />
                         Search
                       </Button>
                     </div>
+
+                    {/* Mobile Search Button */}
+                    <Button 
+                      onClick={handleSearchSubmit}
+                      className="sm:hidden w-full h-12 bg-ghana-gold hover:bg-ghana-gold/90 text-black font-bold text-base rounded-xl shadow-lg"
+                    >
+                      <Search className="h-5 w-5 mr-2" />
+                      Search Tours
+                    </Button>
                   </div>
                 </div>
 
-                {/* Filters Section - Collapsible on Mobile */}
-                <div className="border-t border-gray-200 bg-gray-50/50">
+                {/* Filters Section - Hidden on Mobile */}
+                <div className="hidden sm:block border-t border-gray-200 bg-gray-50/50">
                   <div className="p-4 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
