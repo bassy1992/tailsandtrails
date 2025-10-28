@@ -45,6 +45,7 @@ const removePriceInfo = (text: string): string => {
 };
 
 export default function Index() {
+  console.log('=== INDEX PAGE COMPONENT LOADED ===');
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchDate, setSearchDate] = useState("");
@@ -113,13 +114,16 @@ export default function Index() {
   };
 
   const fetchFeaturedTours = async () => {
+    console.log('=== FETCH FEATURED TOURS STARTED ===');
     try {
       setIsLoadingFeatured(true);
       // Fetch destinations and filter for featured ones, or get first 4 if no featured flag
       const destinations = await destinationsApi.getDestinations({ ordering: '-rating' });
+      console.log('Fetched destinations:', destinations.length);
       
       // Get featured destinations or top-rated ones
       const featured = destinations.filter(dest => dest.is_featured).slice(0, 4);
+      console.log('Featured tours found:', featured.length);
       
       // Clean price info from all tour data
       const cleanTourData = (tours: Destination[]) => {
@@ -155,11 +159,12 @@ export default function Index() {
         setFeaturedTours(cleanTourData(featured));
       }
     } catch (error) {
-      console.error('Error fetching featured tours:', error);
+      console.error('=== ERROR FETCHING FEATURED TOURS ===', error);
       // Fallback to empty array if API fails
       setFeaturedTours([]);
     } finally {
       setIsLoadingFeatured(false);
+      console.log('=== FETCH FEATURED TOURS COMPLETED ===');
     }
   };
 
