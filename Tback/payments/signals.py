@@ -211,32 +211,86 @@ def create_booking_on_successful_payment(sender, instance, created, **kwargs):
     if not created and hasattr(instance, '_old_status'):
         # Check if payment status changed to successful
         if (instance._old_status != 'successful' and 
-            instance.status == 'successful' and 
-            not instance.booking):  # Only if no booking exists yet
+            instance.status == 'successful'):
             
             try:
-                from .booking_details_utils import create_booking_from_payment
+                from .booking_details_utils import create_booking_from_payment, create_ticket_purchase_from_payment
                 from .email_service import EmailService
                 
-                booking = create_booking_from_payment(instance)
-                if booking:
-                    logger.info(f"Auto-created booking {booking.booking_reference} for successful payment {instance.reference}")
+                # Get booking details from metadata
+                booking_details = instance.metadata.get('booking_details', {}) if instance.metadata else {}
+                booking_type = booking_details.get('type', 'destination')
+                
+                # Determine if this is a ticket or destination booking
+                is_ticket = (
+                    booking_type == 'ticket' or
+                    (instance.description and any(word in instance.description.lower() for word in ['ticket', 'event', 'concert', 'festival']))
+                )
+                
+                if is_ticket:
+                    # Create ticket purchase if not already exists
+                    from tickets.models import TicketPurchase
+                    existing_purchase = TicketPurchase.objects.filter(payment_reference=instance.reference).first()
                     
-                    # Send booking confirmation email
-                    try:
-                        booking_details = instance.metadata.get('booking_details', {}) if instance.metadata else {}
-                        email_sent = EmailService.send_booking_confirmation(instance, booking_details)
-                        if email_sent:
-                            logger.info(f"Booking confirmation email sent for payment {instance.reference}")
+                    if not existing_purchase:
+                        ticket_purchase = create_ticket_purchase_from_payment(instance)
+                        if ticket_purchase:
+                            logger.info(f"Auto-created ticket purchase {ticket_purchase.purchase_id} for successful payment {instance.reference}")
+                            
+                            # Send ticket confirmation email
+                            try:
+                                email_sent = EmailService.send_ticket_confirmation(ticket_purchase)
+                                if email_sent:
+                                    logger.info(f"Ticket confirmation email sent for payment {instance.reference}")
+                                    instance.log('info', 'Ticket confirmation email sent', {'purchase_id': str(ticket_purchase.purchase_id)})
+                                else:
+                                    logger.warning(f"Failed to send ticket confirmation email for payment {instance.reference}")
+                                    instance.log('warning', 'Failed to send ticket confirmation email')
+                            except Exception as email_error:
+                                logger.error(f"Error sending ticket confirmation email for payment {instance.reference}: {str(email_error)}")
+                                instance.log('error', f'Error sending ticket confirmation email: {str(email_error)}')
                         else:
-                            logger.warning(f"Failed to send booking confirmation email for payment {instance.reference}")
-                    except Exception as email_error:
-                        logger.error(f"Error sending booking confirmation email for payment {instance.reference}: {str(email_error)}")
+                            logger.warning(f"Failed to create ticket purchase for successful payment {instance.reference}")
+                            instance.log('warning', 'Failed to create ticket purchase - no valid ticket details found')
+                    else:
+                        logger.info(f"Ticket purchase already exists for payment {instance.reference}")
                 else:
-                    logger.warning(f"Failed to create booking for successful payment {instance.reference} - no valid booking details found")
+                    # Create destination booking if not already exists
+                    if not instance.booking:
+                        booking = create_booking_from_payment(instance)
+                        if booking:
+                            logger.info(f"Auto-created booking {booking.booking_reference} for successful payment {instance.reference}")
+                            
+                            # Send booking confirmation email
+                            try:
+                                email_sent = EmailService.send_booking_confirmation(instance, booking_details)
+                                if email_sent:
+                                    logger.info(f"Booking confirmation email sent for payment {instance.reference}")
+                                    instance.log('info', 'Booking confirmation email sent', {'booking_reference': booking.booking_reference})
+                                else:
+                                    logger.warning(f"Failed to send booking confirmation email for payment {instance.reference}")
+                                    instance.log('warning', 'Failed to send booking confirmation email')
+                            except Exception as email_error:
+                                logger.error(f"Error sending booking confirmation email for payment {instance.reference}: {str(email_error)}")
+                                instance.log('error', f'Error sending booking confirmation email: {str(email_error)}')
+                        else:
+                            logger.warning(f"Failed to create booking for successful payment {instance.reference} - no valid booking details found")
+                            instance.log('warning', 'Failed to create booking - no valid booking details found')
+                            
+                            # Still try to send a generic confirmation email
+                            try:
+                                email_sent = EmailService.send_booking_confirmation(instance, booking_details)
+                                if email_sent:
+                                    logger.info(f"Generic confirmation email sent for payment {instance.reference}")
+                                    instance.log('info', 'Generic confirmation email sent')
+                            except Exception as email_error:
+                                logger.error(f"Error sending generic confirmation email for payment {instance.reference}: {str(email_error)}")
+                    else:
+                        logger.info(f"Booking already exists for payment {instance.reference}")
                     
             except Exception as e:
-                logger.error(f"Error creating booking for successful payment {instance.reference}: {str(e)}")
+                logger.error(f"Error processing successful payment {instance.reference}: {str(e)}")
+                instance.log('error', f'Error processing successful payment: {str(e)}')
         
         # Clean up the temporary attribute
         if hasattr(instance, '_old_status'):
