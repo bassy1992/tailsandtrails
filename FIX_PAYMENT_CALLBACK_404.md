@@ -18,7 +18,7 @@ I've updated `Tback/tback_api/settings.py` to use `https://tfront.vercel.app` as
 3. Go to **Variables** tab
 4. Add or update this variable:
    ```
-   FRONTEND_URL=https://tfront.vercel.app
+   FRONTEND_URL=https://www.talesandtrailsghana.com
    ```
 5. Click **Save** - Railway will automatically redeploy
 
@@ -61,8 +61,9 @@ To avoid this issue in the future, set up a stable production domain in Vercel:
 
 ## Current URLs
 
-### Frontend (Vercel)
-- **Production URL**: `https://tfront.vercel.app` ✅ (Use this)
+### Frontend
+- **Production Custom Domain**: `https://www.talesandtrailsghana.com` ✅ (PRIMARY - Use this)
+- **Vercel URL**: `https://tfront.vercel.app` ✅ (Backup)
 - **Project URL**: `https://tfront-bassys-projects-fca17413.vercel.app` ✅ (Also works)
 - **Old URL**: `https://tfront-two.vercel.app` ❌ (Don't use - deleted)
 
@@ -80,7 +81,7 @@ To avoid this issue in the future, set up a stable production domain in Vercel:
 ### Test Payment Callback URL
 ```bash
 # The callback URL should be:
-https://tfront.vercel.app/payment-callback
+https://www.talesandtrailsghana.com/payment-callback
 
 # NOT:
 https://tfront-two.vercel.app/payment-callback
@@ -98,7 +99,7 @@ https://tfront-two.vercel.app/payment-callback
 
 Once fixed, the payment flow will be:
 1. User completes payment on Paystack
-2. Paystack redirects to: `https://tfront.vercel.app/payment-callback?reference=PAY-...`
+2. Paystack redirects to: `https://www.talesandtrailsghana.com/payment-callback?reference=PAY-...`
 3. PaymentCallback page verifies payment
 4. Creates booking/ticket purchase
 5. Sends confirmation email
@@ -126,10 +127,10 @@ Once fixed, the payment flow will be:
 
 To prevent this in the future:
 
-1. **Use stable URLs**: Always use `tfront.vercel.app` not deployment-specific URLs
+1. **Use custom domain**: Always use `www.talesandtrailsghana.com` for production
 2. **Set environment variables**: Don't rely on defaults in code
-3. **Use custom domain**: For production, use your own domain
-4. **Monitor deployments**: Check that new deployments don't break URLs
+3. **Monitor deployments**: Check that new deployments don't break URLs
+4. **Keep domain stable**: Custom domains don't change with deployments
 
 ## Support
 
