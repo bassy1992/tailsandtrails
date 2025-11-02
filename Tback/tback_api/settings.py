@@ -215,8 +215,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite dev server default (backup)
     "http://127.0.0.1:5173",
     "https://tailsandtrails.vercel.app",  # Vercel frontend (main)
-    "https://tfront-two.vercel.app",  # Current custom domain
-    "https://tfront-p8alihiea-bassys-projects-fca17413.vercel.app",  # Previous deployment
+    "https://tfront.vercel.app",  # Vercel production URL
+    "https://tfront-bassys-projects-fca17413.vercel.app",  # Vercel project URL
     "https://tailsandtrails-production.up.railway.app",  # Railway production backend
 ]
 
@@ -263,8 +263,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://tailsandtrails.vercel.app",
-    "https://tfront-two.vercel.app",  # Current custom domain
-    "https://tfront-p8alihiea-bassys-projects-fca17413.vercel.app",  # Previous deployment
+    "https://tfront.vercel.app",  # Vercel production URL
+    "https://tfront-bassys-projects-fca17413.vercel.app",  # Vercel project URL
     "https://tailsandtrails-production.up.railway.app",
 ]
 
@@ -274,7 +274,7 @@ AUTH_USER_MODEL = 'authentication.User'
 # Payment settings
 PAYMENT_TIMEOUT = 30  # seconds
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://tfront-two.vercel.app')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://tfront.vercel.app')
 SITE_NAME = os.getenv('SITE_NAME', 'Trails & Trails')
 
 # Stripe settings removed - using MTN MoMo only
