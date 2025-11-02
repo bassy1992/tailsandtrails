@@ -1,0 +1,13 @@
+{
+  "name": "tailsandtrails-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install": "cd Tfront && npm install",
+    "build": "cd Tfront && npm run build",
+    "dev": "cd Tfront && npm run dev"
+  },
+  "workspaces": [
+    "Tfront"
+  ]
+}

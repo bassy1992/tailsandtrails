@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd Tfront && npm run build",
+  "outputDirectory": "Tfront/dist/spa",
+  "installCommand": "cd Tfront && npm install",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
