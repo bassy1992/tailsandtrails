@@ -36,9 +36,9 @@ COPY . /app/
 WORKDIR /app/Tfront
 RUN pnpm run build
 
-# Collect Django static files
+# Collect Django static files (skip for now, will do at runtime)
 WORKDIR /app/Tback
-RUN python manage.py collectstatic --noinput
+# RUN python manage.py collectstatic --noinput
 
 # Create staticfiles directory
 RUN mkdir -p /app/Tback/staticfiles
