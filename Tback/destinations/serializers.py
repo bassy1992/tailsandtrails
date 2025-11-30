@@ -61,8 +61,8 @@ class DestinationListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'slug', 'location', 'description', 'image',
             'price', 'duration', 'duration_display', 'max_group_size',
-            'rating', 'reviews_count', 'category', 'highlights', 'includes',
-            'price_category', 'is_featured'
+            'start_date', 'end_date', 'rating', 'reviews_count', 'category', 
+            'highlights', 'includes', 'price_category', 'is_featured'
         ]
 
 class DestinationDetailSerializer(serializers.ModelSerializer):
@@ -80,9 +80,9 @@ class DestinationDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'slug', 'location', 'description', 'image',
             'price', 'duration', 'duration_display', 'max_group_size',
-            'rating', 'reviews_count', 'category', 'highlights', 'includes',
-            'images', 'addon_options', 'experience_addons', 'price_category', 
-            'is_featured', 'created_at'
+            'start_date', 'end_date', 'rating', 'reviews_count', 'category', 
+            'highlights', 'includes', 'images', 'addon_options', 'experience_addons', 
+            'price_category', 'is_featured', 'created_at'
         ]
 
 class ReviewSerializer(serializers.ModelSerializer):

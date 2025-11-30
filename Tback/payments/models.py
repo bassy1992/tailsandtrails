@@ -29,6 +29,7 @@ class Payment(models.Model):
         ('card', 'Credit/Debit Card'),
         ('bank', 'Bank Transfer'),
         ('cash', 'Cash'),
+        ('paystack', 'Paystack'),
     ]
     
     # Payment identification

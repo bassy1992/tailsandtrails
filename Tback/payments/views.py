@@ -298,7 +298,7 @@ def get_payment_methods(request):
                     "id": provider.id,
                     "name": provider.name,
                     "code": provider.code
-                } for provider in active_providers.filter(code='stripe')
+                } for provider in active_providers.filter(code__in=['stripe', 'paystack'])
             ]
         },
         {
@@ -1091,3 +1091,223 @@ def convert_frontend_booking_data(frontend_data, payment):
         sample_data = create_sample_booking_details()
         sample_data['final_total'] = float(payment.amount)
         return sample_data
+
+# Paystack Integration Views
+from .paystack_service import PaystackService
+import json
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def paystack_initialize_payment(request):
+    """Initialize a Paystack payment"""
+    try:
+        # Get payment reference from request
+        reference = request.data.get('reference')
+        if not reference:
+            return Response({
+                'success': False,
+                'error': 'Payment reference is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get payment
+        try:
+            payment = Payment.objects.get(reference=reference)
+        except Payment.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Payment not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # Initialize with Paystack
+        paystack_service = PaystackService()
+        callback_url = request.data.get('callback_url')
+        
+        result = paystack_service.initialize_payment(payment, callback_url)
+        
+        if result['success']:
+            return Response({
+                'success': True,
+                'data': result['data'],
+                'authorization_url': result['authorization_url'],
+                'access_code': result['access_code'],
+                'reference': result['reference']
+            })
+        else:
+            return Response({
+                'success': False,
+                'error': result['error']
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        logger.error(f"Paystack initialization error: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'An error occurred while initializing payment'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def paystack_verify_payment(request, reference):
+    """Verify a Paystack payment"""
+    try:
+        paystack_service = PaystackService()
+        result = paystack_service.verify_payment(reference)
+        
+        if result['success']:
+            # Update local payment status
+            try:
+                payment = Payment.objects.get(reference=reference)
+                transaction_data = result['data']
+                
+                if transaction_data['status'] == 'success':
+                    payment.status = 'successful'
+                    payment.processed_at = timezone.now()
+                elif transaction_data['status'] == 'failed':
+                    payment.status = 'failed'
+                    payment.processed_at = timezone.now()
+                
+                payment.metadata.update({
+                    'paystack_verification': transaction_data
+                })
+                payment.save()
+                
+                payment.log('info', 'Payment verified with Paystack', transaction_data)
+                
+            except Payment.DoesNotExist:
+                logger.warning(f"Payment not found for verification: {reference}")
+            
+            return Response({
+                'success': True,
+                'data': result['data']
+            })
+        else:
+            return Response({
+                'success': False,
+                'error': result['error']
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        logger.error(f"Paystack verification error: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'An error occurred while verifying payment'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def paystack_webhook(request):
+    """Handle Paystack webhook"""
+    try:
+        # Get signature from headers
+        signature = request.META.get('HTTP_X_PAYSTACK_SIGNATURE', '')
+        
+        if not signature:
+            logger.warning("Paystack webhook received without signature")
+            return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Process webhook
+        paystack_service = PaystackService()
+        result = paystack_service.handle_webhook(request.data, signature)
+        
+        if result['success']:
+            return Response({'status': 'success'})
+        else:
+            return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        logger.error(f"Paystack webhook error: {str(e)}")
+        return Response({'status': 'error'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def paystack_refund_payment(request, reference):
+    """Refund a Paystack payment"""
+    try:
+        # Get payment
+        payment = get_object_or_404(
+            Payment, 
+            reference=reference, 
+            user=request.user,
+            status='successful'
+        )
+        
+        # Get refund details
+        amount = request.data.get('amount')
+        reason = request.data.get('reason', 'Customer request')
+        
+        if amount:
+            try:
+                amount = Decimal(str(amount))
+                if amount <= 0 or amount > payment.amount:
+                    return Response({
+                        'success': False,
+                        'error': 'Invalid refund amount'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            except (ValueError, TypeError):
+                return Response({
+                    'success': False,
+                    'error': 'Invalid amount format'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Process refund
+        paystack_service = PaystackService()
+        result = paystack_service.refund_payment(payment, amount, reason)
+        
+        if result['success']:
+            return Response({
+                'success': True,
+                'data': result['data'],
+                'message': 'Refund processed successfully'
+            })
+        else:
+            return Response({
+                'success': False,
+                'error': result['error']
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        logger.error(f"Paystack refund error: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'An error occurred while processing refund'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+def convert_frontend_booking_data(booking_data, payment):
+    """Convert frontend booking data to backend format"""
+    try:
+        # Extract basic info
+        converted = {
+            'destination_name': booking_data.get('destination', {}).get('name', 'Unknown Destination'),
+            'package_name': booking_data.get('package', {}).get('name', 'Standard Package'),
+            'start_date': booking_data.get('dates', {}).get('start', ''),
+            'end_date': booking_data.get('dates', {}).get('end', ''),
+            'duration_days': booking_data.get('duration', 1),
+            'group_size': booking_data.get('groupSize', 1),
+            'base_price': float(booking_data.get('basePrice', 0)),
+            'final_total': float(payment.amount),
+            'currency': payment.currency,
+            'booking_type': booking_data.get('type', 'destination')
+        }
+        
+        # Add participants if available
+        participants = booking_data.get('participants', [])
+        if participants:
+            converted['participants'] = participants
+            converted['participant_count'] = len(participants)
+        
+        # Add selected options
+        options = booking_data.get('selectedOptions', [])
+        if options:
+            converted['selected_options'] = options
+            converted['options_total'] = sum(opt.get('price', 0) for opt in options)
+        
+        return converted
+        
+    except Exception as e:
+        logger.error(f"Error converting frontend booking data: {str(e)}")
+        return {
+            'destination_name': 'Unknown Destination',
+            'final_total': float(payment.amount),
+            'currency': payment.currency,
+            'error': 'Failed to parse booking data'
+        }

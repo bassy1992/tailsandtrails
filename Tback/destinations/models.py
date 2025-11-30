@@ -41,6 +41,8 @@ class Destination(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     duration = models.CharField(max_length=20, choices=DURATION_CHOICES)
     max_group_size = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    start_date = models.DateField(null=True, blank=True, help_text="Tour start date")
+    end_date = models.DateField(null=True, blank=True, help_text="Tour end date")
     rating = models.DecimalField(
         max_digits=3, 
         decimal_places=2, 

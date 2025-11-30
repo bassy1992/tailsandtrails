@@ -215,3 +215,9 @@ Stored real-time booking details for payment PAY-20250827001218-BBI3JK
 Started auto-completion task for payment PAY-20250827001218-BBI3JK (delay: 15s)
 Started auto-completion for payment PAY-20250827001218-BBI3JK (15s delay)
 Auto-completed payment PAY-20250827001218-BBI3JK successfully
+Auto-added destination booking details to payment PAY-20251007194233-LRD17T via signal
+Error converting frontend booking data: 'str' object has no attribute 'get'
+Stored real-time booking details for payment PAY-20251007194233-LRD17T
+Started auto-completion task for payment PAY-20251007194233-LRD17T (delay: 15s)
+Started auto-completion for payment PAY-20251007194233-LRD17T (15s delay)
+Auto-completed payment PAY-20251007194233-LRD17T successfully

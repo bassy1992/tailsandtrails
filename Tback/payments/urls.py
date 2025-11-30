@@ -25,6 +25,12 @@ urlpatterns = [
     # MTN MoMo webhook
     path('mtn-momo/webhook/', views.mtn_momo_webhook, name='mtn-momo-webhook'),
     
+    # Paystack endpoints
+    path('paystack/initialize/', views.paystack_initialize_payment, name='paystack-initialize'),
+    path('paystack/verify/<str:reference>/', views.paystack_verify_payment, name='paystack-verify'),
+    path('paystack/webhook/', views.paystack_webhook, name='paystack-webhook'),
+    path('paystack/refund/<str:reference>/', views.paystack_refund_payment, name='paystack-refund'),
+    
     # Demo endpoints
     path('<str:reference>/simulate-auth/', views.simulate_payment_authorization, name='simulate-payment-auth'),
     path('<str:reference>/start-auto-completion/', views.start_demo_auto_completion, name='start-auto-completion'),
