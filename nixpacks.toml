@@ -1,0 +1,17 @@
+[phases.setup]
+nixPkgs = ["python310", "nodejs-18_x"]
+
+[phases.install]
+cmds = [
+  "cd Tback && pip install -r requirements.txt",
+  "cd Tfront && npm install"
+]
+
+[phases.build]
+cmds = [
+  "cd Tback && python manage.py collectstatic --noinput",
+  "cd Tfront && npm run build"
+]
+
+[start]
+cmd = "bash start.sh"
