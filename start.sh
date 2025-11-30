@@ -2,7 +2,7 @@
 
 # Install backend dependencies
 cd Tback
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 
 # Run Django migrations
 python manage.py migrate
