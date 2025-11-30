@@ -4,13 +4,14 @@ nixPkgs = ["python310", "nodejs-18_x"]
 [phases.install]
 cmds = [
   "cd Tback && python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt",
-  "cd Tfront && npm install"
+  "npm install -g pnpm",
+  "cd Tfront && pnpm install"
 ]
 
 [phases.build]
 cmds = [
   "cd Tback && python manage.py collectstatic --noinput",
-  "cd Tfront && npm run build"
+  "cd Tfront && pnpm run build"
 ]
 
 [start]

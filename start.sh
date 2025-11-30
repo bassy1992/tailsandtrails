@@ -1,19 +1,12 @@
 #!/bin/bash
 
-# Install backend dependencies
-cd Tback
-python3 -m pip install -r requirements.txt
-
 # Run Django migrations
+cd Tback
 python manage.py migrate
 
-# Start Django server in background
+# Start Django server in background on port 8000
 python manage.py runserver 0.0.0.0:8000 &
 
-# Install and build frontend
+# Start frontend server on PORT (Railway will set this)
 cd ../Tfront
-npm install
-npm run build
-
-# Start frontend server
-npm start
+PORT=${PORT:-3000} node dist/server/node-build.mjs
