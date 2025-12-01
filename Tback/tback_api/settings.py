@@ -184,6 +184,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://trails-and-trails.vercel.app",  # Production Vercel deployment
     "https://tailsandtrails-production.up.railway.app",  # Railway backend deployment
+    "https://www.talesandtrailsghana.com",  # Production custom domain
+    "https://talesandtrailsghana.com",  # Production custom domain (without www)
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -230,6 +232,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5173",
     "https://trails-and-trails.vercel.app",  # Production Vercel deployment
     "https://tailsandtrails-production.up.railway.app",  # Railway backend deployment
+    "https://www.talesandtrailsghana.com",  # Production custom domain
+    "https://talesandtrailsghana.com",  # Production custom domain (without www)
 ]
 
 # CSRF settings for API requests
