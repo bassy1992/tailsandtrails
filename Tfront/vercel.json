@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:client",
+  "buildCommand": "NODE_ENV=production npm run build:client",
   "outputDirectory": "dist/spa",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
@@ -10,8 +10,11 @@
       "destination": "/index.html"
     }
   ],
-  "env": {
-    "VITE_API_BASE_URL": "https://tailsandtrails-production.up.railway.app",
-    "VITE_API_URL": "https://tailsandtrails-production.up.railway.app/api"
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "VITE_API_BASE_URL": "https://tailsandtrails-production.up.railway.app",
+      "VITE_API_URL": "https://tailsandtrails-production.up.railway.app/api"
+    }
   }
 }
