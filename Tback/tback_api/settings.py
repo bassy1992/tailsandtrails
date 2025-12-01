@@ -69,6 +69,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -170,12 +171,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:5173",  # Vite dev server default (backup)
     "http://127.0.0.1:5173",
+    "https://trails-and-trails.vercel.app",  # Production Vercel deployment
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 # Additional CORS settings for development
-CORS_ALLOW_ALL_ORIGINS = True  # Only for development - allows all origins
+CORS_ALLOW_ALL_ORIGINS = False  # Disable to use specific origins for better security
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -208,19 +210,26 @@ CORS_EXPOSE_HEADERS = [
     'authorization',
 ]
 
-# Ensure CSRF is disabled for API endpoints
+# CSRF trusted origins for cross-domain requests
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://trails-and-trails.vercel.app",  # Production Vercel deployment
 ]
 
-# Disable CSRF for API endpoints
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-]
+# CSRF settings for API requests
+CSRF_COOKIE_SECURE = not DEBUG  # Use secure cookies in production
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access to CSRF token
+CSRF_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests
+CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF tokens
+CSRF_COOKIE_NAME = 'csrftoken'  # Explicit cookie name
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'  # Header name for CSRF token
+CSRF_COOKIE_AGE = 31449600  # 1 year in seconds
+CSRF_TOKEN_VALID_FOR = 31449600  # 1 year in seconds
+CSRF_COOKIE_DOMAIN = None  # Allow for subdomains if needed
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'  # Default CSRF failure view
 
 # Custom user model
 AUTH_USER_MODEL = 'authentication.User'

@@ -1,7 +1,14 @@
 {
-  "buildCommand": "npm run build:client",
-  "outputDirectory": "dist/spa",
+  "buildCommand": "cd Tfront && npm run build:client",
+  "outputDirectory": "Tfront/dist/spa",
+  "devCommand": "cd Tfront && npm run dev",
+  "installCommand": "cd Tfront && npm install",
   "framework": "vite",
+  "functions": {
+    "app/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
