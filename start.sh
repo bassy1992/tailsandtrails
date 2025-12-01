@@ -2,12 +2,18 @@
 
 # Run Django migrations and collect static files
 cd Tback
+
+# Create migrations for any model changes
+python manage.py makemigrations
+
+# Apply migrations
 python manage.py migrate
+
+# Create staticfiles directory if it doesn't exist
+mkdir -p staticfiles
+
+# Collect static files
 python manage.py collectstatic --noinput
 
-# Start Django server in background on port 8000
-python manage.py runserver 0.0.0.0:8000 &
-
-# Start frontend server on PORT (Railway will set this)
-cd ../Tfront
-PORT=${PORT:-3000} node dist/server/node-build.mjs
+# Start Django server on Railway's PORT
+python manage.py runserver 0.0.0.0:${PORT:-8000}
