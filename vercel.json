@@ -1,0 +1,22 @@
+{
+  "buildCommand": "cd Tfront && npm run build:client",
+  "outputDirectory": "Tfront/dist/spa",
+  "devCommand": "cd Tfront && npm run dev",
+  "installCommand": "cd Tfront && npm install",
+  "framework": "vite",
+  "functions": {
+    "app/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_BASE_URL": "https://tailsandtrails-production.up.railway.app",
+    "VITE_API_URL": "https://tailsandtrails-production.up.railway.app/api"
+  }
+}

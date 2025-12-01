@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build:client",
+  "outputDirectory": "dist/spa",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_BASE_URL": "https://tailsandtrails-production.up.railway.app",
+    "VITE_API_URL": "https://tailsandtrails-production.up.railway.app/api"
+  }
+}

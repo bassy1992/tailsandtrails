@@ -1,0 +1,41 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block content %}
+    {% if show_protection_warning %}
+        <div style="background-color: #d1fae5; border: 1px solid #10b981; border-radius: 5px; padding: 15px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 20px; margin-right: 10px;">🔒</span>
+                <h3 style="margin: 0; color: #065f46;">Payment Protection Active</h3>
+            </div>
+            <p style="margin: 0; color: #047857;">
+                <strong>This successful payment is protected from deletion.</strong><br/>
+                Successful payments cannot be deleted to maintain transaction integrity and audit trails.
+                Only non-successful payments (pending, failed, cancelled) can be deleted.
+            </p>
+        </div>
+    {% endif %}
+    
+    {{ block.super }}
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+    {% if show_protection_warning %}
+        <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 5px; padding: 10px; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center;">
+                <span style="font-size: 16px; margin-right: 8px;">⚠️</span>
+                <span style="color: #92400e; font-weight: 500;">
+                    Delete button is disabled for this successful payment
+                </span>
+            </div>
+        </div>
+        
+        <style>
+            .deletelink, .deletelink-box {
+                display: none !important;
+            }
+        </style>
+    {% endif %}
+    
+    {{ block.super }}
+{% endblock %}

@@ -1,0 +1,15 @@
+[phases.setup]
+nixPkgs = ["python310"]
+
+[phases.install]
+cmds = [
+  "cd Tback && python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt"
+]
+
+[phases.build]
+cmds = [
+  "cd Tback && python manage.py collectstatic --noinput"
+]
+
+[start]
+cmd = "bash start.sh"
