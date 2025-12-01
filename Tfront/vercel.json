@@ -11,7 +11,7 @@
     }
   ],
   "env": {
-    "VITE_API_BASE_URL": "https://your-backend-url.herokuapp.com",
-    "VITE_API_URL": "https://your-backend-url.herokuapp.com/api"
+    "VITE_API_BASE_URL": "https://tailsandtrails-production.up.railway.app",
+    "VITE_API_URL": "https://tailsandtrails-production.up.railway.app/api"
   }
 }
