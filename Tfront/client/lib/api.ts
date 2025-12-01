@@ -279,9 +279,7 @@ export const ticketsApi = {
 
 export const destinationsApi = {
   async getCategories(): Promise<Category[]> {
-    const response = await fetch(`${API_BASE_URL}/categories/`);
-    if (!response.ok) throw new Error('Failed to fetch categories');
-    return response.json();
+    return apiClient.request<Category[]>('/categories/');
   },
 
   async getDestinations(params?: {
@@ -298,21 +296,15 @@ export const destinationsApi = {
     if (params?.duration_category) searchParams.append('duration_category', params.duration_category);
     if (params?.ordering) searchParams.append('ordering', params.ordering);
 
-    const url = `${API_BASE_URL}/destinations/${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Failed to fetch destinations');
-    return response.json();
+    const url = `/destinations/${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return apiClient.request<Destination[]>(url);
   },
 
   async getDestination(slug: string): Promise<Destination> {
-    const response = await fetch(`${API_BASE_URL}/destinations/${slug}/`);
-    if (!response.ok) throw new Error('Failed to fetch destination');
-    return response.json();
+    return apiClient.request<Destination>(`/destinations/${slug}/`);
   },
 
   async getStats(): Promise<DestinationStats> {
-    const response = await fetch(`${API_BASE_URL}/stats/`);
-    if (!response.ok) throw new Error('Failed to fetch stats');
-    return response.json();
+    return apiClient.request<DestinationStats>('/stats/');
   }
 };
