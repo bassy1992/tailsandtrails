@@ -29,6 +29,26 @@ def health_check(request):
     return response
 
 @csrf_exempt
+def root_endpoint(request):
+    """Root endpoint to handle base URL requests"""
+    response = JsonResponse({
+        'message': 'Trails & Trails API Server',
+        'status': 'running',
+        'endpoints': {
+            'health': '/api/health/',
+            'admin': '/admin/',
+            'auth': '/api/auth/',
+            'destinations': '/api/destinations/',
+            'tickets': '/api/tickets/',
+            'payments': '/api/payments/'
+        }
+    })
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
+
+@csrf_exempt
 @require_http_methods(["GET", "POST", "OPTIONS"])
 def cors_test(request):
     if request.method == 'OPTIONS':
@@ -51,6 +71,7 @@ def cors_test(request):
     return response
 
 urlpatterns = [
+    path('', root_endpoint, name='root'),  # Add root endpoint
     path('admin/', admin.site.urls),
     path('api/health/', health_check, name='health_check'),
     path('api/cors-test/', cors_test, name='cors_test'),
