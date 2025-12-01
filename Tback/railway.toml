@@ -2,5 +2,5 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "python manage.py migrate && gunicorn tback_api.wsgi:application --bind 0.0.0.0:$PORT"
-restartPolicyType = "on
+startCommand = "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn tback_api.wsgi:application --bind 0.0.0.0:$PORT"
+restartPolicyType = "on_failure"
