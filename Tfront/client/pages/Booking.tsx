@@ -758,13 +758,11 @@ export default function Booking() {
                                     <p className="text-sm text-gray-600">{addOn.description}</p>
                                   )}
                                 </div>
-                                <span className="text-ghana-green font-medium">
-                                  {singleOption 
-                                    ? `+GH₵${singleOption.price.toLocaleString()}`
-                                    : addOn.options && addOn.options.length > 0 
-                                      ? `From GH₵${Math.min(...addOn.options.map(o => o.price)).toLocaleString()}`
-                                      : 'Optional'}
-                                </span>
+                                {singleOption && singleOption.price > 0 && (
+                                  <span className="text-ghana-green font-medium">
+                                    +GH₵{singleOption.price.toLocaleString()}
+                                  </span>
+                                )}
                               </div>
                             </Label>
                           </div>
