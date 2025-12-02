@@ -97,8 +97,8 @@ class BookingDetailView(generics.RetrieveUpdateAPIView):
     def get_queryset(self):
         return Booking.objects.filter(user=self.request.user).select_related('destination')
 
-# Galler
-y Views
+
+# Gallery Views
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def gallery_categories(request):
