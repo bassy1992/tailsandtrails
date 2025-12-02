@@ -772,19 +772,43 @@ export default function Booking() {
                                 onValueChange={(value) => handleOptionChange(addOn.id, value)}
                                 className="space-y-2"
                               >
-                                {addOn.options.map((option) => (
-                                  <div key={option.id} className="flex items-center space-x-2 p-2 border rounded">
-                                    <RadioGroupItem value={option.id} id={`${addOn.id}-${option.id}`} />
-                                    <Label htmlFor={`${addOn.id}-${option.id}`} className="flex-1 cursor-pointer">
-                                      <div className="flex justify-between items-center">
-                                        <p className="text-sm">{option.name}</p>
-                                        <span className="text-sm text-ghana-green">
-                                          {option.price === 0 ? 'Included' : `+GH₵${option.price.toLocaleString()}`}
-                                        </span>
-                                      </div>
-                                    </Label>
-                                  </div>
-                                ))}
+                                {addOn.options
+                                  .filter((option) => {
+                                    // Filter options based on number of adults
+                                    const numAdults = bookingData.travelers.adults;
+                                    const optionName = option.name.toLowerCase();
+                                    
+                                    // Always show "No Transport" option
+                                    if (optionName.includes('no transport')) {
+                                      return true;
+                                    }
+                                    
+                                    // For 1 adult, show per-person options (e.g., "Shared Bus")
+                                    if (numAdults === 1) {
+                                      return !optionName.includes('for 2') && !optionName.includes('2 people');
+                                    }
+                                    
+                                    // For 2 adults, show group options (e.g., "Shared Bus for 2 People")
+                                    if (numAdults === 2) {
+                                      return optionName.includes('for 2') || optionName.includes('2 people');
+                                    }
+                                    
+                                    // Default: show all options
+                                    return true;
+                                  })
+                                  .map((option) => (
+                                    <div key={option.id} className="flex items-center space-x-2 p-2 border rounded">
+                                      <RadioGroupItem value={option.id} id={`${addOn.id}-${option.id}`} />
+                                      <Label htmlFor={`${addOn.id}-${option.id}`} className="flex-1 cursor-pointer">
+                                        <div className="flex justify-between items-center">
+                                          <p className="text-sm">{option.name}</p>
+                                          <span className="text-sm text-ghana-green">
+                                            {option.price === 0 ? 'Included' : `+GH₵${option.price.toLocaleString()}`}
+                                          </span>
+                                        </div>
+                                      </Label>
+                                    </div>
+                                  ))}
                               </RadioGroup>
                             </div>
                           )}
