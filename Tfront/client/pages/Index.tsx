@@ -102,57 +102,57 @@ export default function Index() {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-ghana-green to-ghana-blue text-white">
         <div className="absolute inset-0 bg-black/40"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center space-y-8">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24">
+          <div className="text-center space-y-6 sm:space-y-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight px-2">
               Discover Ghana's
-              <span className="block text-ghana-gold">Rich Heritage</span>
+              <span className="block text-ghana-gold mt-2">Rich Heritage</span>
             </h1>
-            <p className="text-xl md:text-2xl max-w-3xl mx-auto text-gray-200">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto text-gray-200 px-4">
               Experience the beauty, culture, and history of Ghana with our comprehensive tour packages including transport, accommodation, meals, and medical support.
             </p>
             
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto bg-white rounded-lg p-4 shadow-lg">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1 relative">
+            <div className="max-w-2xl mx-auto bg-white rounded-lg p-3 sm:p-4 shadow-lg">
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
                     type="text"
                     placeholder="Where do you want to go?"
-                    className="pl-10 text-gray-900"
+                    className="pl-10 text-gray-900 h-11"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="flex-1 relative">
+                <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
                     type="date"
-                    className="pl-10 text-gray-900"
+                    className="pl-10 text-gray-900 h-11"
                   />
                 </div>
-                <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold px-8">
+                <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 w-full">
                   Search Tours
                 </Button>
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-4 text-sm">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm px-4">
               <div className="flex items-center space-x-2">
-                <Car className="h-5 w-5" />
+                <Car className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Transport Included</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Hotel className="h-5 w-5" />
+                <Hotel className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Quality Hotels</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Utensils className="h-5 w-5" />
+                <Utensils className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Local Cuisine</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Shield className="h-5 w-5" />
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Medical Support</span>
               </div>
             </div>
@@ -161,11 +161,11 @@ export default function Index() {
       </section>
 
       {/* Featured Tours */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Featured Tours</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 px-4">Featured Tours</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
               Discover our most popular destinations and experience the best of Ghana
             </p>
           </div>
@@ -239,24 +239,24 @@ export default function Index() {
       </section>
 
       {/* Statistics */}
-      <section className="py-16 bg-ghana-green text-white">
+      <section className="py-12 sm:py-16 bg-ghana-green text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="space-y-2">
-              <div className="text-4xl font-bold text-ghana-gold">500+</div>
-              <div className="text-lg">Happy Tourists</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-3xl sm:text-4xl font-bold text-ghana-gold">500+</div>
+              <div className="text-sm sm:text-base md:text-lg">Happy Tourists</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-4xl font-bold text-ghana-gold">15+</div>
-              <div className="text-lg">Destinations</div>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-3xl sm:text-4xl font-bold text-ghana-gold">15+</div>
+              <div className="text-sm sm:text-base md:text-lg">Destinations</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-4xl font-bold text-ghana-gold">50+</div>
-              <div className="text-lg">Tour Packages</div>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-3xl sm:text-4xl font-bold text-ghana-gold">50+</div>
+              <div className="text-sm sm:text-base md:text-lg">Tour Packages</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-4xl font-bold text-ghana-gold">24/7</div>
-              <div className="text-lg">Support</div>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-3xl sm:text-4xl font-bold text-ghana-gold">24/7</div>
+              <div className="text-sm sm:text-base md:text-lg">Support</div>
             </div>
           </div>
         </div>
@@ -272,16 +272,16 @@ export default function Index() {
       />
 
       {/* Testimonials */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">What Our Tourists Say</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 px-4">What Our Tourists Say</h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
               Read experiences from travelers who discovered Ghana with us
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className="text-center">
                 <CardContent className="pt-6">
@@ -316,21 +316,21 @@ export default function Index() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-gradient-to-r from-ghana-gold to-amber-400 text-black">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <h2 className="text-3xl md:text-4xl font-bold">Ready to Explore Ghana?</h2>
-          <p className="text-xl">
+      <section className="py-12 sm:py-16 bg-gradient-to-r from-ghana-gold to-amber-400 text-black">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 sm:space-y-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4">Ready to Explore Ghana?</h2>
+          <p className="text-base sm:text-lg md:text-xl px-4">
             Join hundreds of satisfied tourists who have discovered the beauty and culture of Ghana with us. 
             Book your adventure today!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/destinations">
-              <Button size="lg" className="bg-ghana-green hover:bg-ghana-green/90 text-white">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
+            <Link to="/destinations" className="w-full sm:w-auto">
+              <Button size="lg" className="bg-ghana-green hover:bg-ghana-green/90 text-white w-full sm:w-auto">
                 Plan Your Trip
               </Button>
             </Link>
-            <Link to="/contact">
-              <Button size="lg" variant="outline" className="border-ghana-green text-ghana-green hover:bg-ghana-green hover:text-white">
+            <Link to="/contact" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="border-ghana-green text-ghana-green hover:bg-ghana-green hover:text-white w-full sm:w-auto">
                 Contact Us
               </Button>
             </Link>
