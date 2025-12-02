@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,60 +8,34 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, MapPin, Search, Star, Users, Clock, Car, Hotel, Utensils, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import VideoSection from "@/components/VideoSection";
+import { destinationsApi, Destination } from "@/lib/api";
 
 export default function Index() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [featuredTours, setFeaturedTours] = useState<Destination[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const featuredTours = [
-    {
-      id: 1,
-      name: "Cape Coast Castle Heritage Tour",
-      location: "Cape Coast",
-      image: "https://images.pexels.com/photos/16136199/pexels-photo-16136199.jpeg?auto=compress&cs=tinysrgb&w=800",
-      price: "GH₵450",
-      duration: "2 Days",
-      rating: 4.8,
-      reviews: 124,
-      description: "Explore the historic Cape Coast Castle and learn about Ghana's rich heritage.",
-      includes: ["Transport", "Accommodation", "Meals", "Guide"]
-    },
-    {
-      id: 2,
-      name: "Aburi Gardens Nature Escape",
-      location: "Aburi",
-      image: "https://images.pexels.com/photos/27116488/pexels-photo-27116488.jpeg?auto=compress&cs=tinysrgb&w=800",
-      price: "GH₵280",
-      duration: "1 Day",
-      rating: 4.6,
-      reviews: 89,
-      description: "Relax in the beautiful botanical gardens with stunning mountain views.",
-      includes: ["Transport", "Lunch", "Guide"]
-    },
-    {
-      id: 3,
-      name: "Manhyia Palace Cultural Tour",
-      location: "Kumasi",
-      image: "https://images.pexels.com/photos/33033556/pexels-photo-33033556.jpeg?auto=compress&cs=tinysrgb&w=800",
-      price: "GH₵350",
-      duration: "1 Day",
-      rating: 4.7,
-      reviews: 156,
-      description: "Visit the seat of the Asantehene and learn about Ashanti culture.",
-      includes: ["Transport", "Cultural Guide", "Lunch"]
-    },
-    {
-      id: 4,
-      name: "Kakum Canopy Walk Adventure",
-      location: "Kakum National Park",
-      image: "https://images.pexels.com/photos/33008767/pexels-photo-33008767.jpeg?auto=compress&cs=tinysrgb&w=800",
-      price: "GH₵520",
-      duration: "3 Days",
-      rating: 4.9,
-      reviews: 203,
-      description: "Experience the thrilling canopy walk and explore the rainforest.",
-      includes: ["Transport", "Accommodation", "All Meals", "Park Fees"]
-    }
-  ];
+  useEffect(() => {
+    const loadFeaturedTours = async () => {
+      try {
+        setLoading(true);
+        const destinations = await destinationsApi.getDestinations();
+        // Filter featured destinations or take first 4
+        const featured = destinations.filter(d => d.is_featured).slice(0, 4);
+        if (featured.length === 0) {
+          setFeaturedTours(destinations.slice(0, 4));
+        } else {
+          setFeaturedTours(featured);
+        }
+      } catch (error) {
+        console.error('Failed to load destinations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFeaturedTours();
+  }, []);
 
   const featuredVideos = [
     {
@@ -196,57 +170,63 @@ export default function Index() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredTours.map((tour) => (
-              <Card key={tour.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  <img
-                    src={tour.image}
-                    alt={tour.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  <Badge className="absolute top-2 right-2 bg-ghana-gold text-black">
-                    {tour.duration}
-                  </Badge>
-                </div>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{tour.name}</CardTitle>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-ghana-green">{tour.price}</div>
-                      <div className="text-sm text-gray-500">per person</div>
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Loading featured tours...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {featuredTours.map((tour) => (
+                <Card key={tour.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="relative">
+                    <img
+                      src={tour.image}
+                      alt={tour.name}
+                      className="w-full h-48 object-cover"
+                    />
+                    <Badge className="absolute top-2 right-2 bg-ghana-gold text-black">
+                      {tour.duration_display}
+                    </Badge>
+                  </div>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{tour.name}</CardTitle>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-ghana-green">GH₵{tour.price}</div>
+                        <div className="text-sm text-gray-500">per person</div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-1 text-sm text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span>{tour.location}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <CardDescription className="mb-3">{tour.description}</CardDescription>
-                  <div className="flex items-center space-x-1 mb-3">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold">{tour.rating}</span>
-                    <span className="text-gray-500">({tour.reviews} reviews)</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {tour.includes.map((item, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {item}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Link to={`/tour/${tour.id}`} className="w-full">
-                    <Button className="w-full bg-ghana-green hover:bg-ghana-green/90">
-                      Book Now
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                    <div className="flex items-center space-x-1 text-sm text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      <span>{tour.location}</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <CardDescription className="mb-3 line-clamp-2">{tour.description}</CardDescription>
+                    <div className="flex items-center space-x-1 mb-3">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-semibold">{tour.rating}</span>
+                      <span className="text-gray-500">({tour.reviews_count} reviews)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {tour.includes.slice(0, 3).map((item, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {item.item}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Link to={`/tour/${tour.slug}`} className="w-full">
+                      <Button className="w-full bg-ghana-green hover:bg-ghana-green/90">
+                        Book Now
+                      </Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-12">
             <Link to="/destinations">

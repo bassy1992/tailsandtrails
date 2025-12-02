@@ -4,11 +4,6 @@
   "devCommand": "cd Tfront && npm run dev",
   "installCommand": "cd Tfront && npm install",
   "framework": "vite",
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",

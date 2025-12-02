@@ -314,6 +314,24 @@ class ApiClient {
   async getPaymentDetail(reference: string): Promise<PaymentDetail> {
     return this.request<PaymentDetail>(`/payments/${reference}/`);
   }
+
+  async createCheckoutPayment(data: {
+    amount: number;
+    currency: string;
+    payment_method: string;
+    provider_code: string;
+    phone_number?: string;
+    description?: string;
+    booking_details?: any;
+  }): Promise<{ success: boolean; payment: PaymentDetail; message?: string; error?: string }> {
+    return this.request<{ success: boolean; payment: PaymentDetail; message?: string; error?: string }>(
+      '/payments/checkout/',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);

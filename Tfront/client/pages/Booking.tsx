@@ -155,8 +155,6 @@ export default function Booking() {
     medical: "basic"
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<string>("");
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showBreakdown, setShowBreakdown] = useState(true);
 
   // Load tour data from API to get pricing tiers
@@ -341,31 +339,7 @@ export default function Booking() {
     loadBookingFromDatabase();
   }, [searchParams, id]);
 
-  // Load payment methods from API
-  useEffect(() => {
-    const loadPaymentMethods = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/payments/checkout/methods/');
-        const data = await response.json();
-        setPaymentMethods(data.payment_methods || []);
-      } catch (error) {
-        console.error('Error loading payment methods:', error);
-        // Fallback to default methods if API fails
-        setPaymentMethods([
-          {
-            id: 'mobile_money',
-            name: 'Mobile Money',
-            description: 'MTN, Vodafone, AirtelTigo',
-            icon: '📱',
-            processing_time: 'Instant',
-            providers: [{ name: 'MTN Mobile Money' }]
-          }
-        ]);
-      }
-    };
-    
-    loadPaymentMethods();
-  }, []);
+
 
   // Helper function to get price for group size using pricing tiers
   const getPriceForGroup = (numPeople: number): number => {
@@ -453,49 +427,77 @@ export default function Booking() {
     });
   };
 
-  const handleProceedToPayment = () => {
-    if (!paymentMethod) {
-      alert("Please select a payment method");
-      return;
-    }
-
+  const handleProceedToPayment = async () => {
     if (!isAuthenticated) {
       alert("Please log in to complete your booking");
       navigate("/login", { state: { returnUrl: location.pathname } });
       return;
     }
 
-    const paymentData = {
-      tourName: bookingData.tourName,
-      total: totals.total,
-      bookingReference: `GH${Date.now().toString().slice(-6)}`,
-      paymentMethod: paymentMethod,
-      userInfo: {
-        id: user?.id,
-        name: user?.name,
-        email: user?.email,
-        phone: user?.phone
+    // Prepare booking details for backend
+    const bookingDetails = {
+      type: 'destination',
+      destination: {
+        name: bookingData.tourName,
+        location: tourData?.location || 'Ghana',
+        duration: bookingData.duration,
+        image_url: tourData?.image || ''
       },
-      bookingDetails: {
-        bookingData,
-        selectedOptions,
-        addOns: addOns.filter(a => a.selected)
+      travelers: {
+        adults: bookingData.travelers.adults,
+        children: bookingData.travelers.children
+      },
+      selected_date: bookingData.selectedDate,
+      selected_options: {
+        accommodation: addOns.find(a => a.id === 'accommodation')?.options?.find(o => o.id === selectedOptions.accommodation),
+        transport: addOns.find(a => a.id === 'transport')?.options?.find(o => o.id === selectedOptions.transport),
+        meals: addOns.find(a => a.id === 'meals')?.options?.find(o => o.id === selectedOptions.meals)
+      },
+      pricing: {
+        base_total: totals.baseTotal,
+        options_total: totals.addOnTotal,
+        final_total: totals.total
+      },
+      user_info: {
+        name: `${user?.first_name} ${user?.last_name}`,
+        email: user?.email,
+        phone: user?.phone || ''
       }
     };
 
-    // Navigate to appropriate payment method
-    if (paymentMethod === "mobile_money") {
-      navigate("/momo-checkout", { state: paymentData });
-    } else if (paymentMethod === "card") {
-      // Card payments removed - show message
-      alert("Card payments are no longer supported. Please use MTN Mobile Money.");
-      return;
-    } else if (paymentMethod === "bank_transfer") {
-      // Show bank transfer information
-      alert("Bank transfer details will be provided via email. Please contact support for large group bookings.");
-    } else {
-      // Other payment methods
-      alert(`Payment method ${paymentMethod} will be available soon. Please try Mobile Money or Card payment.`);
+    try {
+      // Create payment via API (using Paystack)
+      const response = await apiClient.createCheckoutPayment({
+        amount: totals.total,
+        currency: 'GHS',
+        payment_method: 'card',
+        provider_code: 'paystack',
+        phone_number: user?.phone || '',
+        description: `Booking for ${bookingData.tourName}`,
+        booking_details: bookingDetails
+      });
+
+      if (response.success && response.payment) {
+        // Initialize Paystack and redirect to their hosted page
+        const callbackUrl = `${window.location.origin}/payment-callback?reference=${response.payment.reference}`;
+        
+        const paystackResponse = await apiClient.initializePaystack({
+          reference: response.payment.reference,
+          callback_url: callbackUrl
+        });
+
+        if (paystackResponse.success && paystackResponse.authorization_url) {
+          // Redirect to Paystack's hosted payment page
+          window.location.href = paystackResponse.authorization_url;
+        } else {
+          alert(paystackResponse.error || 'Failed to initialize Paystack payment. Please try again.');
+        }
+      } else {
+        alert(response.error || 'Failed to initiate payment. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      alert(error.message || 'An error occurred while processing your payment. Please try again.');
     }
   };
 
@@ -1107,67 +1109,33 @@ export default function Booking() {
               </CardContent>
             </Card>
 
-            {/* 🔹 4. Payment Methods */}
+            {/* 🔹 4. Payment Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <CreditCard className="h-5 w-5 text-ghana-green" />
-                  <span>Payment Method</span>
+                  <span>Secure Payment</span>
                 </CardTitle>
-                <CardDescription>Choose your preferred payment option</CardDescription>
+                <CardDescription>Powered by Paystack - Accept cards, mobile money, and bank transfers</CardDescription>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
-                  {paymentMethods.map((method) => {
-                    // Only show methods with providers or bank transfer
-                    if (method.providers?.length === 0 && method.id !== 'bank_transfer') {
-                      return null;
-                    }
-
-                    const getIcon = (methodId: string) => {
-                      switch (methodId) {
-                        case 'mobile_money':
-                          return <Smartphone className="h-5 w-5 text-ghana-green" />;
-                        case 'card':
-                          return <CreditCard className="h-5 w-5 text-ghana-green" />;
-                        case 'bank_transfer':
-                          return <Building2 className="h-5 w-5 text-ghana-green" />;
-                        default:
-                          return <CreditCard className="h-5 w-5 text-ghana-green" />;
-                      }
-                    };
-
-                    const getBadgeColor = (processingTime: string) => {
-                      if (processingTime.toLowerCase().includes('instant')) {
-                        return 'text-green-600';
-                      } else if (processingTime.toLowerCase().includes('secure')) {
-                        return 'text-blue-600';
-                      } else {
-                        return 'text-gray-600';
-                      }
-                    };
-
-                    return (
-                      <div key={method.id} className="flex items-center space-x-3 p-4 border rounded-lg">
-                        <RadioGroupItem value={method.id} id={method.id} />
-                        <Label htmlFor={method.id} className="flex-1 cursor-pointer">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              {getIcon(method.id)}
-                              <div>
-                                <p className="font-medium">{method.name}</p>
-                                <p className="text-sm text-gray-600">{method.description}</p>
-                              </div>
-                            </div>
-                            <Badge variant="outline" className={getBadgeColor(method.processing_time)}>
-                              {method.processing_time}
-                            </Badge>
-                          </div>
-                        </Label>
-                      </div>
-                    );
-                  })}
-                </RadioGroup>
+                <div className="flex items-center space-x-3 p-4 border rounded-lg bg-gray-50">
+                  <CreditCard className="h-8 w-8 text-ghana-green" />
+                  <div className="flex-1">
+                    <p className="font-medium">Paystack Payment Gateway</p>
+                    <p className="text-sm text-gray-600">Supports Visa, Mastercard, Mobile Money (MTN, Vodafone, AirtelTigo), and Bank Transfer</p>
+                  </div>
+                  <Badge variant="outline" className="text-green-600 border-green-600">
+                    Secure
+                  </Badge>
+                </div>
+                <div className="mt-4 flex items-start space-x-2 text-xs text-gray-600 bg-blue-50 p-3 rounded-lg">
+                  <Shield className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-blue-800">Safe & Secure</p>
+                    <p>Your payment information is encrypted and processed securely by Paystack. We never store your card details.</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -1245,7 +1213,6 @@ export default function Booking() {
                 <Button 
                   onClick={handleProceedToPayment}
                   className="w-full bg-ghana-green hover:bg-ghana-green/90 text-white"
-                  disabled={!paymentMethod}
                 >
                   Proceed to Payment
                 </Button>

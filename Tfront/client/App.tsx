@@ -23,6 +23,8 @@ import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
 import Booking from "./pages/Booking";
 import MomoCheckout from "./pages/MomoCheckout";
+import PaymentProcessing from "./pages/PaymentProcessing";
+import PaymentCallback from "./pages/PaymentCallback";
 // StripeCheckout removed - using MTN MoMo only
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Tickets from "./pages/Tickets";
@@ -69,6 +71,8 @@ function AppRoutes() {
       } />
       <Route path="/booking/:id" element={<Booking />} />
       <Route path="/momo-checkout" element={<MomoCheckout />} />
+      <Route path="/payment-processing/:reference" element={<PaymentProcessing />} />
+      <Route path="/payment-callback" element={<PaymentCallback />} />
       {/* Stripe checkout removed - using MTN MoMo only */}
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/admin" element={<Placeholder />} />

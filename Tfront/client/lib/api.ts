@@ -155,13 +155,17 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
     };
 
     if (this.token) {
-      headers.Authorization = `Token ${this.token}`;
+      headers['Authorization'] = `Token ${this.token}`;
+    }
+
+    // Merge with any additional headers from options
+    if (options.headers) {
+      Object.assign(headers, options.headers);
     }
 
     const response = await fetch(url, {
@@ -211,7 +215,7 @@ class ApiClient {
 
   // Payment endpoints
   async getPaymentStatus(reference: string): Promise<PaymentDetail> {
-    return this.request<PaymentDetail>(`/payments/status/${reference}/`);
+    return this.request<PaymentDetail>(`/payments/${reference}/status/`);
   }
 
   async getUserPayments(): Promise<PaymentListItem[]> {
@@ -220,6 +224,43 @@ class ApiClient {
 
   async getPaymentDetail(reference: string): Promise<PaymentDetail> {
     return this.request<PaymentDetail>(`/payments/${reference}/`);
+  }
+
+  async createCheckoutPayment(data: {
+    amount: number;
+    currency: string;
+    payment_method: string;
+    provider_code: string;
+    phone_number?: string;
+    description?: string;
+    booking_details?: any;
+  }): Promise<{ success: boolean; payment: PaymentDetail; message?: string; error?: string }> {
+    return this.request<{ success: boolean; payment: PaymentDetail; message?: string; error?: string }>(
+      '/payments/checkout/create/',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  }
+
+  async initializePaystack(data: {
+    reference: string;
+    callback_url: string;
+  }): Promise<{ success: boolean; authorization_url?: string; access_code?: string; error?: string }> {
+    return this.request<{ success: boolean; authorization_url?: string; access_code?: string; error?: string }>(
+      '/payments/paystack/initialize/',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  }
+
+  async verifyPaystack(reference: string): Promise<{ success: boolean; data?: any; error?: string }> {
+    return this.request<{ success: boolean; data?: any; error?: string }>(
+      `/payments/paystack/verify/${reference}/`
+    );
   }
 }
 
