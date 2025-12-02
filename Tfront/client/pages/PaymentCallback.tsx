@@ -46,6 +46,7 @@ export default function PaymentCallback() {
                   paymentMethod: payment.payment_method_display,
                   tourName: payment.metadata?.booking_details?.destination?.name || 'Tour Package',
                   bookingReference: payment.reference,
+                  bookingDetails: payment.metadata?.booking_details || null,
                   paymentDetails: {
                     method: payment.payment_method_display || 'Card Payment',
                     provider: 'Paystack',

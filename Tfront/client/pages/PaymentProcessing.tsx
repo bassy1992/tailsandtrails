@@ -42,11 +42,12 @@ export default function PaymentProcessing() {
             navigate('/payment-success', {
               state: {
                 reference: payment.reference,
-                tourName: tourName,
+                tourName: tourName || payment.metadata?.booking_details?.destination?.name,
                 total: parseFloat(payment.amount),
                 amount: parseFloat(payment.amount),
                 paymentMethod: payment.payment_method_display,
                 bookingReference: payment.reference,
+                bookingDetails: payment.metadata?.booking_details || null,
                 paymentDetails: {
                   method: payment.payment_method_display || 'Mobile Money',
                   provider: 'Paystack',

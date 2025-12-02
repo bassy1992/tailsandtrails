@@ -15,7 +15,24 @@ interface PaymentSuccessData {
   // Tour data
   tourName?: string;
   bookingReference?: string;
-  bookingDetails?: any;
+  bookingDetails?: {
+    destination?: {
+      name?: string;
+      location?: string;
+      duration?: string;
+    };
+    travelers?: {
+      adults?: number;
+      children?: number;
+    };
+    selected_date?: string;
+    selected_options?: any;
+    pricing?: {
+      base_total?: number;
+      options_total?: number;
+      final_total?: number;
+    };
+  };
 
   // Ticket data
   eventName?: string;
@@ -175,7 +192,11 @@ export default function PaymentSuccess() {
                             ? new Date(paymentData.date!).toLocaleDateString('en-GB', {
                                 weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
                               })
-                            : 'September 20-22, 2025'
+                            : paymentData.bookingDetails?.selected_date 
+                              ? new Date(paymentData.bookingDetails.selected_date).toLocaleDateString('en-GB', {
+                                  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                                })
+                              : 'Date to be confirmed'
                           }
                         </span>
                       </div>
@@ -198,11 +219,18 @@ export default function PaymentSuccess() {
                         <>
                           <div className="flex items-center space-x-2">
                             <Users className="h-4 w-4" />
-                            <span>2 Adults, 1 Child</span>
+                            <span>
+                              {paymentData.bookingDetails?.travelers?.adults || 0} Adults
+                              {(paymentData.bookingDetails?.travelers?.children || 0) > 0 && 
+                                `, ${paymentData.bookingDetails.travelers.children} ${paymentData.bookingDetails.travelers.children === 1 ? 'Child' : 'Children'}`
+                              }
+                            </span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <MapPin className="h-4 w-4" />
-                            <span>Cape Coast, Ghana</span>
+                            <span>
+                              {paymentData.bookingDetails?.destination?.location || 'Ghana'}
+                            </span>
                           </div>
                         </>
                       )}
