@@ -9,8 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MapPin, Phone, Mail, Facebook, Instagram, Twitter, User, Settings, LogOut, Calendar } from "lucide-react";
-import { ReactNode } from "react";
+import { MapPin, Phone, Mail, Facebook, Instagram, Twitter, User, Settings, LogOut, Calendar, Menu, X } from "lucide-react";
+import { ReactNode, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface LayoutProps {
@@ -90,6 +90,8 @@ function AuthSection() {
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navigation */}
@@ -97,16 +99,17 @@ export default function Layout({ children }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2F261a98e6df434ad1ad15c1896e5c6aa3%2Fbfa2b897e15b4475b41dbeceafc18e1c?format=webp&width=200"
                 alt="Tales and Trails Ghana Logo"
-                className="h-10 w-auto"
+                className="h-8 sm:h-10 w-auto"
               />
-              <span className="text-2xl font-bold text-ghana-green">Tales and Trails Ghana</span>
+              <span className="text-lg sm:text-2xl font-bold text-ghana-green hidden sm:inline">Tales and Trails Ghana</span>
+              <span className="text-lg font-bold text-ghana-green sm:hidden">T&T Ghana</span>
             </Link>
 
-            {/* Navigation Links */}
+            {/* Navigation Links - Desktop */}
             <div className="hidden md:flex items-center space-x-8">
               <Link to="/" className="text-gray-700 hover:text-ghana-green transition-colors">
                 Home
@@ -128,20 +131,80 @@ export default function Layout({ children }: LayoutProps) {
               </Link>
             </div>
 
-            {/* Auth Section */}
+            {/* Auth Section - Desktop */}
             <div className="hidden md:flex items-center space-x-4">
               <AuthSection />
             </div>
 
             {/* Mobile menu button */}
             <div className="md:hidden">
-              <Button variant="ghost" size="sm">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
               </Button>
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-200 py-4 space-y-2">
+              <Link 
+                to="/" 
+                className="block px-4 py-2 text-gray-700 hover:bg-ghana-green hover:text-white rounded transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/destinations" 
+                className="block px-4 py-2 text-gray-700 hover:bg-ghana-green hover:text-white rounded transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Destinations
+              </Link>
+              <Link 
+                to="/gallery" 
+                className="block px-4 py-2 text-gray-700 hover:bg-ghana-green hover:text-white rounded transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Gallery
+              </Link>
+              <Link 
+                to="/tickets" 
+                className="block px-4 py-2 text-gray-700 hover:bg-ghana-green hover:text-white rounded transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Tickets
+              </Link>
+              <Link 
+                to="/about" 
+                className="block px-4 py-2 text-gray-700 hover:bg-ghana-green hover:text-white rounded transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link 
+                to="/contact" 
+                className="block px-4 py-2 text-gray-700 hover:bg-ghana-green hover:text-white rounded transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              
+              {/* Mobile Auth Section */}
+              <div className="border-t border-gray-200 pt-4 px-4 space-y-2">
+                <AuthSection />
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
