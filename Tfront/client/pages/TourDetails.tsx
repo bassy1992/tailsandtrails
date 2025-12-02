@@ -37,6 +37,37 @@ export default function TourDetails() {
   const [minDate, setMinDate] = useState<string>('');
   const [maxDate, setMaxDate] = useState<string>('');
 
+  // Helper function to get price for group size using pricing tiers
+  const getPriceForGroup = (numPeople: number): { total: number; perPerson: number } => {
+    if (!tour?.pricing_tiers || tour.pricing_tiers.length === 0) {
+      // No pricing tiers, use base price * number of people
+      const basePrice = parseFloat(tour?.price || '0');
+      return {
+        total: basePrice * numPeople,
+        perPerson: basePrice
+      };
+    }
+    
+    // Find matching pricing tier
+    const tier = tour.pricing_tiers.find(t => 
+      numPeople >= t.min_people && numPeople <= t.max_people
+    );
+    
+    if (tier) {
+      return {
+        total: parseFloat(tier.total_price),
+        perPerson: parseFloat(tier.price_per_person)
+      };
+    }
+    
+    // Fallback to base price * number of people
+    const basePrice = parseFloat(tour?.price || '0');
+    return {
+      total: basePrice * numPeople,
+      perPerson: basePrice
+    };
+  };
+
   // Fetch tour data from API
   useEffect(() => {
     const fetchTour = async () => {
@@ -241,8 +272,12 @@ export default function TourDetails() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="text-3xl font-bold text-ghana-green">GH₵{tour.price}</div>
-                    <div className="text-sm text-gray-500">per person</div>
+                    <div className="text-3xl font-bold text-ghana-green">
+                      GH₵{getPriceForGroup(travelers).total.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {travelers > 1 ? `GH₵${getPriceForGroup(travelers).perPerson.toLocaleString()} per person` : 'per person'}
+                    </div>
                   </div>
                   <div className="flex items-center space-x-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
