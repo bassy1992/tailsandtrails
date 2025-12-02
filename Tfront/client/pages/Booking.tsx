@@ -758,11 +758,7 @@ export default function Booking() {
                                     <p className="text-sm text-gray-600">{addOn.description}</p>
                                   )}
                                 </div>
-                                {singleOption && singleOption.price > 0 && (
-                                  <span className="text-ghana-green font-medium">
-                                    +GH₵{singleOption.price.toLocaleString()}
-                                  </span>
-                                )}
+
                               </div>
                             </Label>
                           </div>
