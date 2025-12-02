@@ -11,6 +11,7 @@ import logging
 import threading
 import time
 import random
+import json
 
 from .models import Payment, PaymentProvider, PaymentCallback
 from .serializers import (
@@ -392,11 +393,12 @@ def checkout_payment(request):
                 # Convert frontend booking data to backend format for destinations
                 from .booking_utils import store_booking_details_in_payment
                 logger.info(f"Converting frontend booking data for payment {payment.reference}")
+                logger.info(f"Raw booking_data received: {json.dumps(booking_data, indent=2)}")
                 converted_data = convert_frontend_booking_data(booking_data, payment)
-                logger.info(f"Converted data: {converted_data}")
+                logger.info(f"Converted data: {json.dumps(converted_data, indent=2)}")
                 store_booking_details_in_payment(payment, converted_data)
                 logger.info(f"Stored real-time booking details for payment {payment.reference}")
-                logger.info(f"Final metadata: {payment.metadata}")
+                logger.info(f"Final metadata.booking_details: {json.dumps(payment.metadata.get('booking_details', {}), indent=2)}")
             elif booking:
                 # Extract details from booking model (if available)
                 from .booking_utils import store_booking_details_in_payment, create_sample_booking_details
