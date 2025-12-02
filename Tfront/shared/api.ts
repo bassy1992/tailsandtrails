@@ -45,6 +45,140 @@ export interface ApiError {
   [key: string]: any;
 }
 
+// Destination types
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+}
+
+export interface Destination {
+  id: number;
+  name: string;
+  slug: string;
+  location: string;
+  description: string;
+  image: string;
+  price: string;
+  duration: string;
+  duration_display: string;
+  max_group_size: number;
+  start_date?: string;
+  end_date?: string;
+  rating: string;
+  reviews_count: number;
+  category: Category;
+  highlights: Array<{ highlight: string }>;
+  includes: Array<{ item: string }>;
+  images?: Array<{ image_url: string; alt_text: string; is_primary: boolean }>;
+  price_category: string;
+  is_featured: boolean;
+}
+
+export interface Review {
+  id: number;
+  rating: number;
+  title: string;
+  comment: string;
+  user_name: string;
+  is_verified: boolean;
+  created_at: string;
+}
+
+export interface Stats {
+  total_destinations: number;
+  categories_count: number;
+  featured_destinations: number;
+}
+
+// Payment types
+export interface PaymentListItem {
+  payment_id: string;
+  reference: string;
+  amount: string;
+  currency: string;
+  payment_method: string;
+  payment_method_display: string;
+  status: string;
+  status_display: string;
+  created_at: string;
+  processed_at: string | null;
+}
+
+export interface BookingDetails {
+  type?: 'destination' | 'ticket';
+  destination?: {
+    name: string;
+    location: string;
+    duration: string;
+    image_url?: string;
+  };
+  ticket?: {
+    id: number;
+    title: string;
+    quantity: number;
+    price_per_ticket: number;
+  };
+  travelers?: {
+    adults: number;
+    children: number;
+  };
+  selected_date?: string;
+  selected_options?: {
+    accommodation?: {
+      name: string;
+      price: number;
+    };
+    transport?: {
+      name: string;
+      price: number;
+    };
+    meals?: {
+      name: string;
+      price: number;
+    };
+  };
+  pricing?: {
+    base_total: number;
+    options_total: number;
+    final_total: number;
+  };
+  user_info?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+}
+
+export interface PaymentDetail {
+  payment_id: string;
+  reference: string;
+  user: string | null;
+  booking: number | null;
+  amount: string;
+  currency: string;
+  payment_method: string;
+  payment_method_display: string;
+  provider: {
+    id: number;
+    name: string;
+    code: string;
+    is_active: boolean;
+  } | null;
+  phone_number: string;
+  status: string;
+  status_display: string;
+  external_reference: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  processed_at: string | null;
+  metadata?: {
+    booking_details?: BookingDetails;
+  };
+}
+
 // API utility functions
 class ApiClient {
   private baseUrl: string;
@@ -121,6 +255,53 @@ class ApiClient {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+  }
+
+  // Destination endpoints
+  async getCategories(): Promise<Category[]> {
+    return this.request<Category[]>('/categories/');
+  }
+
+  async getDestinations(params?: {
+    search?: string;
+    category?: number;
+    duration?: string;
+    price_category?: string;
+    ordering?: string;
+  }): Promise<Destination[]> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) queryParams.append(key, String(value));
+      });
+    }
+    const query = queryParams.toString();
+    return this.request<Destination[]>(`/destinations/${query ? `?${query}` : ''}`);
+  }
+
+  async getDestination(slug: string): Promise<Destination> {
+    return this.request<Destination>(`/destinations/${slug}/`);
+  }
+
+  async getDestinationReviews(destinationId: number): Promise<Review[]> {
+    return this.request<Review[]>(`/destinations/${destinationId}/reviews/`);
+  }
+
+  async getStats(): Promise<Stats> {
+    return this.request<Stats>('/stats/');
+  }
+
+  // Payment endpoints
+  async getPaymentStatus(reference: string): Promise<PaymentDetail> {
+    return this.request<PaymentDetail>(`/payments/status/${reference}/`);
+  }
+
+  async getUserPayments(): Promise<PaymentListItem[]> {
+    return this.request<PaymentListItem[]>('/payments/');
+  }
+
+  async getPaymentDetail(reference: string): Promise<PaymentDetail> {
+    return this.request<PaymentDetail>(`/payments/${reference}/`);
   }
 }
 

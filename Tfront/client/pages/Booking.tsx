@@ -15,7 +15,7 @@ import {
   Building2, Check, Star, Clock, Hotel, Car, Utensils, Shield,
   Plus, Minus, ChevronDown, ChevronUp, Info
 } from "lucide-react";
-import { apiClient } from "@/lib/api";
+import { apiClient, destinationsApi } from "@/lib/api";
 
 interface BookingState {
   tourId: string;
@@ -54,6 +54,7 @@ export default function Booking() {
   
   const [loadingFromDatabase, setLoadingFromDatabase] = useState(false);
   const [loadedFromPayment, setLoadedFromPayment] = useState(false);
+  const [loadingTourData, setLoadingTourData] = useState(false);
   
   // Get booking data from navigation state or use defaults
   const [bookingData, setBookingData] = useState<BookingState>(() => {
@@ -62,11 +63,11 @@ export default function Booking() {
     }
     return {
       tourId: id || "1",
-      tourName: "Cape Coast Castle Heritage Tour",
-      duration: "3 Days / 2 Nights", 
-      basePrice: 1500,
-      selectedDate: "2025-09-20",
-      travelers: { adults: 2, children: 1 }
+      tourName: "Loading...",
+      duration: "3 Days", 
+      basePrice: 0,
+      selectedDate: new Date().toISOString().split('T')[0],
+      travelers: { adults: 1, children: 0 }
     };
   });
 
@@ -156,6 +157,61 @@ export default function Booking() {
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showBreakdown, setShowBreakdown] = useState(true);
+
+  // Load tour data from API if no navigation state
+  useEffect(() => {
+    const loadTourData = async () => {
+      // Skip if we have navigation state (came from tour details page)
+      if (location.state) {
+        return;
+      }
+
+      // Skip if we have a payment reference (will be loaded by other useEffect)
+      const paymentRef = searchParams.get('payment') || searchParams.get('ref');
+      if (paymentRef) {
+        return;
+      }
+
+      if (!id) {
+        return;
+      }
+
+      try {
+        setLoadingTourData(true);
+        console.log('Loading tour data from API for:', id);
+        
+        const tour = await destinationsApi.getDestination(id);
+        
+        // Calculate default selected date
+        let defaultDate = new Date().toISOString().split('T')[0];
+        if (tour.start_date) {
+          const startDate = new Date(tour.start_date);
+          const today = new Date();
+          const effectiveDate = startDate > today ? startDate : today;
+          defaultDate = effectiveDate.toISOString().split('T')[0];
+        }
+        
+        setBookingData({
+          tourId: tour.id.toString(),
+          tourName: tour.name,
+          duration: tour.duration_display,
+          basePrice: parseFloat(tour.price),
+          selectedDate: defaultDate,
+          startDate: tour.start_date,
+          endDate: tour.end_date,
+          travelers: { adults: 1, children: 0 }
+        });
+        
+        console.log('Loaded tour data:', tour.name);
+      } catch (error) {
+        console.error('Error loading tour data:', error);
+      } finally {
+        setLoadingTourData(false);
+      }
+    };
+    
+    loadTourData();
+  }, [id, location.state, searchParams]);
 
   // Load booking from database if payment reference is provided
   useEffect(() => {
@@ -356,14 +412,18 @@ export default function Booking() {
     }
   };
 
-  if (loadingFromDatabase) {
+  if (loadingFromDatabase || loadingTourData) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ghana-green mx-auto mb-4"></div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Booking Details</h2>
-            <p className="text-gray-600">Fetching your booking information from database...</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {loadingTourData ? 'Loading Tour Details' : 'Loading Booking Details'}
+            </h2>
+            <p className="text-gray-600">
+              {loadingTourData ? 'Fetching tour information from database...' : 'Fetching your booking information from database...'}
+            </p>
           </div>
         </div>
       </Layout>
