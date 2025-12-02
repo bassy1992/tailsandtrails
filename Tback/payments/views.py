@@ -331,7 +331,13 @@ def checkout_payment(request):
     serializer = CheckoutPaymentSerializer(data=request.data)
     
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        logger.error(f"Checkout payment validation failed: {serializer.errors}")
+        logger.error(f"Request data: {request.data}")
+        return Response({
+            'success': False,
+            'error': 'Validation failed',
+            'details': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
     
     validated_data = serializer.validated_data
     provider = validated_data.pop('provider')

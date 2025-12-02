@@ -490,14 +490,31 @@ export default function Booking() {
           // Redirect to Paystack's hosted payment page
           window.location.href = paystackResponse.authorization_url;
         } else {
+          console.error('Paystack initialization error:', paystackResponse);
           alert(paystackResponse.error || 'Failed to initialize Paystack payment. Please try again.');
         }
       } else {
+        console.error('Payment creation error:', response);
         alert(response.error || 'Failed to initiate payment. Please try again.');
       }
     } catch (error: any) {
-      console.error('Payment error:', error);
-      alert(error.message || 'An error occurred while processing your payment. Please try again.');
+      console.error('Payment error details:', error);
+      // Show more detailed error message
+      let errorMessage = 'An error occurred while processing your payment.';
+      
+      if (error.details) {
+        // Show validation errors
+        const details = Object.entries(error.details)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join('\n');
+        errorMessage = `Validation Error:\n${details}`;
+      } else if (error.error) {
+        errorMessage = error.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     }
   };
 

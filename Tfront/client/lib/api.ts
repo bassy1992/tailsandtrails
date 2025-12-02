@@ -174,7 +174,11 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Network error' }));
+      const error = await response.json().catch(() => ({ 
+        message: 'Network error',
+        status: response.status 
+      }));
+      console.error('API Error:', error);
       throw error;
     }
 
