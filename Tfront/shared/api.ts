@@ -53,6 +53,14 @@ export interface Category {
   description: string;
 }
 
+export interface PricingTier {
+  id: number;
+  min_people: number;
+  max_people: number;
+  total_price: string;
+  price_per_person: string;
+}
+
 export interface Destination {
   id: number;
   name: string;
@@ -72,6 +80,7 @@ export interface Destination {
   highlights: Array<{ highlight: string }>;
   includes: Array<{ item: string }>;
   images?: Array<{ image_url: string; alt_text: string; is_primary: boolean }>;
+  pricing_tiers?: PricingTier[];
   price_category: string;
   is_featured: boolean;
 }

@@ -55,6 +55,7 @@ export default function Booking() {
   const [loadingFromDatabase, setLoadingFromDatabase] = useState(false);
   const [loadedFromPayment, setLoadedFromPayment] = useState(false);
   const [loadingTourData, setLoadingTourData] = useState(false);
+  const [tourData, setTourData] = useState<any>(null);
   
   // Get booking data from navigation state or use defaults
   const [bookingData, setBookingData] = useState<BookingState>(() => {
@@ -181,6 +182,7 @@ export default function Booking() {
         console.log('Loading tour data from API for:', id);
         
         const tour = await destinationsApi.getDestination(id);
+        setTourData(tour); // Store full tour data including pricing tiers
         
         // Calculate default selected date
         let defaultDate = new Date().toISOString().split('T')[0];
@@ -202,7 +204,7 @@ export default function Booking() {
           travelers: { adults: 1, children: 0 }
         });
         
-        console.log('Loaded tour data:', tour.name);
+        console.log('Loaded tour data:', tour.name, 'Pricing tiers:', tour.pricing_tiers);
       } catch (error) {
         console.error('Error loading tour data:', error);
       } finally {
@@ -314,9 +316,29 @@ export default function Booking() {
     loadPaymentMethods();
   }, []);
 
+  // Helper function to get price for group size using pricing tiers
+  const getPriceForGroup = (numPeople: number): number => {
+    if (!tourData?.pricing_tiers || tourData.pricing_tiers.length === 0) {
+      // No pricing tiers, use base price * number of people
+      return bookingData.basePrice * numPeople;
+    }
+    
+    // Find matching pricing tier
+    const tier = tourData.pricing_tiers.find((t: any) => 
+      numPeople >= t.min_people && numPeople <= t.max_people
+    );
+    
+    if (tier) {
+      return parseFloat(tier.total_price);
+    }
+    
+    // Fallback to base price * number of people
+    return bookingData.basePrice * numPeople;
+  };
+
   // Calculate total price
   const calculateTotal = () => {
-    const baseTotal = bookingData.basePrice * bookingData.travelers.adults;
+    const baseTotal = getPriceForGroup(bookingData.travelers.adults);
     
     let addOnTotal = 0;
     

@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import (
     Category, Destination, DestinationHighlight, 
     DestinationInclude, DestinationImage, Review, Booking,
-    AddOnCategory, AddOnOption, ExperienceAddOn, BookingAddOn
+    AddOnCategory, AddOnOption, ExperienceAddOn, BookingAddOn,
+    PricingTier
 )
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -49,10 +50,18 @@ class ExperienceAddOnSerializer(serializers.ModelSerializer):
             'max_participants', 'order'
         ]
 
+class PricingTierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PricingTier
+        fields = [
+            'id', 'min_people', 'max_people', 'total_price', 'price_per_person'
+        ]
+
 class DestinationListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     highlights = DestinationHighlightSerializer(many=True, read_only=True)
     includes = DestinationIncludeSerializer(many=True, read_only=True)
+    pricing_tiers = PricingTierSerializer(many=True, read_only=True)
     duration_display = serializers.CharField(read_only=True)
     price_category = serializers.CharField(read_only=True)
     
@@ -62,7 +71,7 @@ class DestinationListSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'location', 'description', 'image',
             'price', 'duration', 'duration_display', 'max_group_size',
             'start_date', 'end_date', 'rating', 'reviews_count', 'category', 
-            'highlights', 'includes', 'price_category', 'is_featured'
+            'highlights', 'includes', 'pricing_tiers', 'price_category', 'is_featured'
         ]
 
 class DestinationDetailSerializer(serializers.ModelSerializer):
@@ -72,6 +81,7 @@ class DestinationDetailSerializer(serializers.ModelSerializer):
     images = DestinationImageSerializer(many=True, read_only=True)
     addon_options = AddOnOptionSerializer(many=True, read_only=True)
     experience_addons = ExperienceAddOnSerializer(many=True, read_only=True)
+    pricing_tiers = PricingTierSerializer(many=True, read_only=True)
     duration_display = serializers.CharField(read_only=True)
     price_category = serializers.CharField(read_only=True)
     
@@ -82,7 +92,7 @@ class DestinationDetailSerializer(serializers.ModelSerializer):
             'price', 'duration', 'duration_display', 'max_group_size',
             'start_date', 'end_date', 'rating', 'reviews_count', 'category', 
             'highlights', 'includes', 'images', 'addon_options', 'experience_addons', 
-            'price_category', 'is_featured', 'created_at'
+            'pricing_tiers', 'price_category', 'is_featured', 'created_at'
         ]
 
 class ReviewSerializer(serializers.ModelSerializer):

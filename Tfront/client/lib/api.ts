@@ -241,6 +241,14 @@ export interface DestinationInclude {
   item: string;
 }
 
+export interface PricingTier {
+  id: number;
+  min_people: number;
+  max_people: number;
+  total_price: string;
+  price_per_person: string;
+}
+
 export interface Destination {
   id: number;
   name: string;
@@ -259,6 +267,7 @@ export interface Destination {
   category: Category;
   highlights: DestinationHighlight[];
   includes: DestinationInclude[];
+  pricing_tiers?: PricingTier[];
   price_category: string;
   is_featured: boolean;
 }
