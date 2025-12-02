@@ -732,6 +732,68 @@ export default function Booking() {
               </CardHeader>
               <CardContent className="space-y-6">
                 
+                {/* Show database add-ons if available */}
+                {tourData?.addon_options && tourData.addon_options.length > 0 && (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">Available add-ons for this tour:</p>
+                    {addOns.filter(a => a.options).map((addOn) => (
+                      <div key={addOn.id} className="space-y-3">
+                        <h4 className="font-semibold">{addOn.name}</h4>
+                        <p className="text-sm text-gray-600">{addOn.description}</p>
+                        <RadioGroup 
+                          value={selectedOptions[addOn.id] || addOn.options?.[0]?.id}
+                          onValueChange={(value) => handleOptionChange(addOn.id, value)}
+                          className="space-y-2"
+                        >
+                          {addOn.options?.map((option) => (
+                            <div key={option.id} className="flex items-center space-x-2 p-3 border rounded-lg">
+                              <RadioGroupItem value={option.id} id={`${addOn.id}-${option.id}`} />
+                              <Label htmlFor={`${addOn.id}-${option.id}`} className="flex-1 cursor-pointer">
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <p className="font-medium">{option.name}</p>
+                                  </div>
+                                  <span className="text-ghana-green font-medium">
+                                    {option.price === 0 ? 'Included' : `+GH₵${option.price.toLocaleString()}`}
+                                  </span>
+                                </div>
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
+                    ))}
+                    
+                    {/* Experience add-ons */}
+                    {addOns.filter(a => a.category === "experience").length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-semibold">Additional Experiences</h4>
+                        {addOns.filter(a => a.category === "experience").map((addOn) => (
+                          <div key={addOn.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                            <Checkbox
+                              id={addOn.id}
+                              checked={addOn.selected}
+                              onCheckedChange={() => handleAddOnToggle(addOn.id)}
+                            />
+                            <Label htmlFor={addOn.id} className="flex-1 cursor-pointer">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <p className="font-medium">{addOn.name}</p>
+                                  <p className="text-sm text-gray-600">{addOn.description}</p>
+                                </div>
+                                <span className="text-ghana-green font-medium">+GH₵{addOn.price.toLocaleString()}</span>
+                              </div>
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Fallback to hardcoded add-ons if none from database */}
+                {(!tourData?.addon_options || tourData.addon_options.length === 0) && (
+                  <>
                 {/* A. Accommodation */}
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
@@ -988,6 +1050,8 @@ export default function Booking() {
                     </div>
                   </div>
                 </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
