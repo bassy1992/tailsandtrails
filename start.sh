@@ -19,6 +19,9 @@ python manage.py migrate --run-syncdb
 # Create superuser if environment variables are set
 python create_superuser.py
 
+# Create Paystack provider
+python setup_paystack_provider.py 2>/dev/null || true
+
 # Create staticfiles directory if it doesn't exist
 mkdir -p staticfiles
 
