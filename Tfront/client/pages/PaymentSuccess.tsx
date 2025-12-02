@@ -321,7 +321,7 @@ export default function PaymentSuccess() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center space-x-2">
                       <Phone className="h-4 w-4 text-ghana-green" />
-                      <span>+233 24 123 4567</span>
+                      <span>+233 24 127 4481</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Mail className="h-4 w-4 text-ghana-green" />

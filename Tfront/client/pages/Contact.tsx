@@ -235,8 +235,8 @@ export default function Contact() {
                   <Phone className="h-5 w-5 text-ghana-green mt-1" />
                   <div>
                     <div className="font-medium">Phone</div>
-                    <div className="text-sm text-gray-600">+233 24 123 4567</div>
-                    <div className="text-sm text-gray-600">+233 20 987 6543</div>
+                    <div className="text-sm text-gray-600">+233 24 127 4481</div>
+                    <div className="text-sm text-gray-600">+233 54 191 8418</div>
                   </div>
                 </div>
                 
@@ -254,7 +254,7 @@ export default function Contact() {
                   <div>
                     <div className="font-medium">Office Address</div>
                     <div className="text-sm text-gray-600">
-                      123 Independence Avenue<br />
+                      Aviation Highway, Spintex<br />
                       Accra, Ghana<br />
                       West Africa
                     </div>
@@ -282,7 +282,7 @@ export default function Contact() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button variant="outline" className="w-full justify-start" asChild>
-                  <a href="tel:+233241234567">
+                  <a href="tel:+233241274481">
                     <Phone className="h-4 w-4 mr-2" />
                     Call Us Now
                   </a>

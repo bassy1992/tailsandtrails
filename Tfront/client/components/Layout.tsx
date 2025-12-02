@@ -284,7 +284,11 @@ export default function Layout({ children }: LayoutProps) {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4" />
-                  <span className="text-gray-300">+233 24 123 4567</span>
+                  <span className="text-gray-300">+233 24 127 4481</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Phone className="h-4 w-4" />
+                  <span className="text-gray-300">+233 54 191 8418</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
@@ -293,8 +297,8 @@ export default function Layout({ children }: LayoutProps) {
                 <div className="flex items-start space-x-2">
                   <MapPin className="h-4 w-4 mt-1" />
                   <span className="text-gray-300">
-                    Accra, Ghana<br />
-                    West Africa
+                    Aviation Highway, Spintex<br />
+                    Accra, Ghana
                   </span>
                 </div>
               </div>
