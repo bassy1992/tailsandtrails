@@ -128,8 +128,8 @@ class BookingSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['booking_reference']
 
-# Gal
-lery Serializers
+
+# Gallery Serializers
 class GalleryCategorySerializer(serializers.ModelSerializer):
     image_count = serializers.SerializerMethodField()
     video_count = serializers.SerializerMethodField()
