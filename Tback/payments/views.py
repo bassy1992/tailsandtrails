@@ -416,7 +416,20 @@ def checkout_payment(request):
             # Continue with payment creation even if booking details fail
         
         # Handle different payment methods
-        if provider.code == 'stripe':
+        if provider.code == 'paystack':
+            # For Paystack, just create the payment record
+            # Initialization will be done separately via /paystack/initialize/
+            payment.status = 'pending'
+            payment.save()
+            payment.log('info', 'Payment created, awaiting Paystack initialization')
+            
+            return Response({
+                'success': True,
+                'payment': PaymentSerializer(payment).data,
+                'message': 'Payment created successfully'
+            }, status=status.HTTP_201_CREATED)
+            
+        elif provider.code == 'stripe':
             # For Stripe, create a Payment Intent
             from stripe_payments.services import StripeService
             stripe_service = StripeService()
