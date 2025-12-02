@@ -4,10 +4,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
-from .models import Category, Destination, Review, Booking
+from .models import Category, Destination, Review, Booking, GalleryCategory, GalleryImage, GalleryVideo
 from .serializers import (
     CategorySerializer, DestinationListSerializer, DestinationDetailSerializer,
-    ReviewSerializer, BookingSerializer
+    ReviewSerializer, BookingSerializer, GalleryCategorySerializer, 
+    GalleryImageSerializer, GalleryVideoSerializer
 )
 
 class CategoryListView(generics.ListAPIView):
@@ -95,3 +96,53 @@ class BookingDetailView(generics.RetrieveUpdateAPIView):
     
     def get_queryset(self):
         return Booking.objects.filter(user=self.request.user).select_related('destination')
+
+# Galler
+y Views
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def gallery_categories(request):
+    """Get all gallery categories"""
+    categories = GalleryCategory.objects.all()
+    serializer = GalleryCategorySerializer(categories, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def gallery_images(request):
+    """Get all gallery images with optional filtering"""
+    images = GalleryImage.objects.all()
+    
+    # Filter by category
+    category = request.GET.get('category')
+    if category:
+        images = images.filter(category__slug=category)
+    
+    # Filter featured only
+    featured = request.GET.get('featured')
+    if featured == 'true':
+        images = images.filter(is_featured=True)
+    
+    serializer = GalleryImageSerializer(images, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def gallery_videos(request):
+    """Get all gallery videos with optional filtering"""
+    videos = GalleryVideo.objects.all()
+    
+    # Filter by category
+    category = request.GET.get('category')
+    if category:
+        videos = videos.filter(category__slug=category)
+    
+    # Filter featured only
+    featured = request.GET.get('featured')
+    if featured == 'true':
+        videos = videos.filter(is_featured=True)
+    
+    serializer = GalleryVideoSerializer(videos, many=True)
+    return Response(serializer.data)

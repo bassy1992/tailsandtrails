@@ -4,7 +4,7 @@ from .models import (
     Category, Destination, DestinationHighlight, 
     DestinationInclude, DestinationImage, Review, Booking,
     AddOnCategory, AddOnOption, ExperienceAddOn, BookingAddOn,
-    PricingTier
+    PricingTier, GalleryCategory, GalleryImage, GalleryVideo
 )
 
 @admin.register(Category)
@@ -260,4 +260,54 @@ class ExperienceAddOnAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         })
+    )
+
+#
+ Gallery Admin
+@admin.register(GalleryCategory)
+class GalleryCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'order')
+    prepopulated_fields = {'slug': ('name',)}
+    ordering = ('order', 'name')
+
+
+@admin.register(GalleryImage)
+class GalleryImageAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'location', 'is_featured', 'order', 'created_at')
+    list_filter = ('is_featured', 'category', 'created_at')
+    search_fields = ('title', 'description', 'location', 'photographer')
+    list_editable = ('is_featured', 'order')
+    ordering = ('-is_featured', 'order', '-created_at')
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('title', 'description', 'category')
+        }),
+        ('Images', {
+            'fields': ('image_url', 'thumbnail_url')
+        }),
+        ('Details', {
+            'fields': ('location', 'photographer', 'is_featured', 'order')
+        }),
+    )
+
+
+@admin.register(GalleryVideo)
+class GalleryVideoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'duration', 'is_featured', 'order', 'created_at')
+    list_filter = ('is_featured', 'category', 'created_at')
+    search_fields = ('title', 'description')
+    list_editable = ('is_featured', 'order')
+    ordering = ('-is_featured', 'order', '-created_at')
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('title', 'description', 'category')
+        }),
+        ('Video', {
+            'fields': ('video_url', 'thumbnail_url', 'duration')
+        }),
+        ('Display', {
+            'fields': ('is_featured', 'order')
+        }),
     )

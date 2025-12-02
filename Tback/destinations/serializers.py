@@ -3,7 +3,7 @@ from .models import (
     Category, Destination, DestinationHighlight, 
     DestinationInclude, DestinationImage, Review, Booking,
     AddOnCategory, AddOnOption, ExperienceAddOn, BookingAddOn,
-    PricingTier
+    PricingTier, GalleryCategory, GalleryImage, GalleryVideo
 )
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -127,3 +127,43 @@ class BookingSerializer(serializers.ModelSerializer):
             'special_requests', 'selected_addons', 'created_at'
         ]
         read_only_fields = ['booking_reference']
+
+# Gal
+lery Serializers
+class GalleryCategorySerializer(serializers.ModelSerializer):
+    image_count = serializers.SerializerMethodField()
+    video_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = GalleryCategory
+        fields = ['id', 'name', 'slug', 'description', 'order', 'image_count', 'video_count']
+    
+    def get_image_count(self, obj):
+        return obj.images.count()
+    
+    def get_video_count(self, obj):
+        return obj.videos.count()
+
+
+class GalleryImageSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    
+    class Meta:
+        model = GalleryImage
+        fields = [
+            'id', 'title', 'description', 'image_url', 'thumbnail_url',
+            'category', 'category_name', 'location', 'photographer',
+            'is_featured', 'order', 'created_at', 'updated_at'
+        ]
+
+
+class GalleryVideoSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    
+    class Meta:
+        model = GalleryVideo
+        fields = [
+            'id', 'title', 'description', 'video_url', 'thumbnail_url',
+            'category', 'category_name', 'duration', 'is_featured',
+            'order', 'created_at', 'updated_at'
+        ]

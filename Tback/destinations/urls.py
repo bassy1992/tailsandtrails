@@ -21,4 +21,9 @@ urlpatterns = [
     path('dashboard/overview/', dashboard_views.dashboard_overview, name='dashboard-overview'),
     path('dashboard/bookings/', dashboard_views.dashboard_bookings, name='dashboard-bookings'),
     path('dashboard/activity/', dashboard_views.dashboard_activity, name='dashboard-activity'),
+    
+    # Gallery endpoints
+    path('gallery/categories/', views.gallery_categories, name='gallery-categories'),
+    path('gallery/images/', views.gallery_images, name='gallery-images'),
+    path('gallery/videos/', views.gallery_videos, name='gallery-videos'),
 ]
