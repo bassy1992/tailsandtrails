@@ -35,7 +35,7 @@ def remove_paystack_provider(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0004_auto_20250820_0919'),
+        ('payments', '0005_alter_payment_payment_method'),
     ]
 
     operations = [
