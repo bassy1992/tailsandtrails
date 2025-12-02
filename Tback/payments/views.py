@@ -1060,13 +1060,16 @@ def convert_frontend_booking_data(frontend_data, payment):
             'destination_location': destination.get('location', 'Ghana'),
             'duration': destination.get('duration', '1 Day'),
             'base_price': 0,  # Will be calculated from pricing
-            'adults': travelers.get('adults', 0),
+            'adults': travelers.get('adults', 0) or 1,  # Default to 1 if 0
             'children': travelers.get('children', 0),
-            'selected_date': frontend_data.get('selected_date', ''),
-            'base_total': pricing.get('base_total', 0),
+            'selected_date': frontend_data.get('selected_date', '') or payment.created_at.date().isoformat(),
+            'base_total': pricing.get('base_total', 0) or float(payment.amount),
             'options_total': pricing.get('options_total', 0),
             'final_total': pricing.get('final_total', float(payment.amount)),
         }
+        
+        # Log what we extracted
+        logger.info(f"Extracted from frontend - travelers: {travelers}, pricing: {pricing}, selected_date: {frontend_data.get('selected_date')}")
         
         # Override with payment user info if available
         if payment.user:
