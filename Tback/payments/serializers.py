@@ -107,8 +107,17 @@ class CheckoutPaymentSerializer(serializers.Serializer):
         return value.upper()
     
     def validate_phone_number(self, value):
-        if value and not value.startswith('+'):
-            raise serializers.ValidationError("Phone number must include country code")
+        # Phone number is optional, skip validation if empty
+        if not value:
+            return value
+        
+        # If phone number doesn't start with +, assume Ghana and add +233
+        if not value.startswith('+'):
+            # Remove leading 0 if present
+            value = value.lstrip('0')
+            # Add Ghana country code
+            value = '+233' + value
+        
         return value
     
     def validate(self, attrs):

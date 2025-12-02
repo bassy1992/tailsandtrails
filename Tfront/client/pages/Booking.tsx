@@ -466,13 +466,20 @@ export default function Booking() {
     };
 
     try {
+      // Format phone number with country code if needed
+      let phoneNumber = user?.phone || '';
+      if (phoneNumber && !phoneNumber.startsWith('+')) {
+        // Assume Ghana country code if not provided
+        phoneNumber = '+233' + phoneNumber.replace(/^0/, '');
+      }
+
       // Create payment via API (using Paystack)
       const response = await apiClient.createCheckoutPayment({
         amount: totals.total,
         currency: 'GHS',
         payment_method: 'card',
         provider_code: 'paystack',
-        phone_number: user?.phone || '',
+        phone_number: phoneNumber,
         description: `Booking for ${bookingData.tourName}`,
         booking_details: bookingDetails
       });
