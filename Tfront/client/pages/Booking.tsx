@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
+import { useParams, useLocation, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   Building2, Check, Star, Clock, Hotel, Car, Utensils, Shield,
   Plus, Minus, ChevronDown, ChevronUp, Info
 } from "lucide-react";
+import { apiClient } from "@/lib/api";
 
 interface BookingState {
   tourId: string;
@@ -22,6 +23,8 @@ interface BookingState {
   duration: string;
   basePrice: number;
   selectedDate: string;
+  startDate?: string;
+  endDate?: string;
   travelers: {
     adults: number;
     children: number;
@@ -47,6 +50,10 @@ export default function Booking() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
+  
+  const [loadingFromDatabase, setLoadingFromDatabase] = useState(false);
+  const [loadedFromPayment, setLoadedFromPayment] = useState(false);
   
   // Get booking data from navigation state or use defaults
   const [bookingData, setBookingData] = useState<BookingState>(() => {
@@ -149,6 +156,81 @@ export default function Booking() {
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showBreakdown, setShowBreakdown] = useState(true);
+
+  // Load booking from database if payment reference is provided
+  useEffect(() => {
+    const loadBookingFromDatabase = async () => {
+      const paymentRef = searchParams.get('payment') || searchParams.get('ref');
+      
+      if (!paymentRef) {
+        return; // No payment reference, use default/state data
+      }
+
+      try {
+        setLoadingFromDatabase(true);
+        console.log('Loading booking from payment:', paymentRef);
+        
+        const payment = await apiClient.getPaymentStatus(paymentRef);
+        
+        if (payment.metadata?.booking_details) {
+          const details = payment.metadata.booking_details;
+          console.log('Loaded booking details:', details);
+          
+          // Update booking data from database
+          setBookingData({
+            tourId: id || "1",
+            tourName: details.destination?.name || "Tour Package",
+            duration: details.destination?.duration || "3 Days / 2 Nights",
+            basePrice: details.pricing?.base_total ? 
+              details.pricing.base_total / ((details.travelers?.adults || 1) + (details.travelers?.children || 0)) : 
+              1500,
+            selectedDate: details.selected_date || new Date().toISOString().split('T')[0],
+            travelers: {
+              adults: details.travelers?.adults || 2,
+              children: details.travelers?.children || 0
+            }
+          });
+          
+          // Update selected options if available
+          if (details.selected_options) {
+            const newSelectedOptions: { [key: string]: string } = {};
+            
+            if (details.selected_options.accommodation) {
+              // Map accommodation name to option id
+              const accName = details.selected_options.accommodation.name.toLowerCase();
+              if (accName.includes('luxury')) newSelectedOptions.accommodation = 'luxury';
+              else if (accName.includes('premium')) newSelectedOptions.accommodation = 'premium';
+              else newSelectedOptions.accommodation = 'standard';
+            }
+            
+            if (details.selected_options.transport) {
+              const transName = details.selected_options.transport.name.toLowerCase();
+              if (transName.includes('private')) newSelectedOptions.transport = 'private';
+              else if (transName.includes('airport')) newSelectedOptions.transport = 'airport';
+              else newSelectedOptions.transport = 'shared';
+            }
+            
+            if (details.selected_options.meals) {
+              const mealName = details.selected_options.meals.name.toLowerCase();
+              if (mealName.includes('luxury')) newSelectedOptions.meals = 'luxury-meals';
+              else if (mealName.includes('vegetarian') || mealName.includes('vegan')) newSelectedOptions.meals = 'vegetarian';
+              else newSelectedOptions.meals = 'standard';
+            }
+            
+            setSelectedOptions(prev => ({ ...prev, ...newSelectedOptions }));
+          }
+          
+          setLoadedFromPayment(true);
+        }
+      } catch (error) {
+        console.error('Error loading booking from database:', error);
+      } finally {
+        setLoadingFromDatabase(false);
+      }
+    };
+    
+    loadBookingFromDatabase();
+  }, [searchParams, id]);
 
   // Load payment methods from API
   useEffect(() => {
@@ -274,6 +356,20 @@ export default function Booking() {
     }
   };
 
+  if (loadingFromDatabase) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ghana-green mx-auto mb-4"></div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Booking Details</h2>
+            <p className="text-gray-600">Fetching your booking information from database...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (!bookingData) {
     return (
       <Layout>
@@ -390,6 +486,11 @@ export default function Booking() {
                 <CardTitle className="flex items-center space-x-2">
                   <Calendar className="h-5 w-5 text-ghana-green" />
                   <span>Booking Summary</span>
+                  {loadedFromPayment && (
+                    <Badge variant="outline" className="ml-2 border-blue-500 text-blue-600">
+                      Loaded from Database
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -410,15 +511,27 @@ export default function Booking() {
                     <div>
                       <Label className="text-sm text-gray-600">Dates</Label>
                       <p className="font-medium">
-                        {new Date(bookingData.selectedDate).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })} – {new Date(new Date(bookingData.selectedDate).getTime() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })}
+                        {bookingData.startDate && bookingData.endDate ? (
+                          <>
+                            {new Date(bookingData.startDate).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })} – {new Date(bookingData.endDate).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </>
+                        ) : (
+                          <>
+                            {new Date(bookingData.selectedDate).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </>
+                        )}
                       </p>
                     </div>
                     

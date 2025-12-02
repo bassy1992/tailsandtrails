@@ -34,6 +34,8 @@ export default function TourDetails() {
     return tomorrow.toISOString().split('T')[0];
   });
   const [travelers, setTravelers] = useState(1);
+  const [minDate, setMinDate] = useState<string>('');
+  const [maxDate, setMaxDate] = useState<string>('');
 
   // Fetch tour data from API
   useEffect(() => {
@@ -63,6 +65,27 @@ export default function TourDetails() {
         }
         
         setTour(tourData);
+        
+        // Set date constraints from database
+        if (tourData.start_date) {
+          const startDate = new Date(tourData.start_date);
+          const today = new Date();
+          // Use the later of today or the tour's start date
+          const effectiveMinDate = startDate > today ? startDate : today;
+          setMinDate(effectiveMinDate.toISOString().split('T')[0]);
+          
+          // Set default selected date to the minimum available date
+          setSelectedDate(effectiveMinDate.toISOString().split('T')[0]);
+        } else {
+          // Fallback to tomorrow if no start_date in database
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          setMinDate(tomorrow.toISOString().split('T')[0]);
+        }
+        
+        if (tourData.end_date) {
+          setMaxDate(new Date(tourData.end_date).toISOString().split('T')[0]);
+        }
         
         // If we accessed by ID, redirect to the proper slug URL for SEO
         if (/^\d+$/.test(id) && tourData.slug !== id) {
@@ -246,7 +269,13 @@ export default function TourDetails() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-gray-600" />
-                    <span>Daily</span>
+                    {tour.start_date && tour.end_date ? (
+                      <span className="text-sm">
+                        {new Date(tour.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(tour.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    ) : (
+                      <span>Contact for availability</span>
+                    )}
                   </div>
                 </div>
 
@@ -257,14 +286,26 @@ export default function TourDetails() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Select Date
+                      {tour?.start_date && tour?.end_date && (
+                        <span className="text-xs text-gray-500 ml-2">
+                          (Available: {new Date(tour.start_date).toLocaleDateString()} - {new Date(tour.end_date).toLocaleDateString()})
+                        </span>
+                      )}
                     </label>
                     <input
                       type="date"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded-md focus:ring-ghana-green focus:border-ghana-green"
-                      min={new Date().toISOString().split('T')[0]}
+                      min={minDate || new Date().toISOString().split('T')[0]}
+                      max={maxDate || undefined}
                     />
+                    {!tour?.start_date && (
+                      <p className="text-xs text-amber-600 mt-1">
+                        <AlertCircle className="h-3 w-3 inline mr-1" />
+                        Dates not yet configured. Please contact us for availability.
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -312,6 +353,8 @@ export default function TourDetails() {
                           duration: tour.duration_display,
                           basePrice: parseFloat(tour.price),
                           selectedDate: selectedDate,
+                          startDate: tour.start_date,
+                          endDate: tour.end_date,
                           travelers: {
                             adults: Math.max(1, travelers - (travelers > 2 ? 1 : 0)), // Assume children if more than 2
                             children: travelers > 2 ? 1 : 0
@@ -354,6 +397,8 @@ export default function TourDetails() {
                           duration: tour.duration_display,
                           basePrice: parseFloat(tour.price),
                           selectedDate: selectedDate,
+                          startDate: tour.start_date,
+                          endDate: tour.end_date,
                           travelers: {
                             adults: Math.max(1, travelers - (travelers > 2 ? 1 : 0)),
                             children: travelers > 2 ? 1 : 0
