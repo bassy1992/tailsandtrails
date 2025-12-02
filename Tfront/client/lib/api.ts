@@ -268,6 +268,8 @@ export interface Destination {
   highlights: DestinationHighlight[];
   includes: DestinationInclude[];
   pricing_tiers?: PricingTier[];
+  addon_options?: any[];
+  experience_addons?: any[];
   price_category: string;
   is_featured: boolean;
 }

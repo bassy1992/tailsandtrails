@@ -81,6 +81,8 @@ export interface Destination {
   includes: Array<{ item: string }>;
   images?: Array<{ image_url: string; alt_text: string; is_primary: boolean }>;
   pricing_tiers?: PricingTier[];
+  addon_options?: any[];
+  experience_addons?: any[];
   price_category: string;
   is_featured: boolean;
 }

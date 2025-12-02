@@ -179,6 +179,56 @@ export default function Booking() {
         const tour = await destinationsApi.getDestination(id);
         setTourData(tour); // Store full tour data including pricing tiers
         
+        // Load add-ons from tour data
+        if (tour.addon_options || tour.experience_addons) {
+          const loadedAddOns: AddOnOption[] = [];
+          
+          // Group addon_options by category
+          const addonsByCategory: { [key: string]: any[] } = {};
+          tour.addon_options?.forEach((addon: any) => {
+            const categoryName = addon.category.name;
+            if (!addonsByCategory[categoryName]) {
+              addonsByCategory[categoryName] = [];
+            }
+            addonsByCategory[categoryName].push(addon);
+          });
+          
+          // Convert to AddOnOption format
+          Object.entries(addonsByCategory).forEach(([categoryName, addons]) => {
+            const category = addons[0].category;
+            loadedAddOns.push({
+              id: categoryName,
+              name: category.display_name,
+              description: category.description,
+              price: 0,
+              category: categoryName,
+              selected: false,
+              options: addons.map((addon: any) => ({
+                id: addon.id.toString(),
+                name: addon.name,
+                price: parseFloat(addon.price)
+              }))
+            });
+          });
+          
+          // Add experience add-ons
+          tour.experience_addons?.forEach((exp: any) => {
+            loadedAddOns.push({
+              id: exp.id.toString(),
+              name: exp.name,
+              description: exp.description,
+              price: parseFloat(exp.price),
+              category: "experience",
+              selected: false
+            });
+          });
+          
+          if (loadedAddOns.length > 0) {
+            setAddOns(loadedAddOns);
+            console.log('Loaded add-ons from database:', loadedAddOns);
+          }
+        }
+        
         // Only update booking data if we don't have navigation state
         if (location.state) {
           console.log('Using navigation state, but storing tour data for pricing tiers');
