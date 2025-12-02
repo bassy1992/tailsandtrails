@@ -65,6 +65,8 @@ const Dashboard: React.FC = () => {
         return;
       }
 
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://talesandtrailsghana-production.up.railway.app/api';
+
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -72,9 +74,9 @@ const Dashboard: React.FC = () => {
 
       // Fetch all dashboard data in parallel
       const [overviewRes, bookingsRes, activitiesRes] = await Promise.all([
-        fetch('http://localhost:8000/api/dashboard/overview/', { headers }),
-        fetch('http://localhost:8000/api/dashboard/bookings/', { headers }),
-        fetch('http://localhost:8000/api/dashboard/activity/', { headers })
+        fetch(`${API_BASE_URL}/dashboard/overview/`, { headers }),
+        fetch(`${API_BASE_URL}/dashboard/bookings/`, { headers }),
+        fetch(`${API_BASE_URL}/dashboard/activity/`, { headers })
       ]);
 
       if (overviewRes.ok) {
