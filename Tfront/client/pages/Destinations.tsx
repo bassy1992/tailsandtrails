@@ -82,17 +82,17 @@ export default function Destinations() {
       </section>
 
       {/* Filters and Search */}
-      <section className="py-8 bg-gray-50 border-b">
+      <section className="py-6 sm:py-8 bg-gray-50 border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
             {/* Search */}
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <div className="flex-1 w-full lg:max-w-md">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
                 <Input
                   type="text"
                   placeholder="Search destinations..."
-                  className="pl-10"
+                  className="pl-10 w-full h-11 text-sm sm:text-base"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />

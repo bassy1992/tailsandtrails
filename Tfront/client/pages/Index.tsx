@@ -113,26 +113,26 @@ export default function Index() {
             </p>
             
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto bg-white rounded-lg p-3 sm:p-4 shadow-lg">
-              <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <div className="max-w-2xl mx-auto bg-white rounded-lg p-3 sm:p-4 shadow-lg w-full">
+              <div className="flex flex-col gap-3 sm:gap-4 w-full">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
                   <Input
                     type="text"
                     placeholder="Where do you want to go?"
-                    className="pl-10 text-gray-900 h-11"
+                    className="pl-10 text-gray-900 h-11 w-full text-sm sm:text-base"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <div className="relative w-full">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
                   <Input
                     type="date"
-                    className="pl-10 text-gray-900 h-11"
+                    className="pl-10 text-gray-900 h-11 w-full text-sm sm:text-base"
                   />
                 </div>
-                <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 w-full">
+                <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold h-11 w-full text-sm sm:text-base">
                   Search Tours
                 </Button>
               </div>

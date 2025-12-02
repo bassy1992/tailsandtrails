@@ -277,21 +277,21 @@ export default function Tickets() {
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
               Event Tickets
             </h1>
-            <p className="text-xl md:text-2xl text-ghana-gold mb-8">
+            <p className="text-base sm:text-xl md:text-2xl text-ghana-gold mb-6 sm:mb-8 px-4">
               Your gateway to Ghana's hottest concerts, festivals & events
             </p>
-            <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <div className="flex flex-col md:flex-row justify-center items-stretch md:items-center space-y-3 md:space-y-0 md:space-x-4 w-full max-w-2xl mx-auto px-4">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
                 <Input
                   type="text"
                   placeholder="Search events, artists, venues..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 py-3 text-gray-900"
+                  className="pl-10 h-12 text-gray-900 w-full text-sm sm:text-base"
                 />
               </div>
-              <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold px-8 py-3">
+              <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black font-semibold px-6 sm:px-8 h-12 w-full md:w-auto text-sm sm:text-base">
                 <Ticket className="h-5 w-5 mr-2" />
                 Find Tickets
               </Button>
