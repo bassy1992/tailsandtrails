@@ -159,14 +159,9 @@ export default function Booking() {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showBreakdown, setShowBreakdown] = useState(true);
 
-  // Load tour data from API if no navigation state
+  // Load tour data from API to get pricing tiers
   useEffect(() => {
     const loadTourData = async () => {
-      // Skip if we have navigation state (came from tour details page)
-      if (location.state) {
-        return;
-      }
-
       // Skip if we have a payment reference (will be loaded by other useEffect)
       const paymentRef = searchParams.get('payment') || searchParams.get('ref');
       if (paymentRef) {
@@ -183,6 +178,12 @@ export default function Booking() {
         
         const tour = await destinationsApi.getDestination(id);
         setTourData(tour); // Store full tour data including pricing tiers
+        
+        // Only update booking data if we don't have navigation state
+        if (location.state) {
+          console.log('Using navigation state, but storing tour data for pricing tiers');
+          return;
+        }
         
         // Calculate default selected date
         let defaultDate = new Date().toISOString().split('T')[0];
