@@ -325,7 +325,7 @@ export default function PaymentSuccess() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Mail className="h-4 w-4 text-ghana-green" />
-                      <span>support@talesandtrails.gh</span>
+                      <span>talesandtrailsghana@gmail.com</span>
                     </div>
                   </div>
                 </div>

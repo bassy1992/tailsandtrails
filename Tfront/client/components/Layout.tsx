@@ -292,7 +292,7 @@ export default function Layout({ children }: LayoutProps) {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span className="text-gray-300">info@talesandtrails.gh</span>
+                  <span className="text-gray-300">talesandtrailsghana@gmail.com</span>
                 </div>
                 <div className="flex items-start space-x-2">
                   <MapPin className="h-4 w-4 mt-1" />

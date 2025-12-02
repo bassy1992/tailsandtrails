@@ -244,8 +244,7 @@ export default function Contact() {
                   <Mail className="h-5 w-5 text-ghana-green mt-1" />
                   <div>
                     <div className="font-medium">Email</div>
-                    <div className="text-sm text-gray-600">info@talesandtrails.gh</div>
-                    <div className="text-sm text-gray-600">bookings@talesandtrails.gh</div>
+                    <div className="text-sm text-gray-600">talesandtrailsghana@gmail.com</div>
                   </div>
                 </div>
 
@@ -289,7 +288,7 @@ export default function Contact() {
                 </Button>
                 
                 <Button variant="outline" className="w-full justify-start" asChild>
-                  <a href="mailto:info@talesandtrails.gh">
+                  <a href="mailto:talesandtrailsghana@gmail.com">
                     <Mail className="h-4 w-4 mr-2" />
                     Send Email
                   </a>

@@ -152,7 +152,7 @@ export default function ForgotPassword() {
             <p className="text-xs text-gray-500">
               Still having trouble? Contact our support team at{" "}
               <Link to="/contact" className="text-ghana-green hover:underline">
-                support@talesandtrails.gh
+                talesandtrailsghana@gmail.com
               </Link>
             </p>
           </div>
