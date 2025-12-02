@@ -376,6 +376,7 @@ def checkout_payment(request):
         # Store appropriate booking details in payment metadata for admin display
         try:
             booking_data = request.data.get('booking_details', {})
+            logger.info(f"Received booking_details from frontend: {booking_data}")
             
             # Check if this is a ticket payment
             is_ticket_payment = (
@@ -390,9 +391,12 @@ def checkout_payment(request):
             elif booking_data:
                 # Convert frontend booking data to backend format for destinations
                 from .booking_utils import store_booking_details_in_payment
+                logger.info(f"Converting frontend booking data for payment {payment.reference}")
                 converted_data = convert_frontend_booking_data(booking_data, payment)
+                logger.info(f"Converted data: {converted_data}")
                 store_booking_details_in_payment(payment, converted_data)
                 logger.info(f"Stored real-time booking details for payment {payment.reference}")
+                logger.info(f"Final metadata: {payment.metadata}")
             elif booking:
                 # Extract details from booking model (if available)
                 from .booking_utils import store_booking_details_in_payment, create_sample_booking_details
@@ -413,6 +417,7 @@ def checkout_payment(request):
                 logger.info(f"Stored sample booking details for payment {payment.reference}")
         except Exception as e:
             logger.error(f"Failed to store booking details for payment {payment.reference}: {str(e)}")
+            logger.exception(e)
             # Continue with payment creation even if booking details fail
         
         # Handle different payment methods
