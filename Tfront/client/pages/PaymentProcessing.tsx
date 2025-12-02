@@ -43,8 +43,16 @@ export default function PaymentProcessing() {
               state: {
                 reference: payment.reference,
                 tourName: tourName,
-                amount: payment.amount,
-                paymentMethod: payment.payment_method_display
+                total: parseFloat(payment.amount),
+                amount: parseFloat(payment.amount),
+                paymentMethod: payment.payment_method_display,
+                bookingReference: payment.reference,
+                paymentDetails: {
+                  method: payment.payment_method_display || 'Mobile Money',
+                  provider: 'Paystack',
+                  transactionId: payment.reference,
+                  timestamp: new Date().toISOString()
+                }
               }
             });
           }, 2000);

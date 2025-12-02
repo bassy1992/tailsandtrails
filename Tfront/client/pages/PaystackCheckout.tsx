@@ -46,7 +46,7 @@ export default function PaystackCheckout() {
     setError(null);
 
     const handler = window.PaystackPop.setup({
-      key: 'pk_test_your_paystack_public_key', // Replace with your Paystack public key
+      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_your_paystack_public_key',
       email: paymentData.userInfo.email,
       amount: Math.round(paymentData.total * 100), // Amount in pesewas (GH₵ * 100)
       currency: 'GHS',
@@ -77,8 +77,16 @@ export default function PaystackCheckout() {
           state: {
             reference: response.reference,
             tourName: paymentData.tourName,
+            total: paymentData.total,
             amount: paymentData.total,
-            bookingReference: paymentData.bookingReference
+            paymentMethod: 'Card Payment',
+            bookingReference: paymentData.bookingReference || response.reference,
+            paymentDetails: {
+              method: 'Card Payment',
+              provider: 'Paystack',
+              transactionId: response.reference,
+              timestamp: new Date().toISOString()
+            }
           }
         });
       },

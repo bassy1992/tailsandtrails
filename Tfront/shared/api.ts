@@ -103,6 +103,48 @@ export interface Stats {
   featured_destinations: number;
 }
 
+// Gallery types
+export interface GalleryCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  order: number;
+  image_count: number;
+  video_count: number;
+}
+
+export interface GalleryImage {
+  id: number;
+  title: string;
+  description: string;
+  image_url: string;
+  thumbnail_url: string;
+  category: number | null;
+  category_name: string;
+  location: string;
+  photographer: string;
+  is_featured: boolean;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GalleryVideo {
+  id: number;
+  title: string;
+  description: string;
+  video_url: string;
+  thumbnail_url: string;
+  category: number | null;
+  category_name: string;
+  duration: string;
+  is_featured: boolean;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // Payment types
 export interface PaymentListItem {
   payment_id: string;
@@ -331,6 +373,33 @@ class ApiClient {
         body: JSON.stringify(data),
       }
     );
+  }
+
+  // Gallery endpoints
+  async getGalleryCategories(): Promise<GalleryCategory[]> {
+    return this.request<GalleryCategory[]>('/gallery/categories/');
+  }
+
+  async getGalleryImages(params?: {
+    category?: string;
+    featured?: boolean;
+  }): Promise<GalleryImage[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.featured) queryParams.append('featured', 'true');
+    const query = queryParams.toString();
+    return this.request<GalleryImage[]>(`/gallery/images/${query ? `?${query}` : ''}`);
+  }
+
+  async getGalleryVideos(params?: {
+    category?: string;
+    featured?: boolean;
+  }): Promise<GalleryVideo[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.featured) queryParams.append('featured', 'true');
+    const query = queryParams.toString();
+    return this.request<GalleryVideo[]>(`/gallery/videos/${query ? `?${query}` : ''}`);
   }
 }
 

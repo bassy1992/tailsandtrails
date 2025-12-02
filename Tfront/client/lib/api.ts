@@ -466,3 +466,76 @@ export const destinationsApi = {
     return apiClient.request<DestinationStats>('/stats/');
   }
 };
+
+// Gallery API types
+export interface GalleryCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  order: number;
+  image_count: number;
+  video_count: number;
+}
+
+export interface GalleryImage {
+  id: number;
+  title: string;
+  description: string;
+  image_url: string;
+  thumbnail_url: string;
+  category: number | null;
+  category_name: string;
+  location: string;
+  photographer: string;
+  is_featured: boolean;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GalleryVideo {
+  id: number;
+  title: string;
+  description: string;
+  video_url: string;
+  thumbnail_url: string;
+  category: number | null;
+  category_name: string;
+  duration: string;
+  is_featured: boolean;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// Gallery API functions
+export const galleryApi = {
+  async getCategories(): Promise<GalleryCategory[]> {
+    return apiClient.request<GalleryCategory[]>('/gallery/categories/');
+  },
+
+  async getImages(params?: {
+    category?: string;
+    featured?: boolean;
+  }): Promise<GalleryImage[]> {
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.featured) searchParams.append('featured', 'true');
+
+    const url = `/gallery/images/${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return apiClient.request<GalleryImage[]>(url);
+  },
+
+  async getVideos(params?: {
+    category?: string;
+    featured?: boolean;
+  }): Promise<GalleryVideo[]> {
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.featured) searchParams.append('featured', 'true');
+
+    const url = `/gallery/videos/${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+    return apiClient.request<GalleryVideo[]>(url);
+  }
+};

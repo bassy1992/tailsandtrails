@@ -31,14 +31,16 @@ interface PaymentSuccessData {
   eventDetails?: any;
 
   // Common fields
-  total: number;
-  paymentMethod: string;
-  paymentDetails: {
-    method: string;
+  reference?: string;
+  total?: number;
+  amount?: number;
+  paymentMethod?: string;
+  paymentDetails?: {
+    method?: string;
     provider?: string;
     phone?: string;
-    transactionId: string;
-    timestamp: string;
+    transactionId?: string;
+    timestamp?: string;
   };
 }
 
@@ -316,18 +318,22 @@ export default function PaymentSuccess() {
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-600">Transaction ID</p>
-                      <p className="font-mono text-sm font-medium">{paymentData.paymentDetails.transactionId}</p>
+                      <p className="font-mono text-sm font-medium">
+                        {paymentData.paymentDetails?.transactionId || paymentData.reference || bookingRef}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Payment Method</p>
                       <div className="flex items-center space-x-2">
-                        {paymentData.paymentDetails.method === 'Mobile Money' ? (
+                        {(paymentData.paymentDetails?.method || paymentData.paymentMethod) === 'Mobile Money' ? (
                           <Smartphone className="h-4 w-4 text-ghana-green" />
                         ) : (
                           <CreditCard className="h-4 w-4 text-ghana-green" />
                         )}
-                        <span className="font-medium">{paymentData.paymentDetails.method}</span>
-                        {paymentData.paymentDetails.provider && (
+                        <span className="font-medium">
+                          {paymentData.paymentDetails?.method || paymentData.paymentMethod || 'Card Payment'}
+                        </span>
+                        {paymentData.paymentDetails?.provider && (
                           <Badge variant="outline" className="text-xs">
                             {paymentData.paymentDetails.provider}
                           </Badge>
@@ -339,13 +345,26 @@ export default function PaymentSuccess() {
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-600">Amount Paid</p>
-                      <p className="text-xl font-bold text-ghana-green">GH₵{paymentData.total.toLocaleString()}</p>
+                      <p className="text-xl font-bold text-ghana-green">
+                        GH₵{(paymentData.total || paymentData.amount || 0).toLocaleString()}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Payment Date</p>
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-gray-400" />
-                        <span className="font-medium">{formatDate(paymentData.paymentDetails.timestamp)}</span>
+                        <span className="font-medium">
+                          {paymentData.paymentDetails?.timestamp 
+                            ? formatDate(paymentData.paymentDetails.timestamp)
+                            : new Date().toLocaleDateString('en-GB', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })
+                          }
+                        </span>
                       </div>
                     </div>
                   </div>

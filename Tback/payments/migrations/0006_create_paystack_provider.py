@@ -13,7 +13,7 @@ def create_paystack_provider(apps, schema_editor):
         defaults={
             'name': 'Paystack',
             'is_active': True,
-            'config': {
+            'configuration': {
                 'supports_cards': True,
                 'supports_mobile_money': True,
                 'supports_bank_transfer': True,

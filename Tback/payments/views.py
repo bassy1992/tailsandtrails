@@ -1032,118 +1032,94 @@ def ensure_all_booking_details(request):
 def convert_frontend_booking_data(frontend_data, payment):
     """
     Convert frontend booking data to backend booking details format
+    Handles the actual structure sent from Booking.tsx
     """
     try:
-        # Extract booking data from frontend structure
-        booking_details = frontend_data.get('bookingData', {})
-        selected_options = frontend_data.get('selectedOptions', {})
-        selected_addons = frontend_data.get('addOns', [])
+        logger.info(f"Converting frontend booking data: {frontend_data}")
+        
+        # Extract data from the actual frontend structure
+        destination = frontend_data.get('destination', {})
+        travelers = frontend_data.get('travelers', {})
+        selected_options = frontend_data.get('selected_options', {})
+        pricing = frontend_data.get('pricing', {})
+        user_info = frontend_data.get('user_info', {})
         
         # Build backend format
         backend_data = {
-            'user_name': 'Guest User',  # Will be updated with actual user if available
-            'user_email': '',
-            'user_phone': payment.phone_number or '',
-            'destination_name': booking_details.get('tourName', 'Tour Booking'),
-            'destination_location': 'Ghana',  # Default location
-            'duration': booking_details.get('duration', '1 Day'),
-            'base_price': booking_details.get('basePrice', 0),
-            'adults': booking_details.get('travelers', {}).get('adults', 1),
-            'children': booking_details.get('travelers', {}).get('children', 0),
-            'selected_date': booking_details.get('selectedDate', ''),
-            'final_total': float(payment.amount),
+            'user_name': user_info.get('name', 'Guest User'),
+            'user_email': user_info.get('email', ''),
+            'user_phone': user_info.get('phone', payment.phone_number or ''),
+            'destination_name': destination.get('name', 'Tour Booking'),
+            'destination_location': destination.get('location', 'Ghana'),
+            'duration': destination.get('duration', '1 Day'),
+            'base_price': 0,  # Will be calculated from pricing
+            'adults': travelers.get('adults', 0),
+            'children': travelers.get('children', 0),
+            'selected_date': frontend_data.get('selected_date', ''),
+            'base_total': pricing.get('base_total', 0),
+            'options_total': pricing.get('options_total', 0),
+            'final_total': pricing.get('final_total', float(payment.amount)),
         }
         
-        # Use actual user info if available
+        # Override with payment user info if available
         if payment.user:
             user_name = f"{payment.user.first_name} {payment.user.last_name}".strip()
             if not user_name:
                 user_name = payment.user.username or payment.user.email.split('@')[0] if payment.user.email else "User"
             backend_data['user_name'] = user_name
             backend_data['user_email'] = payment.user.email or ''
-        else:
-            # Try to get user from frontend booking data if available
-            user_info = frontend_data.get('userInfo', {})
-            if user_info:
-                backend_data['user_name'] = user_info.get('name', 'Guest User')
-                backend_data['user_email'] = user_info.get('email', '')
-                backend_data['user_phone'] = user_info.get('phone', payment.phone_number or '')
         
-        # Process selected options
-        accommodation_option = selected_options.get('accommodation', 'standard')
-        transport_option = selected_options.get('transport', 'shared')
-        meals_option = selected_options.get('meals', 'standard')
-        medical_option = selected_options.get('medical', 'basic')
+        # Process selected options from frontend
+        accommodation = selected_options.get('accommodation', {})
+        if accommodation:
+            backend_data['accommodation'] = {
+                'name': accommodation.get('name', 'Standard Accommodation'),
+                'price': accommodation.get('price', 0),
+                'is_default': accommodation.get('isDefault', False)
+            }
         
-        # Map frontend options to backend format
-        accommodation_map = {
-            'standard': {'name': 'Standard Hotel', 'price': 0, 'is_default': True},
-            'premium': {'name': 'Premium Hotel', 'price': 500, 'is_default': False},
-            'luxury': {'name': 'Luxury Resort', 'price': 1200, 'is_default': False}
-        }
+        transport = selected_options.get('transport', {})
+        if transport:
+            backend_data['transport'] = {
+                'name': transport.get('name', 'Standard Transport'),
+                'price': transport.get('price', 0),
+                'is_default': transport.get('isDefault', False)
+            }
         
-        transport_map = {
-            'shared': {'name': 'Shared Bus', 'price': 0, 'is_default': True},
-            'private': {'name': 'Private Van', 'price': 800, 'is_default': False},
-            'airport': {'name': 'Airport Pickup & Drop', 'price': 400, 'is_default': False}
-        }
+        meals = selected_options.get('meals', {})
+        if meals:
+            backend_data['meals'] = {
+                'name': meals.get('name', 'Standard Meals'),
+                'price': meals.get('price', 0),
+                'is_default': meals.get('isDefault', False)
+            }
         
-        meals_map = {
-            'standard': {'name': 'Standard Meals', 'price': 0, 'is_default': True},
-            'vegetarian': {'name': 'Vegetarian / Vegan Option', 'price': 0, 'is_default': False},
-            'luxury': {'name': 'Luxury Dining Package', 'price': 300, 'is_default': False}
-        }
+        # Add medical/insurance if available
+        medical = selected_options.get('medical', {})
+        if medical:
+            backend_data['medical'] = {
+                'name': medical.get('name', 'Basic Coverage'),
+                'price': medical.get('price', 0),
+                'is_default': medical.get('isDefault', False)
+            }
         
-        medical_map = {
-            'basic': {'name': 'Basic First Aid', 'price': 0, 'is_default': True},
-            'insurance': {'name': 'Travel Insurance', 'price': 200, 'is_default': False},
-            'support': {'name': 'On-call Medical Support', 'price': 500, 'is_default': False}
-        }
+        # Add experiences if available
+        experiences = selected_options.get('experiences', [])
+        if experiences:
+            backend_data['experiences'] = [
+                {
+                    'name': exp.get('name', 'Experience'),
+                    'price': exp.get('price', 0)
+                }
+                for exp in experiences
+            ]
         
-        # Add selected options
-        backend_data['accommodation'] = accommodation_map.get(accommodation_option, accommodation_map['standard'])
-        backend_data['transport'] = transport_map.get(transport_option, transport_map['shared'])
-        backend_data['meals'] = meals_map.get(meals_option, meals_map['standard'])
-        backend_data['medical'] = medical_map.get(medical_option, medical_map['basic'])
-        
-        # Process experience add-ons
-        experiences = []
-        for addon in selected_addons:
-            if addon.get('category') == 'experience' and addon.get('selected'):
-                experiences.append({
-                    'name': addon.get('name', 'Experience'),
-                    'price': addon.get('price', 0)
-                })
-        
-        backend_data['experiences'] = experiences
-        
-        # Calculate totals
-        base_total = backend_data['base_price'] * (backend_data['adults'] + backend_data['children'])
-        
-        options_total = 0
-        traveler_count = backend_data['adults'] + backend_data['children']
-        
-        # Add option costs
-        if not backend_data['accommodation']['is_default']:
-            options_total += backend_data['accommodation']['price'] * traveler_count
-        if not backend_data['transport']['is_default']:
-            options_total += backend_data['transport']['price']
-        if not backend_data['meals']['is_default']:
-            options_total += backend_data['meals']['price'] * traveler_count
-        if not backend_data['medical']['is_default']:
-            options_total += backend_data['medical']['price']
-        
-        # Add experience costs
-        for exp in experiences:
-            options_total += exp['price']
-        
-        backend_data['base_total'] = base_total
-        backend_data['options_total'] = options_total
-        
+        logger.info(f"Converted booking data: {backend_data}")
         return backend_data
         
     except Exception as e:
         logger.error(f"Error converting frontend booking data: {str(e)}")
+        logger.exception(e)
         # Return sample data as fallback
         from .booking_utils import create_sample_booking_details
         sample_data = create_sample_booking_details()
