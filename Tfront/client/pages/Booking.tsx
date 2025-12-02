@@ -465,6 +465,12 @@ export default function Booking() {
       }
     };
 
+    // Log booking details for debugging
+    console.log('📦 Booking Details being sent:', bookingDetails);
+    console.log('👥 Travelers:', bookingData.travelers);
+    console.log('📅 Selected Date:', bookingData.selectedDate);
+    console.log('🏖️ Tour Name:', bookingData.tourName);
+
     try {
       // Format phone number with country code if needed
       let phoneNumber = user?.phone || '';
