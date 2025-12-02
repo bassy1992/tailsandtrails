@@ -87,6 +87,64 @@ class Destination(models.Model):
             return 'mid'
         else:
             return 'luxury'
+    
+    def get_price_for_group(self, num_people):
+        """
+        Get the total price for a group of people.
+        Checks for tiered pricing first, falls back to base price * num_people.
+        """
+        # Check if there are pricing tiers
+        pricing_tiers = self.pricing_tiers.filter(
+            min_people__lte=num_people,
+            max_people__gte=num_people
+        ).first()
+        
+        if pricing_tiers:
+            return pricing_tiers.total_price
+        
+        # Fallback to base price * number of people
+        return self.price * num_people
+
+class PricingTier(models.Model):
+    """
+    Tiered pricing for destinations based on group size.
+    Example: 1 person = GH₵1,200, 2 people = GH₵2,100 (not 2,400)
+    """
+    destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='pricing_tiers')
+    min_people = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    max_people = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    total_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        validators=[MinValueValidator(0)],
+        help_text="Total price for this group size range"
+    )
+    price_per_person = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        validators=[MinValueValidator(0)],
+        help_text="Effective price per person (for display)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['destination', 'min_people']
+        unique_together = ['destination', 'min_people', 'max_people']
+        indexes = [
+            models.Index(fields=['destination', 'min_people', 'max_people']),
+        ]
+    
+    def __str__(self):
+        if self.min_people == self.max_people:
+            return f"{self.destination.name} - {self.min_people} person: GH₵{self.total_price}"
+        return f"{self.destination.name} - {self.min_people}-{self.max_people} people: GH₵{self.total_price}"
+    
+    def save(self, *args, **kwargs):
+        # Auto-calculate price per person
+        if self.total_price and self.min_people:
+            self.price_per_person = self.total_price / self.min_people
+        super().save(*args, **kwargs)
 
 class DestinationHighlight(models.Model):
     destination = models.ForeignKey(Destination, on_delete=models.CASCADE, related_name='highlights')

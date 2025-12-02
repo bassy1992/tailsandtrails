@@ -3,7 +3,8 @@ from django.utils.html import format_html
 from .models import (
     Category, Destination, DestinationHighlight, 
     DestinationInclude, DestinationImage, Review, Booking,
-    AddOnCategory, AddOnOption, ExperienceAddOn, BookingAddOn
+    AddOnCategory, AddOnOption, ExperienceAddOn, BookingAddOn,
+    PricingTier
 )
 
 @admin.register(Category)
@@ -34,13 +35,23 @@ class DestinationImageInline(admin.TabularInline):
 
 class AddOnOptionInline(admin.TabularInline):
     model = AddOnOption
-    extra = 1
+    extra = 0
     fields = ('category', 'name', 'description', 'price', 'pricing_type', 'is_default', 'is_active', 'order')
+    
+    def has_add_permission(self, request, obj=None):
+        # Only allow adding if there are categories available
+        return AddOnCategory.objects.filter(is_active=True).exists()
 
 class ExperienceAddOnInline(admin.TabularInline):
     model = ExperienceAddOn
-    extra = 1
+    extra = 0
     fields = ('name', 'description', 'price', 'duration', 'max_participants', 'is_active', 'order')
+
+class PricingTierInline(admin.TabularInline):
+    model = PricingTier
+    extra = 1
+    fields = ('min_people', 'max_people', 'total_price', 'price_per_person')
+    readonly_fields = ('price_per_person',)
 
 class BookingAddOnInline(admin.TabularInline):
     model = BookingAddOn
@@ -51,21 +62,21 @@ class BookingAddOnInline(admin.TabularInline):
 @admin.register(Destination)
 class DestinationAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'location', 'category', 'price', 'duration_display', 
+        'name', 'location', 'category', 'price', 'duration', 
         'rating', 'reviews_count', 'is_active', 'is_featured', 'created_at'
     )
     list_filter = ('category', 'duration', 'is_active', 'is_featured', 'created_at')
     search_fields = ('name', 'location', 'description')
     prepopulated_fields = {'slug': ('name',)}
     readonly_fields = ('created_at', 'updated_at')
-    inlines = [DestinationHighlightInline, DestinationIncludeInline, DestinationImageInline, AddOnOptionInline, ExperienceAddOnInline]
+    inlines = [PricingTierInline, DestinationHighlightInline, DestinationIncludeInline, DestinationImageInline, AddOnOptionInline, ExperienceAddOnInline]
     
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'slug', 'location', 'category', 'description')
         }),
         ('Tour Details', {
-            'fields': ('price', 'duration', 'max_group_size', 'image')
+            'fields': ('price', 'duration', 'max_group_size', 'start_date', 'end_date', 'image')
         }),
         ('Ratings & Reviews', {
             'fields': ('rating', 'reviews_count')
@@ -84,6 +95,17 @@ class DestinationAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" width="100" height="60" style="object-fit: cover;" />', obj.image)
         return "No image"
     image_preview.short_description = 'Image Preview'
+    
+    def get_form(self, request, obj=None, **kwargs):
+        # Override to handle any form errors gracefully
+        try:
+            return super().get_form(request, obj, **kwargs)
+        except Exception as e:
+            # Log the error
+            import logging
+            logger = logging.getLogger('django')
+            logger.error(f"Error in DestinationAdmin.get_form: {e}")
+            raise
 
 @admin.register(DestinationImage)
 class DestinationImageAdmin(admin.ModelAdmin):
@@ -185,6 +207,36 @@ class AddOnOptionAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         })
     )
+
+@admin.register(PricingTier)
+class PricingTierAdmin(admin.ModelAdmin):
+    list_display = ('destination', 'people_range', 'total_price', 'price_per_person', 'created_at')
+    list_filter = ('destination__category',)
+    search_fields = ('destination__name',)
+    readonly_fields = ('price_per_person', 'created_at', 'updated_at')
+    ordering = ('destination', 'min_people')
+    
+    fieldsets = (
+        ('Destination', {
+            'fields': ('destination',)
+        }),
+        ('Group Size', {
+            'fields': ('min_people', 'max_people')
+        }),
+        ('Pricing', {
+            'fields': ('total_price', 'price_per_person')
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
+    
+    def people_range(self, obj):
+        if obj.min_people == obj.max_people:
+            return f"{obj.min_people} person"
+        return f"{obj.min_people}-{obj.max_people} people"
+    people_range.short_description = 'Group Size'
 
 @admin.register(ExperienceAddOn)
 class ExperienceAddOnAdmin(admin.ModelAdmin):
