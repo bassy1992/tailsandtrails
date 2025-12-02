@@ -262,8 +262,8 @@ class ExperienceAddOnAdmin(admin.ModelAdmin):
         })
     )
 
-#
- Gallery Admin
+
+# Gallery Admin
 @admin.register(GalleryCategory)
 class GalleryCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'order')
