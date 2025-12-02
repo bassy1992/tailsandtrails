@@ -380,13 +380,27 @@ export default function Booking() {
   };
 
   const handleTravelersChange = (type: 'adults' | 'children', increment: boolean) => {
-    setBookingData(prev => ({
-      ...prev,
-      travelers: {
-        ...prev.travelers,
-        [type]: Math.max(0, prev.travelers[type] + (increment ? 1 : -1))
+    const maxGroupSize = tourData?.max_group_size || 10; // Default to 10 if not set
+    
+    setBookingData(prev => {
+      const newValue = prev.travelers[type] + (increment ? 1 : -1);
+      const totalTravelers = type === 'adults' 
+        ? newValue + prev.travelers.children 
+        : prev.travelers.adults + newValue;
+      
+      // Don't allow exceeding max group size
+      if (totalTravelers > maxGroupSize) {
+        return prev;
       }
-    }));
+      
+      return {
+        ...prev,
+        travelers: {
+          ...prev.travelers,
+          [type]: Math.max(0, newValue)
+        }
+      };
+    });
   };
 
   const handleProceedToPayment = () => {
@@ -619,7 +633,12 @@ export default function Booking() {
                     </div>
                     
                     <div>
-                      <Label className="text-sm text-gray-600">Travelers</Label>
+                      <Label className="text-sm text-gray-600">
+                        Travelers
+                        {tourData?.max_group_size && (
+                          <span className="text-xs text-gray-500 ml-2">(Max {tourData.max_group_size})</span>
+                        )}
+                      </Label>
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="outline"
@@ -634,6 +653,7 @@ export default function Booking() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleTravelersChange('adults', true)}
+                          disabled={bookingData.travelers.adults >= (tourData?.max_group_size || 10)}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
