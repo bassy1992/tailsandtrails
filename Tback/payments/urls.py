@@ -35,6 +35,7 @@ urlpatterns = [
     path('<str:reference>/simulate-auth/', views.simulate_payment_authorization, name='simulate-payment-auth'),
     path('<str:reference>/start-auto-completion/', views.start_demo_auto_completion, name='start-auto-completion'),
     path('<str:reference>/force-complete/', views.force_complete_payment, name='force-complete-payment'),
+    path('setup/create-paystack-provider/', views.create_paystack_provider_endpoint, name='create-paystack-provider'),
     
     # Booking details endpoints
     path('<str:reference>/add-booking-details/', views.add_booking_details_to_payment, name='add-booking-details'),

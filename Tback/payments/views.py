@@ -693,6 +693,45 @@ def auto_complete_payment_after_delay(payment_reference, delay_seconds=30, succe
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+def create_paystack_provider_endpoint(request):
+    """
+    Manually create Paystack provider (for setup)
+    """
+    try:
+        provider, created = PaymentProvider.objects.update_or_create(
+            code='paystack',
+            defaults={
+                'name': 'Paystack',
+                'is_active': True,
+                'config': {
+                    'supports_cards': True,
+                    'supports_mobile_money': True,
+                    'supports_bank_transfer': True,
+                    'supports_ussd': True,
+                    'currencies': ['GHS', 'NGN', 'USD', 'ZAR', 'KES'],
+                }
+            }
+        )
+        
+        return Response({
+            'success': True,
+            'message': 'Created Paystack provider' if created else 'Updated Paystack provider',
+            'provider': {
+                'id': provider.id,
+                'code': provider.code,
+                'name': provider.name,
+                'is_active': provider.is_active
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error creating Paystack provider: {str(e)}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def start_demo_auto_completion(request, reference):
     """
     Manually start auto-completion for a payment (for testing)
