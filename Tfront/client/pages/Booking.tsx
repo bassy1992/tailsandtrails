@@ -238,7 +238,7 @@ export default function Booking() {
             tourName: details.destination?.name || "Tour Package",
             duration: details.destination?.duration || "3 Days / 2 Nights",
             basePrice: details.pricing?.base_total ? 
-              details.pricing.base_total / ((details.travelers?.adults || 1) + (details.travelers?.children || 0)) : 
+              details.pricing.base_total / (details.travelers?.adults || 1) : 
               1500,
             selectedDate: details.selected_date || new Date().toISOString().split('T')[0],
             travelers: {
@@ -316,7 +316,7 @@ export default function Booking() {
 
   // Calculate total price
   const calculateTotal = () => {
-    const baseTotal = bookingData.basePrice * (bookingData.travelers.adults + bookingData.travelers.children);
+    const baseTotal = bookingData.basePrice * bookingData.travelers.adults;
     
     let addOnTotal = 0;
     
@@ -326,7 +326,7 @@ export default function Booking() {
       if (addOn?.options) {
         const option = addOn.options.find(o => o.id === optionId);
         if (option && option.price > 0) {
-          addOnTotal += option.price * (bookingData.travelers.adults + bookingData.travelers.children);
+          addOnTotal += option.price * bookingData.travelers.adults;
         }
       }
     });
@@ -597,44 +597,23 @@ export default function Booking() {
                     
                     <div>
                       <Label className="text-sm text-gray-600">Travelers</Label>
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('adults', false)}
-                            disabled={bookingData.travelers.adults <= 1}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="font-medium">{bookingData.travelers.adults} Adults</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('adults', true)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('children', false)}
-                            disabled={bookingData.travelers.children <= 0}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="font-medium">{bookingData.travelers.children} Child</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleTravelersChange('children', true)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleTravelersChange('adults', false)}
+                          disabled={bookingData.travelers.adults <= 1}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="font-medium">{bookingData.travelers.adults} {bookingData.travelers.adults === 1 ? 'Adult' : 'Adults'}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleTravelersChange('adults', true)}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
                     
@@ -1007,11 +986,11 @@ export default function Booking() {
                     {/* Base Package */}
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span>Base Package ({bookingData.travelers.adults + bookingData.travelers.children} travelers)</span>
+                        <span>Base Package ({bookingData.travelers.adults} {bookingData.travelers.adults === 1 ? 'traveler' : 'travelers'})</span>
                         <span>GH₵{totals.baseTotal.toLocaleString()}</span>
                       </div>
                       <div className="text-xs text-gray-500">
-                        {bookingData.travelers.adults} Adults + {bookingData.travelers.children} Child × GH₵{bookingData.basePrice.toLocaleString()}
+                        {bookingData.travelers.adults} {bookingData.travelers.adults === 1 ? 'Adult' : 'Adults'} × GH₵{bookingData.basePrice.toLocaleString()}
                       </div>
                     </div>
 
@@ -1025,7 +1004,7 @@ export default function Booking() {
                       const option = addOn.options.find(o => o.id === optionId);
                       if (!option || option.price === 0) return null;
                       
-                      const upgradeTotal = option.price * (bookingData.travelers.adults + bookingData.travelers.children);
+                      const upgradeTotal = option.price * bookingData.travelers.adults;
                       
                       return (
                         <div key={category} className="flex justify-between text-sm">
