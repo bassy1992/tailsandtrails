@@ -736,56 +736,67 @@ export default function Booking() {
                 {tourData?.addon_options && tourData.addon_options.length > 0 && (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-600">Available add-ons for this tour:</p>
-                    {addOns.filter(a => a.options).map((addOn) => (
-                      <div key={addOn.id} className="space-y-3">
-                        <div className="flex items-center space-x-3 p-3 border rounded-lg">
-                          <Checkbox
-                            id={`addon-${addOn.id}`}
-                            checked={addOn.selected}
-                            onCheckedChange={() => handleAddOnToggle(addOn.id)}
-                          />
-                          <Label htmlFor={`addon-${addOn.id}`} className="flex-1 cursor-pointer">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <p className="font-medium">{addOn.name}</p>
-                                <p className="text-sm text-gray-600">{addOn.description}</p>
-                              </div>
-                              <span className="text-ghana-green font-medium">
-                                {addOn.options && addOn.options.length > 0 
-                                  ? `From GH₵${Math.min(...addOn.options.map(o => o.price)).toLocaleString()}`
-                                  : 'Optional'}
-                              </span>
-                            </div>
-                          </Label>
-                        </div>
-                        
-                        {/* Show options when selected */}
-                        {addOn.selected && addOn.options && (
-                          <div className="ml-8 space-y-2">
-                            <p className="text-sm font-medium text-gray-700">Choose option:</p>
-                            <RadioGroup 
-                              value={selectedOptions[addOn.id] || addOn.options[0]?.id}
-                              onValueChange={(value) => handleOptionChange(addOn.id, value)}
-                              className="space-y-2"
-                            >
-                              {addOn.options.map((option) => (
-                                <div key={option.id} className="flex items-center space-x-2 p-2 border rounded">
-                                  <RadioGroupItem value={option.id} id={`${addOn.id}-${option.id}`} />
-                                  <Label htmlFor={`${addOn.id}-${option.id}`} className="flex-1 cursor-pointer">
-                                    <div className="flex justify-between items-center">
-                                      <p className="text-sm">{option.name}</p>
-                                      <span className="text-sm text-ghana-green">
-                                        {option.price === 0 ? 'Included' : `+GH₵${option.price.toLocaleString()}`}
-                                      </span>
-                                    </div>
-                                  </Label>
+                    {addOns.filter(a => a.options).map((addOn) => {
+                      // If only one option, show it directly without expansion
+                      const singleOption = addOn.options?.length === 1 ? addOn.options[0] : null;
+                      
+                      return (
+                        <div key={addOn.id} className="space-y-3">
+                          <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                            <Checkbox
+                              id={`addon-${addOn.id}`}
+                              checked={addOn.selected}
+                              onCheckedChange={() => handleAddOnToggle(addOn.id)}
+                            />
+                            <Label htmlFor={`addon-${addOn.id}`} className="flex-1 cursor-pointer">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <p className="font-medium">
+                                    {singleOption ? singleOption.name : addOn.name}
+                                  </p>
+                                  {!singleOption && (
+                                    <p className="text-sm text-gray-600">{addOn.description}</p>
+                                  )}
                                 </div>
-                              ))}
-                            </RadioGroup>
+                                <span className="text-ghana-green font-medium">
+                                  {singleOption 
+                                    ? `+GH₵${singleOption.price.toLocaleString()}`
+                                    : addOn.options && addOn.options.length > 0 
+                                      ? `From GH₵${Math.min(...addOn.options.map(o => o.price)).toLocaleString()}`
+                                      : 'Optional'}
+                                </span>
+                              </div>
+                            </Label>
                           </div>
-                        )}
-                      </div>
-                    ))}
+                          
+                          {/* Show options when selected (only if multiple options) */}
+                          {addOn.selected && !singleOption && addOn.options && addOn.options.length > 1 && (
+                            <div className="ml-8 space-y-2">
+                              <p className="text-sm font-medium text-gray-700">Choose option:</p>
+                              <RadioGroup 
+                                value={selectedOptions[addOn.id] || addOn.options[0]?.id}
+                                onValueChange={(value) => handleOptionChange(addOn.id, value)}
+                                className="space-y-2"
+                              >
+                                {addOn.options.map((option) => (
+                                  <div key={option.id} className="flex items-center space-x-2 p-2 border rounded">
+                                    <RadioGroupItem value={option.id} id={`${addOn.id}-${option.id}`} />
+                                    <Label htmlFor={`${addOn.id}-${option.id}`} className="flex-1 cursor-pointer">
+                                      <div className="flex justify-between items-center">
+                                        <p className="text-sm">{option.name}</p>
+                                        <span className="text-sm text-ghana-green">
+                                          {option.price === 0 ? 'Included' : `+GH₵${option.price.toLocaleString()}`}
+                                        </span>
+                                      </div>
+                                    </Label>
+                                  </div>
+                                ))}
+                              </RadioGroup>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                     
                     {/* Experience add-ons */}
                     {addOns.filter(a => a.category === "experience").length > 0 && (
