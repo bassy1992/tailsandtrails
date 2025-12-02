@@ -23,12 +23,29 @@ def dashboard_overview(request):
     ticket_purchases = TicketPurchase.objects.filter(user=user)
     completed_tickets = ticket_purchases.filter(status='completed')
     
+    # Get user's payments (for bookings made through payment system)
+    from payments.models import Payment
+    payments = Payment.objects.filter(user=user, status='successful')
+    
     # Calculate statistics
     total_bookings = bookings.count()
     total_tickets = ticket_purchases.count()
+    total_payments = payments.count()
+    
+    # Count unique destinations from completed bookings and successful payments
     destinations_visited = completed_bookings.values('destination').distinct().count()
     
-    # Calculate total spent (bookings + tickets)
+    # Add destinations from payment metadata
+    payment_destinations = set()
+    for payment in payments:
+        if payment.metadata and 'booking_details' in payment.metadata:
+            booking_details = payment.metadata['booking_details']
+            if 'destination' in booking_details and booking_details['destination'].get('name'):
+                payment_destinations.add(booking_details['destination']['name'])
+    
+    destinations_visited += len(payment_destinations)
+    
+    # Calculate total spent (bookings + tickets + payments)
     booking_total = bookings.aggregate(
         total=Sum('total_amount')
     )['total'] or 0
@@ -37,7 +54,11 @@ def dashboard_overview(request):
         total=Sum('total_amount')
     )['total'] or 0
     
-    total_spent = float(booking_total) + float(ticket_total)
+    payment_total = payments.aggregate(
+        total=Sum('amount')
+    )['total'] or 0
+    
+    total_spent = float(booking_total) + float(ticket_total) + float(payment_total)
     
     # Get member since date (assuming user creation date)
     member_since = user.date_joined
@@ -57,7 +78,7 @@ def dashboard_overview(request):
         member_color = 'bg-orange-100 text-orange-800'
     
     return Response({
-        'total_bookings': total_bookings + total_tickets,
+        'total_bookings': total_bookings + total_tickets + total_payments,
         'destinations_visited': destinations_visited,
         'total_spent': total_spent,
         'member_since': member_since,
@@ -84,6 +105,10 @@ def dashboard_bookings(request):
     ticket_purchases = TicketPurchase.objects.filter(user=user).select_related(
         'ticket', 'ticket__venue'
     ).order_by('-created_at')
+    
+    # Get payments (for bookings made through payment system)
+    from payments.models import Payment
+    payments = Payment.objects.filter(user=user, status='successful').order_by('-created_at')
     
     # Serialize bookings
     booking_data = []
@@ -128,6 +153,34 @@ def dashboard_bookings(request):
             'participants': purchase.quantity,
             'created_at': purchase.created_at
         })
+    
+    # Add payments (bookings made through payment system)
+    for payment in payments:
+        if payment.metadata and 'booking_details' in payment.metadata:
+            booking_details = payment.metadata['booking_details']
+            destination = booking_details.get('destination', {})
+            travelers = booking_details.get('travelers', {})
+            pricing = booking_details.get('pricing', {})
+            
+            # Determine if this is a ticket or destination booking
+            booking_type = booking_details.get('type', 'destination')
+            
+            if booking_type == 'ticket':
+                # Skip tickets as they should be in ticket_purchases
+                continue
+            
+            booking_data.append({
+                'id': payment.reference,
+                'type': 'destination',
+                'destination': destination.get('name', 'Tour Package'),
+                'date': booking_details.get('selected_date', payment.created_at.date()),
+                'duration': destination.get('duration', 'N/A'),
+                'status': 'confirmed',  # Successful payments are confirmed
+                'amount': f"GH₵ {payment.amount}",
+                'image': destination.get('image_url'),
+                'participants': travelers.get('adults', 0) + travelers.get('children', 0),
+                'created_at': payment.created_at
+            })
     
     # Sort by creation date
     booking_data.sort(key=lambda x: x['created_at'], reverse=True)
@@ -187,6 +240,38 @@ def dashboard_activity(request):
             'status': purchase.status,
             'status_color': status_color,
             'reference': str(purchase.purchase_id)
+        })
+    
+    # Get recent payments
+    from payments.models import Payment
+    recent_payments = Payment.objects.filter(
+        user=user
+    ).order_by('-updated_at')[:10]
+    
+    for payment in recent_payments:
+        status_color = {
+            'successful': 'green',
+            'processing': 'yellow',
+            'pending': 'yellow',
+            'failed': 'red',
+            'cancelled': 'red'
+        }.get(payment.status, 'gray')
+        
+        # Get destination name from metadata
+        destination_name = 'Payment'
+        if payment.metadata and 'booking_details' in payment.metadata:
+            booking_details = payment.metadata['booking_details']
+            if 'destination' in booking_details:
+                destination_name = booking_details['destination'].get('name', 'Tour Package')
+        
+        activities.append({
+            'id': payment.id,
+            'type': 'payment',
+            'title': f"{destination_name} payment {payment.status}",
+            'date': payment.updated_at,
+            'status': payment.status,
+            'status_color': status_color,
+            'reference': payment.reference
         })
     
     # Sort by date and limit to 10 most recent
